@@ -5,10 +5,12 @@ Vision deliverable: 12 (Intermediate UI Schema)
 
 ## Summary
 
-Defines the framework-neutral tree produced from `ComponentMapping` results and
-consumed by the React Generator. The tree references Design System components by
-id and binds props to design tokens, never to hardcoded values. JSON Schema
-draft 2020-12. A Dashboard sample validates against it.
+Defines the framework-neutral tree consumed by the React Generator. The tree is
+produced from `ComponentMapping` results by the application-layer assembler, or
+emitted directly by the Prototype Generator alongside a generated prototype
+(ADR-006). The tree references Design System components by id and binds props to
+design tokens, never to hardcoded values. JSON Schema draft 2020-12. A Dashboard
+sample validates against it.
 
 ## Schema
 
@@ -92,6 +94,8 @@ draft 2020-12. A Dashboard sample validates against it.
 ## Usage
 
 - Produced by the application-layer assembler from `ComponentMapping` results.
+- Also emitted by the Prototype Generator alongside a generated prototype, so the
+  pipeline can skip Analyze/Map for generated prototypes (ADR-006).
 - Consumed by `IReactGenerator`.
 - Validated by `Aife.Contracts.Tests` against this schema.
 

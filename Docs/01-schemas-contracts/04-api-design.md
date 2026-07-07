@@ -59,6 +59,28 @@ stateDiagram-v2
     Failed --> [*]
 ```
 
+## Prototype generation lifecycle
+
+`POST /prototypes/generate` (ADR-006) is its own async job, separate from a
+generation session. It returns `202` with `Location: /prototypes/{id}`; clients
+poll `GET /prototypes/{id}` until the generated prototype is available.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Queued
+    Queued --> Generating
+    Generating --> Completed
+    Generating --> Failed: generation or validation error
+    Completed --> [*]
+    Failed --> [*]
+```
+
+A completed generation produces a DS-conformant `Prototype` by construction. To
+convert it to React, the client starts a generation session with
+`POST /sessions` referencing the generated `prototypeId`. The prototype
+conformance report (`GET /prototypes/{id}/conformance`, ADR-005) is advisory for
+uploaded prototypes and a sanity check for generated ones.
+
 ## Request and response examples
 
 Create session:

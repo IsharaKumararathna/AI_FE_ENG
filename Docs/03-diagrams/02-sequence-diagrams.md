@@ -5,10 +5,11 @@ Vision deliverable: 22 (Sequence Diagrams)
 
 ## Summary
 
-Five sequence diagrams covering the flows that matter most: the full pipeline, a
-knowledge lookup, LLM Router provider selection, the AI Review flow, and prompt
-version resolution. Diagram names reference every stage and schema by name to
-support pipeline traceability.
+Seven sequence diagrams covering the flows that matter most: the full pipeline,
+prototype generation from intent, prototype conformance review, a knowledge
+lookup, LLM Router provider selection, the AI Review flow, and prompt version
+resolution. Diagram names reference every stage and schema by name to support
+pipeline traceability.
 
 ## Full pipeline
 
@@ -43,6 +44,65 @@ sequenceDiagram
     Orch->>Store: persist analysis, tree, artifacts, report
     Client->>API: GET /sessions/{id}
     API-->>Client: status, artifacts, review
+```
+
+## Prototype generation flow
+
+Audience: developers. Shows a Product Owner generating a DS-conformant prototype
+from intent (ADR-006). The output is conformant by construction; it then feeds
+the normal pipeline.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant PG as Prototype Generator
+    participant KP as IKnowledgeProvider
+    participant R as LlmRouter
+    participant Store as Prototype Repo
+    Client->>API: POST /prototypes/generate (PrototypeRequest)
+    API->>PG: GenerateAsync(PrototypeRequest)
+    PG->>KP: SearchComponentsAsync / GetDesignTokensAsync / GetLayoutPatternsAsync
+    KP-->>PG: approved components, tokens, layouts, referenceUiPatterns
+    PG->>R: CompleteAsync(generation prompt)
+    R-->>PG: Prototype (html, css) + IntermediateUiTree
+    PG->>PG: validate (approved components, no hardcoded literals)
+    PG->>Store: save generated Prototype
+    API-->>Client: 202 { prototypeId }, Location: /prototypes/{id}
+    Client->>API: GET /prototypes/{id}
+    API-->>Client: conformant Prototype (by construction)
+```
+
+## Prototype conformance review flow
+
+Audience: developers. Shows the input-side review of an uploaded prototype
+(ADR-005). Advisory and non-blocking in the MVP. Triggered on
+`GET /prototypes/{id}/conformance`; the report is computed and cached on first
+request.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant AN as Prototype Analyzer
+    participant PCR as Prototype Conformance Reviewer
+    participant KP as IKnowledgeProvider
+    participant R as LlmRouter
+    participant Store as Conformance Report Repo
+    Client->>API: GET /prototypes/{id}/conformance
+    API->>Store: GetAsync(prototypeId)
+    alt not cached
+        API->>AN: AnalyzeAsync(Prototype)
+        AN-->>API: PrototypeAnalysis
+        API->>PCR: ReviewAsync(PrototypeAnalysis, html, css)
+        PCR->>KP: tokens, layouts, referenceUiPatterns, a11y rules
+        KP-->>PCR: knowledge entries
+        PCR->>R: CompleteAsync(conformance prompt)
+        R-->>PCR: PrototypeConformanceReport JSON
+        PCR->>PCR: validate against schema
+        PCR->>Store: save report
+    end
+    API-->>Client: PrototypeConformanceReport (advisory findings)
 ```
 
 ## Knowledge lookup

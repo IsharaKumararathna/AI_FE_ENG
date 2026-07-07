@@ -24,15 +24,16 @@ AI_FE_ENG/
     components/
     tokens/
     layouts/
+    referenceUiPatterns/
     icons/
     best-practices/
     accessibility/
   src/
     Aife.Domain/                entities, value objects, domain events
     Aife.Application/           pipeline orchestration, stage contracts, abstractions
-    Aife.Ai/                    Prototype Analyzer, Component Mapper, React Generator, AI Reviewer
+    Aife.Ai/                    Prototype Analyzer, Prototype Conformance Reviewer, Prototype Generator, Component Mapper, React Generator, AI Reviewer
     Aife.Knowledge/             IKnowledgeProvider, JsonKnowledgeProvider
-    Aife.Infrastructure/        Cosmos DB repositories, LLM provider clients, file storage
+    Aife.Infrastructure/        MVP file/in-memory repositories; post-MVP Cosmos repositories. LLM provider clients, file storage
     Aife.Api/                   REST API, authentication, validation
     Aife.Cli/                   minimal CLI for MVP runs
   tests/
@@ -83,7 +84,7 @@ flowchart TD
 | Stage interfaces, pipeline orchestration | `Aife.Application` | Defines `IKnowledgeProvider`, `ILlmProvider`, `IPromptManager`. |
 | AI stage implementations | `Aife.Ai` | Depends only on application abstractions. |
 | Knowledge access | `Aife.Knowledge` | `JsonKnowledgeProvider` reads `knowledge/` in MVP. |
-| Cosmos repositories, LLM clients, storage | `Aife.Infrastructure` | Implements repositories and `ILlmProvider` clients. |
+| Cosmos repositories, LLM clients, storage | `Aife.Infrastructure` | MVP: file/in-memory repositories. Post-MVP: Cosmos repositories. Implements `ILlmProvider` clients (ADR-004 amendment). |
 | REST endpoints, auth, validation | `Aife.Api` | Composition root; registers all implementations. |
 | Command-line runs | `Aife.Cli` | Thin host over `Aife.Application` for MVP demos. |
 | Schema and golden-file tests | `Aife.Contracts.Tests` | Validates the three JSON Schemas and sample data. |
@@ -93,7 +94,8 @@ flowchart TD
 
 - One class per file. No file holds two classes.
 - JSON serialization uses Newtonsoft.Json across all projects.
-- Cosmos repositories filter in the query, never in memory.
+- MVP repositories are file/in-memory; post-MVP Cosmos repositories filter in
+  the query, never in memory (ADR-004 amendment).
 - `Aife.Ai` has no project reference to `Aife.Infrastructure` or
   `Aife.Knowledge`. It consumes them through `Aife.Application` abstractions so
   the boundary is enforced at compile time.

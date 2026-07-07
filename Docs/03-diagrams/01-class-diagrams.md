@@ -95,6 +95,14 @@ classDiagram
         <<interface>>
         +ReviewAsync(Artifacts, Tree)
     }
+    class IPrototypeGenerator {
+        <<interface>>
+        +GenerateAsync(PrototypeRequest)
+    }
+    class IPrototypeConformanceReviewer {
+        <<interface>>
+        +ReviewAsync(PrototypeAnalysis, Html, Css)
+    }
     class IKnowledgeProvider {
         <<interface>>
         +SearchComponentsAsync(query)
@@ -113,6 +121,14 @@ classDiagram
     class McpKnowledgeProvider
     class AzureOpenAiProvider
     class SecondaryProvider
+    class PrototypeGenerator
+    class PrototypeConformanceReviewer
+    IPrototypeGenerator ..> IKnowledgeProvider : uses
+    IPrototypeGenerator ..> LlmRouter : uses
+    IPrototypeConformanceReviewer ..> IKnowledgeProvider : uses
+    IPrototypeConformanceReviewer ..> LlmRouter : uses
+    IPrototypeGenerator <|.. PrototypeGenerator
+    IPrototypeConformanceReviewer <|.. PrototypeConformanceReviewer
     IComponentMapper ..> IKnowledgeProvider : uses
     IReactGenerator ..> IKnowledgeProvider : uses
     IReactGenerator ..> LlmRouter : uses
@@ -121,6 +137,61 @@ classDiagram
     IKnowledgeProvider <|.. McpKnowledgeProvider
     ILlmProvider <|.. AzureOpenAiProvider
     ILlmProvider <|.. SecondaryProvider
+```
+
+## Persistence
+
+Audience: developers. Shows the repository interfaces in `Aife.Application` and
+their swappable implementations. The API composition root wires the file
+implementations in the MVP; Cosmos is the post-MVP target (ADR-004 amendment).
+
+```mermaid
+classDiagram
+    class ISessionRepository {
+        <<interface>>
+        +GetAsync(id)
+        +SaveAsync(session)
+    }
+    class IArtifactRepository {
+        <<interface>>
+        +ListAsync(sessionId)
+        +SaveAsync(artifact)
+    }
+    class IPromptRepository {
+        <<interface>>
+        +GetAsync(key)
+        +SaveAsync(template)
+    }
+    class IPromptVersionRepository {
+        <<interface>>
+        +GetAsync(key, version)
+        +SaveAsync(version)
+    }
+    class IConformanceReportRepository {
+        <<interface>>
+        +GetAsync(prototypeId)
+        +SaveAsync(report)
+    }
+    class FileSessionRepository
+    class FileArtifactRepository
+    class FilePromptRepository
+    class FilePromptVersionRepository
+    class FileConformanceReportRepository
+    class CosmosSessionRepository
+    class CosmosArtifactRepository
+    class CosmosPromptRepository
+    class CosmosPromptVersionRepository
+    class CosmosConformanceReportRepository
+    ISessionRepository <|.. FileSessionRepository
+    ISessionRepository <|.. CosmosSessionRepository
+    IArtifactRepository <|.. FileArtifactRepository
+    IArtifactRepository <|.. CosmosArtifactRepository
+    IPromptRepository <|.. FilePromptRepository
+    IPromptRepository <|.. CosmosPromptRepository
+    IPromptVersionRepository <|.. FilePromptVersionRepository
+    IPromptVersionRepository <|.. CosmosPromptVersionRepository
+    IConformanceReportRepository <|.. FileConformanceReportRepository
+    IConformanceReportRepository <|.. CosmosConformanceReportRepository
 ```
 
 ## What is not shown

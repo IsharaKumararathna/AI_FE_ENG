@@ -13,7 +13,8 @@ consistently across schemas, API contracts, and diagrams.
 
 | Term | Definition |
 |---|---|
-| Prototype | An uploaded HTML and CSS artifact to be converted. |
+| Prototype | An HTML and CSS artifact to be converted; uploaded by an author or generated from intent (ADR-006). |
+| PrototypeRequest | An intent spec (pages, regions, components, content) used by the Prototype Generator to produce a conformant Prototype. |
 | PrototypeAnalysis | Structured result of analyzing a prototype: layout and detected elements. |
 | DetectedElement | A UI primitive found in a prototype (button, table, form, and so on). |
 | ComponentMapping | A mapping from a detected element to an approved Design System component, with confidence. |
@@ -22,7 +23,9 @@ consistently across schemas, API contracts, and diagrams.
 | GeneratedArtifact | A generated React or TypeScript file. |
 | ReviewReport | The AI Reviewer output: score, violations, suggestions. |
 | Violation | A single compliance, accessibility, or architecture finding. |
-| KnowledgeEntry | One unit of Design System knowledge (component, token, layout, icon, best practice, accessibility rule). |
+| PrototypeConformanceReport | The Prototype Conformance Reviewer output: drift findings against the Design System and reference UI (ADR-005). |
+| ConformanceFinding | A single drift finding in a conformance report: category, severity, message, location. |
+| KnowledgeEntry | One unit of Design System knowledge (component, token, layout, icon, best practice, accessibility rule, reference UI pattern). |
 | PromptTemplate | A versioned prompt with variables and an output contract. |
 | PromptVersion | An immutable, semver-tagged snapshot of a prompt template. |
 | LlmProviderConfig | Configuration for one LLM provider: endpoint, model, parameters. |
@@ -82,16 +85,34 @@ classDiagram
         +Severity
         +Message
     }
+    class PrototypeRequest {
+        +Intent
+        +Pages
+    }
+    class PrototypeConformanceReport {
+        +Outcome
+        +Findings
+        +Suggestions
+    }
+    class ConformanceFinding {
+        +Category
+        +Severity
+        +Message
+        +Location
+    }
     GenerationSession --> Prototype
     GenerationSession --> PrototypeAnalysis
     GenerationSession --> IntermediateUiTree
     GenerationSession --> GeneratedArtifact
     GenerationSession --> ReviewReport
+    GenerationSession --> PrototypeConformanceReport
+    PrototypeRequest --> Prototype : generates
     PrototypeAnalysis --> DetectedElement
     ComponentMapping --> DetectedElement
     IntermediateUiTree --> UiNode
     UiNode --> UiNode
     ReviewReport --> Violation
+    PrototypeConformanceReport --> ConformanceFinding
 ```
 
 ## Prompting and provider context
@@ -121,12 +142,20 @@ classDiagram
 ## Invariants
 
 - A `GenerationSession` references exactly one `Prototype` and produces at most
-  one `IntermediateUiTree`, one set of `GeneratedArtifact`, and one
-  `ReviewReport`.
+  one `IntermediateUiTree`, one set of `GeneratedArtifact`, one `ReviewReport`,
+  and one `PrototypeConformanceReport`.
+- A `Prototype` may be uploaded by an author or generated from a
+  `PrototypeRequest`. A generated prototype is conformant by construction
+  (ADR-006); an uploaded prototype is scored by the Prototype Conformance Review.
+- A `PrototypeConformanceReport` is advisory for uploaded prototypes and a
+  non-blocking sanity check for generated ones (ADR-005).
 - A `ComponentMapping` with confidence below the threshold is flagged for
   human review rather than auto-applied.
 - A `UiNode` references a component id that must exist as a `KnowledgeEntry`.
 - A `PromptVersion` is immutable once published; edits create a new version.
+- Persistence goes through repository interfaces in the application layer. The
+  MVP uses file/in-memory implementations; Cosmos is the post-MVP target
+  (ADR-004 amendment).
 
 ## What is not shown
 
