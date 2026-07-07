@@ -1,6 +1,6 @@
 # AI-Powered Enterprise Frontend Development Platform — Documentation
 
-Status: Draft · Date: 2026-07-07 · Version: 0.1
+Status: Approved · Date: 2026-07-07 · Version: 1.0
 
 This is the design documentation set for the AI-Powered Enterprise Frontend
 Development Platform (research initiative, repository key `aife`). It covers
@@ -11,16 +11,21 @@ designs, prompt templates, and diagrams that a future build phase executes again
 
 The vision document `AI_Powered_Enterprise_Frontend_Development_Platform_Plan.md`
 is the source of truth. This set decomposes its 30 deliverables into verifiable
-artifacts.
+artifacts, plus extensions added by ADR-005 (Prototype Conformance Review) and
+ADR-006 (Prototype Generation).
+
+**Design baseline: Approved v1.0 — 2026-07-07.** All documents below are at this
+baseline; ADRs carry their own decision status (Accepted/Amended). Implementation
+executes against this frozen baseline; subsequent changes require a new version.
 
 ## Reading order
 
 Read foundation first, then schemas and contracts, then AI module designs, then
 diagrams, then cross-cutting.
 
-1. Foundation: `00-foundation/01` through `08`, plus the ADRs.
+1. Foundation: `00-foundation/01` through `09`, plus the ADRs.
 2. Schemas and contracts: `01-schemas-contracts/01` through `05`.
-3. AI module designs: `02-ai-modules/01` through `05`.
+3. AI module designs: `02-ai-modules/01` through `06`.
 4. Diagrams: `03-diagrams/01` and `02`.
 5. Cross-cutting and operations: `04-cross-cutting/01` through `09`.
 
@@ -38,37 +43,38 @@ diagrams, then cross-cutting.
 
 | Document | Title | Milestone | Status |
 |---|---|---|---|
-| `00-foundation/01-system-architecture.md` | System Architecture | A | Draft |
-| `00-foundation/02-module-breakdown.md` | Module Breakdown | A | Draft |
-| `00-foundation/03-folder-structure.md` | Folder Structure | A | Draft |
-| `00-foundation/04-domain-model.md` | Domain Model | A | Draft |
-| `00-foundation/05-backend-architecture.md` | Backend Architecture | A | Draft |
-| `00-foundation/06-frontend-architecture.md` | Frontend Architecture | A | Draft |
-| `00-foundation/07-ai-architecture.md` | AI Architecture | A | Draft |
-| `00-foundation/08-mcp-architecture.md` | MCP Architecture | A | Draft |
-| `00-foundation/adrs/ADR-001` to `ADR-006` | Foundational decisions | A | Draft |
-| `01-schemas-contracts/01-component-catalog-schema.md` | Component Catalog Schema | B | Draft |
-| `01-schemas-contracts/02-intermediate-ui-schema.md` | Intermediate UI Schema | B | Draft |
-| `01-schemas-contracts/03-knowledge-base-schema.md` | Knowledge Base Schema | B | Draft |
-| `01-schemas-contracts/04-api-design.md` | API Design | B | Draft |
-| `01-schemas-contracts/05-database-design.md` | Database Design | B | Draft |
-| `02-ai-modules/01-prompt-templates.md` | Prompt Templates | C | Draft |
-| `02-ai-modules/02-prompt-versioning.md` | Prompt Versioning | C | Draft |
-| `02-ai-modules/03-component-mapping-strategy.md` | Component Mapping Strategy | C | Draft |
-| `02-ai-modules/04-react-generation-strategy.md` | React Generation Strategy | C | Draft |
-| `02-ai-modules/05-ai-review-strategy.md` | AI Review Strategy | C | Draft |
-| `02-ai-modules/06-prototype-generation-strategy.md` | Prototype Generation Strategy | C | Draft |
-| `03-diagrams/01-class-diagrams.md` | Class Diagrams | D | Draft |
-| `03-diagrams/02-sequence-diagrams.md` | Sequence Diagrams | D | Draft |
-| `04-cross-cutting/01-mcp-server-design.md` | MCP Server Design and Tool Definitions | E | Draft |
-| `04-cross-cutting/02-deployment-architecture.md` | Deployment Architecture | E | Draft |
-| `04-cross-cutting/03-cicd-strategy.md` | CI/CD Strategy | E | Draft |
-| `04-cross-cutting/04-security.md` | Security | E | Draft |
-| `04-cross-cutting/05-testing-strategy.md` | Testing Strategy | E | Draft |
-| `04-cross-cutting/06-scalability-strategy.md` | Scalability Strategy | E | Draft |
-| `04-cross-cutting/07-extension-strategy.md` | Extension Strategy | E | Draft |
-| `04-cross-cutting/08-enterprise-adoption.md` | Enterprise Adoption Strategy | E | Draft |
-| `04-cross-cutting/09-future-roadmap.md` | Future Roadmap | E | Draft |
+| `00-foundation/01-system-architecture.md` | System Architecture | A | Approved |
+| `00-foundation/02-module-breakdown.md` | Module Breakdown | A | Approved |
+| `00-foundation/03-folder-structure.md` | Folder Structure | A | Approved |
+| `00-foundation/04-domain-model.md` | Domain Model | A | Approved |
+| `00-foundation/05-backend-architecture.md` | Backend Architecture | A | Approved |
+| `00-foundation/06-frontend-architecture.md` | Frontend Architecture | A | Approved |
+| `00-foundation/07-ai-architecture.md` | AI Architecture | A | Approved |
+| `00-foundation/08-mcp-architecture.md` | MCP Architecture | A | Approved |
+| `00-foundation/09-phase1-mvp-work-breakdown.md` | Phase 1 MVP Work Breakdown | A | Approved |
+| `00-foundation/adrs/ADR-001` to `ADR-006` | Foundational decisions | A | Accepted |
+| `01-schemas-contracts/01-component-catalog-schema.md` | Component Catalog Schema | B | Approved |
+| `01-schemas-contracts/02-intermediate-ui-schema.md` | Intermediate UI Schema | B | Approved |
+| `01-schemas-contracts/03-knowledge-base-schema.md` | Knowledge Base Schema | B | Approved |
+| `01-schemas-contracts/04-api-design.md` | API Design | B | Approved |
+| `01-schemas-contracts/05-database-design.md` | Database Design | B | Approved |
+| `02-ai-modules/01-prompt-templates.md` | Prompt Templates | C | Approved |
+| `02-ai-modules/02-prompt-versioning.md` | Prompt Versioning | C | Approved |
+| `02-ai-modules/03-component-mapping-strategy.md` | Component Mapping Strategy | C | Approved |
+| `02-ai-modules/04-react-generation-strategy.md` | React Generation Strategy | C | Approved |
+| `02-ai-modules/05-ai-review-strategy.md` | AI Review Strategy | C | Approved |
+| `02-ai-modules/06-prototype-generation-strategy.md` | Prototype Generation Strategy | C | Approved |
+| `03-diagrams/01-class-diagrams.md` | Class Diagrams | D | Approved |
+| `03-diagrams/02-sequence-diagrams.md` | Sequence Diagrams | D | Approved |
+| `04-cross-cutting/01-mcp-server-design.md` | MCP Server Design and Tool Definitions | E | Approved |
+| `04-cross-cutting/02-deployment-architecture.md` | Deployment Architecture | E | Approved |
+| `04-cross-cutting/03-cicd-strategy.md` | CI/CD Strategy | E | Approved |
+| `04-cross-cutting/04-security.md` | Security | E | Approved |
+| `04-cross-cutting/05-testing-strategy.md` | Testing Strategy | E | Approved |
+| `04-cross-cutting/06-scalability-strategy.md` | Scalability Strategy | E | Approved |
+| `04-cross-cutting/07-extension-strategy.md` | Extension Strategy | E | Approved |
+| `04-cross-cutting/08-enterprise-adoption.md` | Enterprise Adoption Strategy | E | Approved |
+| `04-cross-cutting/09-future-roadmap.md` | Future Roadmap | E | Approved |
 
 ## Coverage matrix (vision deliverables)
 

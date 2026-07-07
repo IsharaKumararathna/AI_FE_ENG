@@ -1,6 +1,6 @@
 # Prototype Generation Strategy
 
-Status: Draft · Date: 2026-07-07 · Version: 0.1
+Status: Approved · Date: 2026-07-07 · Version: 1.0
 Related decision: ADR-006 (Prototype generation from intent)
 
 ## Summary

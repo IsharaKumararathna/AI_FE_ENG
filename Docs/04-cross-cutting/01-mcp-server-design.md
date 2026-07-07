@@ -1,6 +1,6 @@
 # MCP Server Design and Tool Definitions
 
-Status: Draft · Date: 2026-07-07 · Version: 0.1
+Status: Approved · Date: 2026-07-07 · Version: 1.0
 Vision deliverables: 19 (MCP Server Design), 20 (MCP Tool Definitions)
 
 ## Summary
