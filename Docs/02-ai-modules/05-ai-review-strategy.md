@@ -84,6 +84,71 @@ The reviewer calls `IKnowledgeProvider` for:
 It also receives the `IntermediateUiTree` and the `GeneratedArtifact` set from
 the session.
 
+## Prototype Conformance Review (input-side)
+
+The AI Reviewer above governs the *output* (generated React). ADR-005 adds an
+input-side **Prototype Conformance Review** that governs the *prototype* a
+non-technical author uploads, before conversion. It shares the rule-as-data model
+above but operates on a different input and produces a different report.
+
+### Scope (MVP)
+
+- Advisory and non-blocking. A failed report does not block conversion; it
+  guides the author.
+- Runs as a pre-conversion stage consuming the `PrototypeAnalysis` (layout,
+  header, sidebar, footer, navigation, forms, cards, tables, buttons, dialogs,
+  typography, spacing) and the raw HTML/CSS.
+- Reuses `IKnowledgeProvider`, `LlmRouter`, and `PromptManager`; introduces no
+  new abstraction.
+
+### Input-side dimensions
+
+| Dimension | Source of truth | Examples |
+|---|---|---|
+| Token conformance | Design token set | Hardcoded color not in palette, spacing off the token scale, radius not a token. |
+| Component conformance | Approved components | Raw HTML element with no approved DS mapping, custom widget diverging from DS. |
+| Layout conformance | Layout patterns + Reference UI patterns | Page structure diverging from approved layouts or current production UI. |
+| Typography conformance | Design token set (typography) | Font sizes, weights, or families not drawn from tokens. |
+| Accessibility (prototype) | Accessibility rules | Missing labels, no focus indication, table headers missing scope — flagged on the prototype, not just the output. |
+
+### Reference UI patterns ("similar to current UI")
+
+The Knowledge Base carries a new **Reference UI patterns** category: approved
+page and layout patterns drawn from current production applications. The
+conformance review compares the prototype's detected structure against these
+reference patterns and reports drift, so prototypes stay similar to the existing
+UI. These are data, versioned with the Knowledge Base; see
+`01-schemas-contracts/03-knowledge-base-schema.md`.
+
+### Output schema
+
+```json
+{
+  "prototypeId": "p-001",
+  "outcome": "Passed with warnings",
+  "findings": [
+    {
+      "ruleId": "CONF_COLOR_OFF_TOKEN",
+      "category": "Token conformance",
+      "severity": "advisory",
+      "message": "Background #123456 is not in the color token palette; nearest token is color.surface.muted.",
+      "location": { "selector": ".hero", "property": "background-color" }
+    }
+  ],
+  "suggestions": [
+    "Replace #123456 with color.surface.muted to match the current dashboard hero."
+  ]
+}
+```
+
+### Post-MVP (deferred)
+
+- Blocking gates: a failed conformance report prevents conversion.
+- Auto-normalization: snap colors to nearest token, spacing to the scale.
+- Guided authoring: DS-backed prototype templates so prototypes are conforming by
+  construction. Recorded as a roadmap milestone in
+  `04-cross-cutting/09-future-roadmap.md`.
+
 ## What is not shown
 
 - Generation rules the reviewer checks against: see

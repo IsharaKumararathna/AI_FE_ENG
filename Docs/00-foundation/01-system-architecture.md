@@ -8,16 +8,22 @@ Vision deliverable: 1 (System Architecture)
 The platform converts HTML and CSS prototypes into production-ready React and
 TypeScript applications that conform to an organization Design System by default.
 A pipeline of AI stages (analyze, map, generate, review) runs on a .NET backend.
-Every AI stage retrieves Design System knowledge through a single abstraction,
-`IKnowledgeProvider`, so the MVP can read local JSON, Markdown, and YAML while
-remaining ready to swap in an MCP server in Phase 2 without touching AI code.
+The platform also governs the *input*: a Prototype Conformance Review stage
+scores the uploaded prototype against the Design System and a reference UI
+baseline before conversion, so non-technical authors see drift at authoring time
+(see ADR-005). For authors who cannot hand-build a conformant prototype, a
+Prototype Generator produces a DS-conformant prototype from intent, correct at
+once with no back-and-forth (see ADR-006, Phase 1.5). Every AI stage retrieves
+Design System knowledge through a single abstraction, `IKnowledgeProvider`, so
+the MVP can read local JSON, Markdown, and YAML while remaining ready to swap in
+an MCP server in Phase 2 without touching AI code.
 
 ## Actors and goals
 
 | Actor | Goal |
 |---|---|
-| Business Analyst | Upload a prototype and receive a standards-compliant UI skeleton. |
-| Product Owner | Validate that generated UI matches intent and design standards. |
+| Business Analyst | Upload a prototype and receive a conformance report plus a standards-compliant UI skeleton. |
+| Product Owner | Describe intent and receive a DS-conformant prototype; validate the generated UI matches intent and design standards. |
 | UX Designer | Confirm design tokens, layouts, and components are respected. |
 | Software Engineer | Receive production-ready React code and a compliance review report. |
 
@@ -28,13 +34,18 @@ module documents). Stages are independent and individually testable.
 
 ```mermaid
 flowchart LR
-    P[Prototype<br/>HTML and CSS] --> AN[Prototype Analyzer]
+    P[Uploaded Prototype<br/>HTML and CSS] --> AN[Prototype Analyzer]
+    INT[PO Intent<br/>PrototypeRequest] --> PG[Prototype Generator<br/>ADR-006, by construction]
+    PG --> P2[Conformant Prototype]
+    P2 --> AN
+    AN --> PCR[Prototype Conformance Review<br/>advisory, ADR-005]
     AN --> ID[Component Identification]
     ID --> MP[Component Mapper]
     MP --> TR[Intermediate UI Tree]
     TR --> RG[React Generator]
     RG --> RV[AI Reviewer]
     RV --> OUT[Production React<br/>plus Review Report]
+    PCR --> CR[Conformance Report<br/>non-blocking]
 ```
 
 ## System context

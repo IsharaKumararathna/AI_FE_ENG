@@ -8,14 +8,20 @@ Vision deliverable: 30 (Future Roadmap)
 The vision defines Phases 2 through 5. This document refines them into
 milestones mapped to the extension points in `04-cross-cutting/07-extension-strategy.md`.
 Each milestone is sized so it can be planned into sprints. Dates are not committed
-here; they are set during sprint planning.
+here; they are set during sprint planning. The Phase 1 MVP baseline includes the
+advisory Prototype Conformance Review (ADR-005). Phase 1.5 adds the Prototype
+Generator (ADR-006): intent → DS-conformant prototype, correct at once, no
+back-and-forth for non-technical authors. The milestones below extend the
+platform from that baseline.
 
 ## Milestone map
 
 | Phase | Milestone | Capabilities | Extension points used |
 |---|---|---|---|
+| Phase 1.5 | Prototype generation from intent | Generate a DS-conformant prototype from a PO's intent; conformant by construction, no back-and-forth (ADR-006). | Prototype Generator, Knowledge Provider. |
 | Phase 2 | MCP server | Expose Knowledge Base as MCP tools; add `McpKnowledgeProvider`. | `IKnowledgeProvider`. |
 | Phase 2 | Input expansion | Figma JSON and image input. | Prototype ingestion. |
+| Phase 2 | Guided prototype authoring | Visual authoring from DS component blocks plus blocking conformance gates; complements intent-based generation (ADR-006) with an interactive surface. | Prototype ingestion, Prototype Conformance Reviewer, Knowledge Base. |
 | Phase 3 | Storybook integration | Read live Storybook stories as knowledge. | `IKnowledgeProvider`. |
 | Phase 3 | Token governance | Design token validation and drift detection. | Review rules, Knowledge Base. |
 | Phase 4 | PR review | Automatic PR reviews on generated code. | `IAiReviewer`, repository integration. |
@@ -29,8 +35,10 @@ here; they are set during sprint planning.
 
 ```mermaid
 flowchart LR
-    P1[Phase 1 MVP] --> P2M[MCP server]
+    P1[Phase 1 MVP] --> P15[Prototype generation]
+    P1 --> P2M[MCP server]
     P1 --> P2I[Input expansion]
+    P15 --> P2G[Guided prototype authoring]
     P2M --> P3S[Storybook integration]
     P2M --> P3T[Token governance]
     P3S --> P4P[PR review]

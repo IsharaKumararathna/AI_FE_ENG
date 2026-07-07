@@ -73,6 +73,39 @@ Every template has:
 - Few-shot: a file with an inline color producing a blocking compliance
   violation.
 
+## Prototype Generator
+
+- Key: `prototype.generator`
+- Variables: `{{prototypeRequest}}`, `{{availableComponents}}` (from
+  `IKnowledgeProvider.SearchComponentsAsync`), `{{tokens}}`,
+  `{{layoutPatterns}}`, `{{referenceUiPatterns}}`
+- System message: "You generate a Design-System-conformant HTML and CSS prototype
+  from a PrototypeRequest. Use only the provided approved components and design
+  tokens. Bind styles to token CSS variables, never to hardcoded literals. Mirror
+  the referenced UI pattern where one is provided. Include each component's
+  accessibility attributes. Return JSON matching the generated Prototype schema:
+  html, css, intermediateUiTree, tokensUsed, componentsUsed."
+- Output contract: generated `Prototype` (see
+  `02-ai-modules/06-prototype-generation-strategy.md`, ADR-006).
+- Few-shot: a `PrototypeRequest` for a Dashboard mapped to a conformant prototype
+  that uses `AppBar`, `NavList`, `DataTable`, and `PrimaryButton` bound to tokens.
+
+## Prototype Conformance Reviewer
+
+- Key: `prototype.conformance.reviewer`
+- Variables: `{{prototypeAnalysis}}`, `{{html}}`, `{{css}}`, `{{tokens}}`,
+  `{{approvedComponents}}`, `{{layoutPatterns}}`, `{{referenceUiPatterns}}`,
+  `{{accessibilityRules}}`
+- System message: "You review an uploaded prototype for Design System drift.
+  Compare detected elements and styles against the provided tokens, approved
+  components, layouts, and reference UI patterns. Return findings with category,
+  severity (advisory or blocking), and a message; severity is advisory in the
+  MVP. Return JSON matching the PrototypeConformanceReport schema."
+- Output contract: `PrototypeConformanceReport` (see
+  `02-ai-modules/05-ai-review-strategy.md`, ADR-005).
+- Few-shot: a hero section with a hardcoded `#123456` background producing an
+  advisory token-conformance finding with the nearest token suggestion.
+
 ## Rules across templates
 
 - Output is always JSON validated against the named schema. The router requests

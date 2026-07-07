@@ -24,6 +24,9 @@ AI stages never use it.
 | Method | Path | Purpose | Request body | Success response |
 |---|---|---|---|---|
 | POST | `/prototypes` | Upload HTML and CSS. | `{ html, css }` | `201` `Prototype` |
+| POST | `/prototypes/generate` | Generate a DS-conformant prototype from intent (ADR-006, async). | `PrototypeRequest` | `202` `{ prototypeId }`, `Location: /prototypes/{id}` |
+| GET | `/prototypes/{id}` | Fetch a prototype (including a generated one); poll an async generate job. | none | `200` `Prototype` |
+| GET | `/prototypes/{id}/conformance` | Get the prototype conformance report (advisory, ADR-005). | none | `200` `PrototypeConformanceReport` |
 | POST | `/sessions` | Start a generation session. | `{ prototypeId }` | `202` `{ sessionId }`, `Location: /sessions/{id}` |
 | GET | `/sessions/{id}` | Get session status and stage states. | none | `200` `GenerationSession` |
 | GET | `/sessions/{id}/analysis` | Get prototype analysis. | none | `200` `PrototypeAnalysis` |
@@ -103,6 +106,9 @@ should back off (for example, two seconds) between calls.
 ## Schema references
 
 - `PrototypeAnalysis`: `01-schemas-contracts` (domain model and database design).
+- `PrototypeRequest` and generated `Prototype`: see
+  `02-ai-modules/06-prototype-generation-strategy.md` (ADR-006).
+- `PrototypeConformanceReport`: see `02-ai-modules/05-ai-review-strategy.md` (ADR-005).
 - `ComponentMapping[]`: see `02-ai-modules/03-component-mapping-strategy.md`.
 - `IntermediateUiTree`: `01-schemas-contracts/02-intermediate-ui-schema.md`.
 - `GeneratedArtifact[]` and `ReviewReport`: see the domain model and

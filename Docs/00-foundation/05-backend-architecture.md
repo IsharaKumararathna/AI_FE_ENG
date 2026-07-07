@@ -25,7 +25,7 @@ abstractions. The API is the only composition root.
 | Application | Command and query handlers, stage contracts | MediatR for request dispatch. FluentValidation for input. |
 | AI | Stage implementations | Implement stage interfaces from application. Call `LlmRouter` and `IKnowledgeProvider` only. |
 | Knowledge | `JsonKnowledgeProvider` | Reads `knowledge/`. Implements `IKnowledgeProvider`. |
-| Infrastructure | Repositories, LLM clients, storage | Cosmos repositories with query-side filtering. Polly resilience for LLM calls. |
+| Infrastructure | Repositories, LLM clients, storage | MVP: file/in-memory repositories behind application-layer interfaces. Post-MVP: Cosmos repositories with query-side filtering. Polly resilience for LLM calls. |
 | API | Minimal controllers or endpoints | Registers all implementations. Returns `ProblemDetails` on errors. |
 
 ## Pipeline orchestration
@@ -71,13 +71,29 @@ Do not introduce `System.Text.Json` in this codebase. Stage outputs that cross
 the LLM boundary are deserialized into typed contracts, never used as raw
 strings.
 
-## Cosmos DB repositories
+## Repositories
 
-Repositories implement query interfaces from the application layer. Every read
-filters in the Cosmos query using parameters and partition keys; no repository
-pulls a large document set and filters in memory. Write operations upsert by id
-and partition key. Partition keys per container are specified in
-`01-schemas-contracts/05-database-design.md`.
+Repositories implement query interfaces defined in the application layer:
+`ISessionRepository`, `IArtifactRepository`, `IPromptRepository`,
+`IPromptVersionRepository`. The API composition root wires the active
+implementation, so the persistence backend is swappable without touching the
+domain or application layers.
+
+### MVP: file and in-memory repositories
+
+Per the ADR-004 MVP-scope amendment, the MVP ships file-based implementations
+that require no cloud resources, mirroring the `JsonKnowledgeProvider` pattern
+from ADR-003: `FileSessionRepository`, `FileArtifactRepository`,
+`FilePromptRepository`, `FilePromptVersionRepository` persist JSON files on
+disk. The `knowledgeCache` store is omitted in the MVP.
+
+### Post-MVP: Cosmos DB repositories
+
+`CosmosDb*Repository` implementations are the production target once Cosmos is
+provisioned. Every read filters in the Cosmos query using parameters and
+partition keys; no repository pulls a large document set and filters in memory.
+Write operations upsert by id and partition key. Partition keys per container
+are specified in `01-schemas-contracts/05-database-design.md`.
 
 ## Asynchronous generation
 

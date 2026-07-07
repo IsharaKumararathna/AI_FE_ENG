@@ -11,6 +11,19 @@ Large generated files are stored in Blob Storage with a Cosmos reference.
 Repositories filter server-side using query parameters and partition keys; no
 repository pulls a large set and filters in memory.
 
+## MVP scope
+
+Per the ADR-004 MVP-scope amendment, the MVP does not provision Cosmos DB.
+Sessions, artifacts, prompt templates, and prompt versions are persisted as
+JSON files on disk by file-based repository implementations
+(`FileSessionRepository`, `FileArtifactRepository`, `FilePromptRepository`,
+`FilePromptVersionRepository`) behind the same application-layer repository
+interfaces. The `knowledgeCache` container is omitted in the MVP. The Cosmos
+containers, partition keys, query-side filtering convention, and Blob Storage
+reference pattern described below are the post-MVP production target and apply
+once `CosmosDb*Repository` implementations are registered in the composition
+root.
+
 ## Containers
 
 | Container | Partition key | Purpose | Example document |

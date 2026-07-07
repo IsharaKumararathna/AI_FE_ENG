@@ -6,8 +6,9 @@ Vision deliverable: 13 (Knowledge Base Schema)
 ## Summary
 
 Defines the on-disk Knowledge Base that `JsonKnowledgeProvider` reads in the MVP.
-The base is a directory of typed files: components, tokens, layouts, icons, best
-practices, and accessibility rules, plus a manifest that indexes them. The
+The base is a directory of typed files: components, tokens, layouts, reference UI
+patterns, icons, best practices, and accessibility rules, plus a manifest that
+indexes them. The
 manifest schema is JSON Schema draft 2020-12. A small sample dataset ships under
 `knowledge/` for contract tests and demos.
 
@@ -23,6 +24,8 @@ knowledge/
     tokens.json              conforms to design-token-set (below)
   layouts/
     AppLayout.json           conforms to layout-pattern (below)
+  referenceUiPatterns/
+    DashboardPage.json       conforms to reference-ui-pattern (below)
   icons/
     icons.json               conforms to icon-set (below)
   best-practices/
@@ -43,12 +46,13 @@ index it without parsing prose.
   "$id": "https://aife/schemas/knowledge-manifest.schema.json",
   "title": "KnowledgeManifest",
   "type": "object",
-  "required": ["version", "components", "tokens", "layouts", "icons", "bestPractices", "accessibilityRules"],
+  "required": ["version", "components", "tokens", "layouts", "referenceUiPatterns", "icons", "bestPractices", "accessibilityRules"],
   "properties": {
     "version": { "type": "string" },
     "components": { "type": "array", "items": { "type": "string" } },
     "tokens": { "type": "string" },
     "layouts": { "type": "array", "items": { "type": "string" } },
+    "referenceUiPatterns": { "type": "array", "items": { "type": "string" } },
     "icons": { "type": "string" },
     "bestPractices": { "type": "array", "items": { "type": "string" } },
     "accessibilityRules": { "type": "string" }
@@ -103,6 +107,42 @@ index it without parsing prose.
 }
 ```
 
+### Reference UI pattern
+
+Captures approved page and layout patterns drawn from current production UI, so
+the Prototype Conformance Review (ADR-005) can detect when an uploaded prototype
+diverges from the existing application look and structure.
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aife/schemas/reference-ui-pattern.schema.json",
+  "title": "ReferenceUiPattern",
+  "type": "object",
+  "required": ["patternId", "name", "layoutId", "regions"],
+  "properties": {
+    "patternId": { "type": "string", "description": "e.g. DashboardPage" },
+    "name": { "type": "string" },
+    "description": { "type": "string", "description": "What current production UI this pattern is drawn from" },
+    "layoutId": { "type": "string", "description": "Layout this pattern instantiates, e.g. AppLayout" },
+    "regions": {
+      "type": "array",
+      "description": "Expected elements per layout slot, used to detect prototype drift",
+      "items": {
+        "type": "object",
+        "required": ["slot", "element"],
+        "properties": {
+          "slot": { "type": "string", "description": "e.g. header, sidebar, main, footer" },
+          "element": { "type": "string", "description": "e.g. AppBar, NavList, DataTable" }
+        }
+      }
+    },
+    "sourceApp": { "type": "string", "description": "Production app this pattern is sourced from" },
+    "sourceVersion": { "type": "string" }
+  }
+}
+```
+
 ### Icon set and accessibility rule set
 
 Icon set is an array of `{ name, label, svgPath }`. Accessibility rule set is an
@@ -118,6 +158,9 @@ The sample dataset under `knowledge/` includes:
 - A minimal token set with `color.action.primary`, `color.text.primary`,
   `spacing.button.padding`, `spacing.table.cell`, and `radius.button`.
 - One layout: `AppLayout` with slots `header`, `sidebar`, `main`, `footer`.
+- One reference UI pattern: `DashboardPage` instantiating `AppLayout` with
+  regions `header=AppBar`, `sidebar=NavList`, `main=DataTable`, used by the
+  Prototype Conformance Review to detect drift from the current dashboard UI.
 - A small icon set and one accessibility rule (button focus ring visible).
 
 This dataset is sufficient to exercise the full pipeline end to end in design and
