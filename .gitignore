@@ -146,3 +146,6 @@ log*.txt
 tmp/
 temp/
 .clinerules
+
+# AI-FE-ENG specific files
+/data
