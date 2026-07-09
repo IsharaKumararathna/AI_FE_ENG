@@ -1,0 +1,6 @@
+[
+  {
+    "path": "src/Dashboard.tsx",
+    "content": "import { PrimaryButton, DataTable } from '@org/ds/react'; export const Dashboard = () => null;"
+  }
+]
