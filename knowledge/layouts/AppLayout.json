@@ -1,0 +1,6 @@
+{
+  "layoutId": "AppLayout",
+  "name": "Application Layout",
+  "description": "Standard application shell with header, sidebar, main content, and footer.",
+  "slots": ["header", "sidebar", "main", "footer"]
+}

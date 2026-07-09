@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aife/schemas/knowledge-manifest.schema.json",
+  "title": "KnowledgeManifest",
+  "type": "object",
+  "required": ["version", "components", "tokens", "layouts", "referenceUiPatterns", "icons", "bestPractices", "accessibilityRules"],
+  "properties": {
+    "version": { "type": "string" },
+    "components": { "type": "array", "items": { "type": "string" } },
+    "tokens": { "type": "string" },
+    "layouts": { "type": "array", "items": { "type": "string" } },
+    "referenceUiPatterns": { "type": "array", "items": { "type": "string" } },
+    "icons": { "type": "string" },
+    "bestPractices": { "type": "array", "items": { "type": "string" } },
+    "accessibilityRules": { "type": "string" }
+  }
+}

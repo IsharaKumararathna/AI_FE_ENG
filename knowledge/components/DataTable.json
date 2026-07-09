@@ -1,0 +1,20 @@
+{
+  "componentId": "DataTable",
+  "name": "Data Table",
+  "category": "table",
+  "status": "approved",
+  "description": "Accessible table for tabular data with sortable columns.",
+  "props": [
+    { "name": "columns", "type": "array", "required": true },
+    { "name": "rows", "type": "array", "required": true },
+    { "name": "sortable", "type": "boolean", "required": false, "default": false }
+  ],
+  "tokensConsumed": ["color.table.header", "spacing.table.cell", "border.table"],
+  "accessibility": {
+    "role": "table",
+    "keyboardSupport": true,
+    "ariaProps": ["aria-sort", "aria-rowcount"],
+    "notes": ["Use scope on header cells."]
+  },
+  "mapsFromHtml": ["table"]
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aife/schemas/prototype-request.schema.json",
+  "title": "PrototypeRequest",
+  "type": "object",
+  "required": ["intent", "pages"],
+  "properties": {
+    "intent": { "type": "string", "description": "Free-text description of what the PO wants" },
+    "pages": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/pageSpec" }
+    }
+  },
+  "$defs": {
+    "pageSpec": {
+      "type": "object",
+      "required": ["name", "layout"],
+      "properties": {
+        "name": { "type": "string" },
+        "layout": { "type": "string", "description": "Approved layout id" },
+        "referencePattern": { "type": "string", "description": "Reference UI pattern id" },
+        "regions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/regionSpec" }
+        },
+        "actions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/actionSpec" }
+        }
+      }
+    },
+    "regionSpec": {
+      "type": "object",
+      "required": ["slot", "component"],
+      "properties": {
+        "slot": { "type": "string" },
+        "component": { "type": "string", "description": "Approved componentId" },
+        "props": { "type": "object" }
+      }
+    },
+    "actionSpec": {
+      "type": "object",
+      "required": ["slot", "component"],
+      "properties": {
+        "slot": { "type": "string" },
+        "component": { "type": "string", "description": "Approved componentId" },
+        "label": { "type": "string" }
+      }
+    }
+  }
+}

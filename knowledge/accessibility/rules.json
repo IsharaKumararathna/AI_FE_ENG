@@ -1,0 +1,22 @@
+{
+  "rules": [
+    {
+      "ruleId": "A11Y_BUTTON_FOCUS_RING",
+      "category": "Accessibility",
+      "statement": "Buttons must have a visible focus ring.",
+      "severity": "blocking"
+    },
+    {
+      "ruleId": "A11Y_INPUT_LABEL",
+      "category": "Accessibility",
+      "statement": "Inputs must have an associated label.",
+      "severity": "blocking"
+    },
+    {
+      "ruleId": "A11Y_TABLE_HEADER_SCOPE",
+      "category": "Accessibility",
+      "statement": "Table header cells must declare scope.",
+      "severity": "advisory"
+    }
+  ]
+}

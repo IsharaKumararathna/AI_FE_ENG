@@ -1,0 +1,7 @@
+{
+  "icons": [
+    { "name": "search", "label": "Search", "svgPath": "M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zm10 17l-6-6" },
+    { "name": "add", "label": "Add", "svgPath": "M12 5v14M5 12h14" },
+    { "name": "menu", "label": "Menu", "svgPath": "M3 6h18M3 12h18M3 18h18" }
+  ]
+}

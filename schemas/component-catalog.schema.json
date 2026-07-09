@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aife/schemas/component-catalog.schema.json",
+  "title": "ComponentCatalogEntry",
+  "type": "object",
+  "required": ["componentId", "name", "category", "status", "props"],
+  "properties": {
+    "componentId": { "type": "string", "description": "Stable unique id, e.g. PrimaryButton" },
+    "name": { "type": "string" },
+    "category": {
+      "enum": ["button", "input", "select", "table", "dialog", "layout", "navigation", "card", "typography", "feedback", "other"]
+    },
+    "status": { "enum": ["approved", "deprecated", "experimental"] },
+    "description": { "type": "string" },
+    "props": { "type": "array", "items": { "$ref": "#/$defs/prop" } },
+    "variants": { "type": "array", "items": { "$ref": "#/$defs/variant" } },
+    "tokensConsumed": { "type": "array", "items": { "type": "string" } },
+    "examples": { "type": "array", "items": { "$ref": "#/$defs/example" } },
+    "accessibility": { "$ref": "#/$defs/accessibility" },
+    "mapsFromHtml": { "type": "array", "items": { "type": "string" }, "description": "HTML elements this maps from, e.g. button" }
+  },
+  "$defs": {
+    "prop": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "required": { "type": "boolean", "default": false },
+        "default": {},
+        "description": { "type": "string" },
+        "enum": { "type": "array" }
+      }
+    },
+    "variant": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "propOverrides": { "type": "object" }
+      }
+    },
+    "example": {
+      "type": "object",
+      "required": ["name", "code"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "code": { "type": "string" }
+      }
+    },
+    "accessibility": {
+      "type": "object",
+      "properties": {
+        "role": { "type": "string" },
+        "keyboardSupport": { "type": "boolean" },
+        "ariaProps": { "type": "array", "items": { "type": "string" } },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

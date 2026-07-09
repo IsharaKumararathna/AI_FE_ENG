@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aife/schemas/reference-ui-pattern.schema.json",
+  "title": "ReferenceUiPattern",
+  "type": "object",
+  "required": ["patternId", "name", "layoutId", "regions"],
+  "properties": {
+    "patternId": { "type": "string", "description": "e.g. DashboardPage" },
+    "name": { "type": "string" },
+    "description": { "type": "string", "description": "What current production UI this pattern is drawn from" },
+    "layoutId": { "type": "string", "description": "Layout this pattern instantiates, e.g. AppLayout" },
+    "regions": {
+      "type": "array",
+      "description": "Expected elements per layout slot, used to detect prototype drift",
+      "items": {
+        "type": "object",
+        "required": ["slot", "element"],
+        "properties": {
+          "slot": { "type": "string", "description": "e.g. header, sidebar, main, footer" },
+          "element": { "type": "string", "description": "e.g. AppBar, NavList, DataTable" }
+        }
+      }
+    },
+    "sourceApp": { "type": "string", "description": "Production app this pattern is sourced from" },
+    "sourceVersion": { "type": "string" }
+  }
+}

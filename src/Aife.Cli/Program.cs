@@ -1,0 +1,162 @@
+using Aife.Application.AI;
+using Aife.Application.AI.Stages;
+using Aife.Application.Knowledge;
+using Aife.Application.Persistence;
+using Aife.Application.Pipeline;
+using Aife.Application.Prompting;
+using Aife.Ai.Stages;
+using Aife.Domain.Generation;
+using Aife.Infrastructure.AI;
+using Aife.Infrastructure.Persistence;
+using Aife.Knowledge;
+using Microsoft.Extensions.DependencyInjection;
+
+// ── Paths ──
+var repoRoot = FindRepoRoot();
+var knowledgePath = Path.Combine(repoRoot, "knowledge");
+var dataPath = Path.Combine(repoRoot, "data");
+Directory.CreateDirectory(dataPath);
+
+// ── DI ──
+var services = new ServiceCollection();
+
+services.AddSingleton<IKnowledgeProvider>(_ => new JsonKnowledgeProvider(knowledgePath));
+services.AddSingleton<ILlmProvider, StubLlmProvider>();
+services.AddSingleton<LlmRouter>();
+
+services.AddSingleton<IPromptRepository>(_ => new FilePromptRepository(dataPath));
+services.AddSingleton<IPromptVersionRepository>(_ => new FilePromptVersionRepository(dataPath));
+services.AddSingleton<IPromptManager, PromptManager>();
+
+services.AddSingleton<IPrototypeRepository>(_ => new FilePrototypeRepository(dataPath));
+services.AddSingleton<ISessionRepository>(_ => new FileSessionRepository(dataPath));
+services.AddSingleton<IArtifactRepository>(_ => new FileArtifactRepository(dataPath));
+
+services.AddSingleton<IPrototypeAnalyzer, PrototypeAnalyzer>();
+services.AddSingleton<IComponentMapper, ComponentMapper>();
+services.AddSingleton<IUiTreeAssembler, UiTreeAssembler>();
+services.AddSingleton<IReactGenerator, ReactGenerator>();
+services.AddSingleton<IAiReviewer, AiReviewer>();
+services.AddSingleton<IPrototypeConformanceReviewer, PrototypeConformanceReviewer>();
+services.AddSingleton<IPrototypeGenerator, PrototypeGenerator>();
+services.AddSingleton<IConformanceReportRepository>(_ => new FileConformanceReportRepository(dataPath));
+services.AddSingleton<RunGenerationSessionHandler>();
+
+var sp = services.BuildServiceProvider();
+
+// ── Seed prompts ──
+await Aife.Cli.PromptSeeder.SeedAsync(
+    sp.GetRequiredService<IPromptRepository>(),
+    sp.GetRequiredService<IPromptVersionRepository>());
+
+// ── Run ──
+var handler = sp.GetRequiredService<RunGenerationSessionHandler>();
+
+var htmlPath = args.Length > 0 ? args[0] : null;
+if (string.IsNullOrEmpty(htmlPath))
+{
+    // Demo run with a sample prototype
+    htmlPath = null;
+}
+
+string html;
+string css = "";
+
+if (htmlPath is not null && File.Exists(htmlPath))
+{
+    html = await File.ReadAllTextAsync(htmlPath);
+    var cssPath = Path.ChangeExtension(htmlPath, ".css");
+    if (File.Exists(cssPath))
+        css = await File.ReadAllTextAsync(cssPath);
+}
+else
+{
+    Console.WriteLine("No prototype file specified. Running demo with a sample prototype.");
+    Console.WriteLine("Usage: aife <path-to-prototype.html>");
+    Console.WriteLine();
+    html = """
+    <html>
+      <body>
+        <button>Submit</button>
+        <table><tr><th>Name</th></tr></table>
+      </body>
+    </html>
+    """;
+}
+
+var prototype = new Prototype
+{
+    Id = $"p-cli-{Guid.NewGuid():N}",
+    Html = html,
+    Css = css
+};
+
+Console.WriteLine($"Prototype: {prototype.Id}");
+Console.WriteLine("Running pipeline...");
+
+var result = await handler.HandleAsync(prototype, CancellationToken.None);
+
+Console.WriteLine();
+Console.WriteLine($"Session:  {result.Session.Id}");
+Console.WriteLine($"Status:   {result.Session.Status}");
+Console.WriteLine();
+
+if (result.Analysis is not null)
+{
+    Console.WriteLine($"Analysis: layout={result.Analysis.Layout}, {result.Analysis.Elements.Count} element(s)");
+}
+
+if (result.Mappings is not null)
+{
+    foreach (var m in result.Mappings)
+    {
+        Console.WriteLine($"  Map: {m.ElementRef} -> {m.ComponentId ?? "(unmapped)"} (confidence={m.Confidence:F2})");
+    }
+}
+
+Console.WriteLine();
+if (result.Artifacts is not null)
+{
+    Console.WriteLine($"Artifacts: {result.Artifacts.Count} file(s)");
+    foreach (var a in result.Artifacts)
+    {
+        Console.WriteLine($"  {a.Path} ({a.Content.Length} chars)");
+    }
+}
+
+Console.WriteLine();
+if (result.Review is not null)
+{
+    Console.WriteLine($"Review: score={result.Review.Score}, outcome={result.Review.Outcome}");
+    if (result.Review.Violations.Count > 0)
+    {
+        Console.WriteLine($"  Violations: {result.Review.Violations.Count}");
+    }
+    if (result.Review.Suggestions.Count > 0)
+    {
+        foreach (var s in result.Review.Suggestions)
+        {
+            Console.WriteLine($"  Suggestion: {s}");
+        }
+    }
+}
+
+Console.WriteLine();
+Console.WriteLine("Done.");
+
+return 0;
+
+// ── Helpers ──
+
+static string FindRepoRoot()
+{
+    var dir = new DirectoryInfo(AppContext.BaseDirectory);
+    while (dir is not null)
+    {
+        if (Directory.Exists(Path.Combine(dir.FullName, "knowledge")) &&
+            Directory.Exists(Path.Combine(dir.FullName, "src")))
+            return dir.FullName;
+        dir = dir.Parent;
+    }
+    return Directory.GetCurrentDirectory();
+}

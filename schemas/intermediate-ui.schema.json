@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aife/schemas/intermediate-ui.schema.json",
+  "title": "IntermediateUiTree",
+  "type": "object",
+  "required": ["page", "layout", "children"],
+  "properties": {
+    "page": { "type": "string" },
+    "layout": { "type": "string", "description": "Approved layout id, e.g. AppLayout" },
+    "tokens": { "type": "object", "description": "Page-level token overrides" },
+    "children": { "type": "array", "items": { "$ref": "#/$defs/uiNode" } }
+  },
+  "$defs": {
+    "uiNode": {
+      "type": "object",
+      "required": ["componentId"],
+      "properties": {
+        "nodeId": { "type": "string" },
+        "componentId": { "type": "string" },
+        "variant": { "type": "string" },
+        "props": { "type": "object" },
+        "tokenBindings": { "type": "object", "description": "Maps a prop or slot to a design token name" },
+        "text": { "type": "string" },
+        "children": { "type": "array", "items": { "$ref": "#/$defs/uiNode" } }
+      },
+      "additionalProperties": false
+    }
+  }
+}

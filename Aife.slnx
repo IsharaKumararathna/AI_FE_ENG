@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Aife.Ai/Aife.Ai.csproj" />
+    <Project Path="src/Aife.Api/Aife.Api.csproj" />
+    <Project Path="src/Aife.Application/Aife.Application.csproj" />
+    <Project Path="src/Aife.Cli/Aife.Cli.csproj" />
+    <Project Path="src/Aife.Domain/Aife.Domain.csproj" />
+    <Project Path="src/Aife.Infrastructure/Aife.Infrastructure.csproj" />
+    <Project Path="src/Aife.Knowledge/Aife.Knowledge.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Aife.Ai.Tests/Aife.Ai.Tests.csproj" />
+    <Project Path="tests/Aife.Api.Tests/Aife.Api.Tests.csproj" />
+    <Project Path="tests/Aife.Application.Tests/Aife.Application.Tests.csproj" />
+    <Project Path="tests/Aife.Contracts.Tests/Aife.Contracts.Tests.csproj" />
+    <Project Path="tests/Aife.Domain.Tests/Aife.Domain.Tests.csproj" />
+    <Project Path="tests/Aife.Infrastructure.Tests/Aife.Infrastructure.Tests.csproj" />
+    <Project Path="tests/Aife.Knowledge.Tests/Aife.Knowledge.Tests.csproj" />
+    <Project Path="tests/Aife.PromptEval/Aife.PromptEval.csproj" />
+  </Folder>
+</Solution>

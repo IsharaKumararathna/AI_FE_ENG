@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aife/schemas/layout-pattern.schema.json",
+  "title": "LayoutPattern",
+  "type": "object",
+  "required": ["layoutId", "name", "slots"],
+  "properties": {
+    "layoutId": { "type": "string", "description": "e.g. AppLayout" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "slots": { "type": "array", "items": { "type": "string" }, "description": "Named regions: header, sidebar, main, footer" }
+  }
+}

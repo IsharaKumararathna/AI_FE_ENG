@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aife/schemas/design-token-set.schema.json",
+  "title": "DesignTokenSet",
+  "type": "object",
+  "required": ["tokens"],
+  "properties": {
+    "tokens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "value", "category"],
+        "properties": {
+          "name": { "type": "string", "description": "e.g. color.action.primary" },
+          "value": { "type": "string" },
+          "category": { "enum": ["color", "spacing", "radius", "typography", "border", "shadow"] },
+          "description": { "type": "string" }
+        }
+      }
+    }
+  }
+}

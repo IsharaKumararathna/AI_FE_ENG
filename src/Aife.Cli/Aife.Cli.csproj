@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Aife.Application\Aife.Application.csproj" />
+    <ProjectReference Include="..\Aife.Ai\Aife.Ai.csproj" />
+    <ProjectReference Include="..\Aife.Knowledge\Aife.Knowledge.csproj" />
+    <ProjectReference Include="..\Aife.Infrastructure\Aife.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aife/schemas/prototype-conformance-report.schema.json",
+  "title": "PrototypeConformanceReport",
+  "type": "object",
+  "required": ["prototypeId", "outcome", "findings"],
+  "properties": {
+    "prototypeId": { "type": "string" },
+    "outcome": { "enum": ["Passed", "Passed with warnings", "Failed"] },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/conformanceFinding" }
+    },
+    "suggestions": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "conformanceFinding": {
+      "type": "object",
+      "required": ["ruleId", "category", "severity", "message"],
+      "properties": {
+        "ruleId": { "type": "string" },
+        "category": { "type": "string", "description": "e.g. Token conformance, Component conformance" },
+        "severity": { "enum": ["advisory", "blocking"] },
+        "message": { "type": "string" },
+        "location": {
+          "type": "object",
+          "properties": {
+            "selector": { "type": "string" },
+            "property": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

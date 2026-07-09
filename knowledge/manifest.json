@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "components": ["components/PrimaryButton.json", "components/DataTable.json"],
+  "tokens": "tokens/tokens.json",
+  "layouts": ["layouts/AppLayout.json"],
+  "referenceUiPatterns": ["referenceUiPatterns/DashboardPage.json"],
+  "icons": "icons/icons.json",
+  "bestPractices": ["best-practices/naming.md"],
+  "accessibilityRules": "accessibility/rules.json"
+}
