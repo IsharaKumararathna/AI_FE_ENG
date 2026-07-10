@@ -23,11 +23,35 @@ dotnet build
 # 3. Test (62 tests)
 dotnet test
 
-# 4. Run the API
-dotnet run --project src\Aife.Api
+# 4. Run the API (opens browser at http://localhost:5000)
+dotnet run --project src\Aife.Api --launch-profile "Aife.API.Development"
 
 # 5. Run the CLI (demo mode)
 dotnet run --project src\Aife.Cli
+
+# 6. Run the CLI with --tree for Active Inspections view
+dotnet run --project src\Aife.Cli -- --tree
+```
+
+## VS Code Launch Configurations (F5)
+
+| Configuration | What it does |
+|---|---|
+| **API — Development** | Starts the API with DeepSeek, opens browser to dashboard |
+| **API — No LLM (Stub)** | Starts the API without real LLM (uses stub provider), opens browser |
+| **API — Production** | Starts the API in Production mode |
+| **CLI — Run Default** | Runs the CLI with the demo prototype |
+| **CLI — Active Inspections (--tree)** | Generates the Active Inspections React view directly |
+| **CLI — Run Prototype** | Runs the BUSpek prototype through the full pipeline |
+
+**Using `dotnet run` profiles:**
+
+```powershell
+# Development (DeepSeek + dashboard)
+dotnet run --project src\Aife.Api --launch-profile "Aife.API.Development"
+
+# Stub LLM (no API key needed, dashboard works)
+dotnet run --project src\Aife.Api --launch-profile "Aife.API.NoLLM"
 ```
 
 ## What's in the box

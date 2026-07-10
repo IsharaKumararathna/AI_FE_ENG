@@ -1,4 +1,4 @@
-// BUSpek AI Frontend Generator — Dashboard
+// AI Frontend Generator — Dashboard
 const API = window.location.origin + '/api/v1';
 
 let currentSessionId = null;
@@ -162,92 +162,84 @@ function renderPreview(artifacts) {
   const mainFile = artifacts.find(a => a.path.endsWith('.tsx')) || artifacts[0];
   if (!mainFile) return;
 
-  // Transform the TSX: remove imports, replace with mock component definitions
   let code = mainFile.content
-    // Remove import lines
     .replace(/import\s+.*from\s+['"].*['"];?\s*/g, '')
-    // Remove TypeScript types
     .replace(/:\s*React\.FC[^=]*/g, '')
-    .replace(/:\s*string/g, '')
-    .replace(/:\s*boolean/g, '')
-    .replace(/:\s*number/g, '')
-    .replace(/<[^>]+>/g, m => m.replace(/\s+as\s+[^>]+/g, ''));
+    .replace(/\bexport default\b/g, '')
+    .replace(/const\s+ActiveInspections/g, 'function ActiveInspections');
 
   const html = `<!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"><\/script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"><\/script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f9fafb; color: #111928; font-size: 14px; }
-    .bus-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
-    .bus-btn-primary { background: #1548be; color: white; }
-    .bus-btn-primary:hover { background: #1e429f; }
-    .bus-btn-outline-secondary { background: white; color: #1f2a37; box-shadow: inset 0 0 0 1px #9ca3af; border-radius: 8px; }
-    .bus-tab-strip { display: flex; gap: 4px; border-bottom: 2px solid #e5e7eb; }
-    .bus-tab { padding: 8px 16px; font-size: 13px; font-weight: 600; color: #6b7280; border: none; border-bottom: 2px solid transparent; background: none; cursor: pointer; }
-    .bus-tab.active { color: #1548be; border-bottom-color: #1548be; }
-    .bus-table { width: 100%; border-collapse: collapse; background: white; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
-    .bus-table th { background: #f4f6f9; padding: 12px 8px; font-size: 14px; font-weight: 600; color: #6b7280; text-align: left; }
-    .bus-table td { padding: 16px 8px; font-size: 12px; border-bottom: 1px solid #e5e7eb; }
-    .app-shell { display: grid; grid-template-columns: 240px 1fr; grid-template-rows: 56px 1fr; min-height: 100vh; }
-    .topbar { grid-column: 1/-1; display: flex; align-items: center; gap: 12px; padding: 0 16px; background: white; border-bottom: 1px solid #e5e7eb; }
-    .sidebar { background: white; border-right: 1px solid #e5e7eb; padding: 12px 0; }
-    .sidebar a { display: block; padding: 10px 16px; color: #374151; text-decoration: none; font-size: 13px; }
-    .sidebar a.active { background: #ebf5ff; color: #1548be; font-weight: 600; }
-    .main-content { padding: 24px; overflow-y: auto; }
-    .page-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
-    .toolbar { display: flex; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
-    .data-grid-container { overflow-x: auto; margin-bottom: 16px; }
-    .pagination { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
-  </style>
-</head>
+<head><meta charset="UTF-8">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"><\/script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"><\/script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter','Segoe UI',sans-serif; background: #f9fafb; color: #111928; font-size: 14px; padding: 24px; }
+  .bus-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .bus-btn-primary { background: #1548be; color: white; }
+  .bus-btn-primary:hover { background: #1e429f; }
+  .bus-btn-outline-secondary { background: white; color: #1f2a37; box-shadow: inset 0 0 0 1px #9ca3af; border-radius: 8px; }
+  .bus-tab-strip { display: flex; gap: 4px; border-bottom: 2px solid #e5e7eb; margin-bottom: 16px; }
+  .bus-tab { padding: 8px 16px; font-size: 13px; font-weight: 600; color: #6b7280; border: none; border-bottom: 2px solid transparent; background: none; cursor: pointer; }
+  .bus-tab.active { color: #1548be; border-bottom-color: #1548be; }
+  .bus-table { width: 100%; border-collapse: collapse; background: white; border: 1px solid #e5e7eb; border-radius: 8px; }
+  .bus-table th { background: #f4f6f9; padding: 12px 8px; font-size: 14px; font-weight: 600; color: #6b7280; text-align: left; border-bottom: 1px solid #e5e7eb; }
+  .bus-table td { padding: 16px 8px; font-size: 12px; border-bottom: 1px solid #e5e7eb; }
+  .app-shell { display: grid; grid-template-columns: 240px 1fr; grid-template-rows: 56px 1fr; min-height: 100vh; }
+  .toolbar { display: flex; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
+</style></head>
 <body>
-  <div id="root"></div>
-  <script type="text/babel" data-presets="react">
-    // Mock BUSKvalitet Design System components
-    const BUSButton = ({ children, variant, ...props }) => {
-      const cls = variant === 'outlineSecondary' ? 'bus-btn bus-btn-outline-secondary' : 'bus-btn bus-btn-primary';
-      return React.createElement('button', { className: cls, ...props }, children);
+  <div id="root"><div style="text-align:center;padding:48px;color:#6b7280;">⏳ Loading preview...</div></div>
+  <script type="text/babel">
+    var e = React.createElement;
+    var BUSButton = function(p) {
+      var cls = p.variant === 'outlineSecondary' ? 'bus-btn bus-btn-outline-secondary' : 'bus-btn bus-btn-primary';
+      return e('button', { className: cls }, p.children || p.label || '');
     };
-    const BUSTabStrip = ({ tabs, activeIndex }) => {
-      const items = typeof tabs === 'string' ? tabs.split(',') : (tabs || ['Tab 1', 'Tab 2']);
-      return React.createElement('div', { className: 'bus-tab-strip' },
-        items.map((t, i) => React.createElement('button', { key: i, className: 'bus-tab' + (i === (activeIndex||0) ? ' active' : '') }, t))
+    var BUSTabStrip = function(p) {
+      var items = p.tabs ? p.tabs.split(',') : ['Tab 1', 'Tab 2'];
+      return e('div', { className: 'bus-tab-strip' },
+        items.map(function(t, i) { return e('button', { key: i, className: 'bus-tab' + (i === (p.activeIndex||0) ? ' active' : '') }, t.trim()); })
       );
     };
-    const DataGrid = ({ columns, sortable }) => {
-      const cols = typeof columns === 'string' ? columns.split(',') : (columns || ['Col 1', 'Col 2']);
-      return React.createElement('div', { className: 'data-grid-container' },
-        React.createElement('table', { className: 'bus-table' },
-          React.createElement('thead', null,
-            React.createElement('tr', null, cols.map((c, i) => React.createElement('th', { key: i }, c)))
-          ),
-          React.createElement('tbody', null,
-            React.createElement('tr', null, cols.map((c, i) => React.createElement('td', { key: i }, '—')))
-          )
+    var DataGrid = function(p) {
+      var cols = p.columns ? p.columns.split(',') : ['Col 1', 'Col 2'];
+      return e('div', {},
+        e('table', { className: 'bus-table' },
+          e('thead', null, e('tr', null, cols.map(function(c, i) { return e('th', { key: i }, c.trim()); }))),
+          e('tbody', null, e('tr', null, cols.map(function(c, i) { return e('td', { key: i }, '—'); })))
         )
       );
     };
-    const BUSInput = ({ placeholder, ...props }) =>
-      React.createElement('input', { placeholder: placeholder || 'Enter text...', style: { padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px', fontSize: '13px' }, ...props });
-    const BUSCheckbox = ({ label, ...props }) =>
-      React.createElement('label', { style: { display: 'flex', gap: '8px', alignItems: 'center', fontSize: '13px' } },
-        React.createElement('input', { type: 'checkbox', ...props }), label);
-    const BUSSwitch = ({ checked, ...props }) =>
-      React.createElement('input', { type: 'checkbox', defaultChecked: checked, ...props });
-    const AppLayout = ({ children }) => children;
+    var BUSInput = function(p) {
+      return e('input', { placeholder: p.placeholder || '', style: { padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px', fontSize: '13px', width: '200px' } });
+    };
+    var BUSFormField = function(p) { return e('div', {}, p.children); };
+    var BUSCheckbox = function(p) { return e('label', {}, e('input', { type: 'checkbox' }), p.label); };
+    var BUSSwitch = function(p) { return e('input', { type: 'checkbox', defaultChecked: p.checked }); };
+    var AppLayout = function(p) { return e('div', {}, p.children); };
 
-    try {
-      ${code}
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(React.createElement(ActiveInspections || Generated));
-    } catch(e) {
-      document.getElementById('root').innerHTML = '<div style="padding:24px;color:#c81e1e;">Preview error: ' + e.message + '<br><br>Generated code:<br><pre style="font-size:11px;color:#374151;">' + ${JSON.stringify(mainFile.content)}.replace(/</g, '&lt;') + '</pre></div>';
+    ${code}
+
+    function App() {
+      var Comp = ActiveInspections || Generated;
+      if (!Comp) return e('div', { style: { padding: '24px', color: '#c81e1e' } }, 'No component found in generated code.');
+      return e(Comp);
     }
+
+    var root = document.getElementById('root');
+    try {
+      ReactDOM.createRoot(root).render(e(App));
+    } catch(ex) {
+      root.innerHTML = '<div style=\"padding:24px;color:#c81e1e;\">Preview render error: ' + ex.message + '<br><pre style=\"font-size:11px;margin-top:8px;color:#374151;\">' + decodeURIComponent(\"%3Ccode%3E\") + mainFile.content.replace(/</g, '&lt;').replace(/>/g, '&gt;').substring(0, 500) + '</pre></div>';
+    }
+  <\/script>
+</body></html>`;
+
+  iframe.srcdoc = html;
+}
   <\/script>
 </body>
 </html>`;
