@@ -5,22 +5,23 @@ Vision deliverable: 5 (Frontend Architecture)
 
 ## Summary
 
-The Phase 1 MVP is API-first. The client surface is a REST API plus a minimal
-command-line host for runs and demos. A web portal is deferred to a later phase
-and is described here as design only. This keeps the MVP focused on pipeline
-correctness and avoids building UI before the generation contract is stable.
+The Phase 1 MVP is API-first. The primary client surface is a REST API plus a
+minimal command-line host for runs and demos. A lightweight stakeholder dashboard
+(ADR-007) is included in the MVP as a static page served by the API for business
+stakeholder demos and evaluation. The full web portal remains deferred to a later
+phase and is described here as design only.
 
-This scope is the recommended answer to open question one (platform UI scope) in
-the plan. Confirm before committing: API and CLI only, minimal portal later, or
-portal only.
+This scope is the confirmed answer to open question one (platform UI scope):
+API, CLI, and a lightweight dashboard in the MVP; full portal later.
 
 ## MVP client surface
 
 | Client | Purpose | Status |
 |---|---|---|
-| REST API | Primary integration surface for all pipeline operations. | In scope for MVP design. |
-| `Aife.Cli` | Run a session end to end from the command line; useful for demos and tests. | In scope for MVP design. |
-| Web portal | Upload prototypes, watch session progress, review output. | Deferred (design below). |
+| REST API | Primary integration surface for all pipeline operations. | In scope for MVP. |
+| `Aife.Cli` | Run a session end to end from the command line; useful for demos and tests. | In scope for MVP. |
+| Stakeholder dashboard | Upload prototypes, view generated React live, read review report, download PDF. Served as static files by the API (ADR-007). | In scope for MVP (ADR-007, added 2026-07-10). |
+| Web portal | Full SPA with auth, SignalR, dogfooded DS components. | Deferred (design below). |
 
 ## Deferred web portal design
 
@@ -65,8 +66,9 @@ Portal views (future):
 
 ## Open question
 
-Open question one: confirm the MVP is API and CLI only with the portal deferred.
-The alternative is a minimal portal in the MVP. Recommendation: API and CLI only.
+Open question one: **resolved** (ADR-007, 2026-07-10). The MVP includes a
+lightweight stakeholder dashboard (static page served by the API) alongside the
+API and CLI. The full portal remains deferred.
 
 ## What is not shown
 

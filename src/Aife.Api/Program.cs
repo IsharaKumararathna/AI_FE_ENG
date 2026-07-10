@@ -115,6 +115,8 @@ await PromptSeeder.SeedAsync(
 app.UseSerilogRequestLogging();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+app.UseDefaultFiles();  // Serve wwwroot/index.html at /
+app.UseStaticFiles();   // Serve wwwroot/ (dashboard, CSS, JS)
 
 if (app.Environment.IsDevelopment())
 {
@@ -122,6 +124,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapControllers();
+
+// Root redirects to dashboard (fallback if default files miss)
+app.MapGet("/", () => Results.Redirect("/index.html"));
 
 app.Run();
 

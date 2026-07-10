@@ -16,7 +16,8 @@ Generator, ADR-006) is included as a follow-on epic, not part of the core MVP.
 React Generator → AI Reviewer; file/in-memory repositories (ADR-004 amendment);
 Prototype Conformance Review, advisory (ADR-005); `JsonKnowledgeProvider` with a
 sample dataset including reference UI patterns; prompt management/versioning;
-multi-provider LLM router; REST API; CLI; the test pyramid.
+multi-provider LLM router; REST API; CLI; stakeholder dashboard (ADR-007);
+the test pyramid.
 
 **Out (deferred):** Cosmos DB repositories (post-MVP, ADR-004); MCP server
 (Phase 2); auto-normalization and blocking gates (Phase 4); Figma/image input
@@ -126,6 +127,7 @@ Expose the pipeline over REST and a thin CLI.
 | E6-1 | REST endpoints (`POST /prototypes`, `POST /sessions`, `GET /sessions/{id}` + sub-resources, `/health`); async `202` + `Location` | Full flow callable via API |
 | E6-2 | API integration tests (test server) | Endpoints + ProblemDetails verified |
 | E6-3 | `Aife.Cli` for MVP demos | One command runs the pipeline |
+| E6-4 | Stakeholder dashboard (ADR-007): static `wwwroot/` served by API; upload, live React preview, review report, PDF export | Non-technical users can upload, generate, and view results in a browser |
 
 ### E7 — Prototype Conformance Review (ADR-005)
 Input-side governance, advisory and non-blocking.

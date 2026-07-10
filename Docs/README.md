@@ -52,7 +52,7 @@ diagrams, then cross-cutting.
 | `00-foundation/07-ai-architecture.md` | AI Architecture | A | Approved |
 | `00-foundation/08-mcp-architecture.md` | MCP Architecture | A | Approved |
 | `00-foundation/09-phase1-mvp-work-breakdown.md` | Phase 1 MVP Work Breakdown | A | Approved |
-| `00-foundation/adrs/ADR-001` to `ADR-006` | Foundational decisions | A | Accepted |
+| `00-foundation/adrs/ADR-001` to `ADR-007` | Foundational decisions | A | Accepted |
 | `01-schemas-contracts/01-component-catalog-schema.md` | Component Catalog Schema | B | Approved |
 | `01-schemas-contracts/02-intermediate-ui-schema.md` | Intermediate UI Schema | B | Approved |
 | `01-schemas-contracts/03-knowledge-base-schema.md` | Knowledge Base Schema | B | Approved |

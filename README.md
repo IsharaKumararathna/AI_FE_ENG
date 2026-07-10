@@ -142,6 +142,7 @@ Aife.Api / Aife.Cli ← depends on all (composition root)
 | ADR-004 | Cosmos DB (production); file repositories (MVP, amendment) |
 | ADR-005 | Prototype Conformance Review — advisory, non-blocking input-side governance |
 | ADR-006 | Prototype Generator — intent → DS-conformant prototype (Phase 1.5) |
+| ADR-007 | Lightweight stakeholder dashboard — static page served by API for demos |
 
 Full design documentation: `Docs/README.md`
 

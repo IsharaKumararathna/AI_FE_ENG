@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BUSpek AI Frontend Generator</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- React + Babel for live preview -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-icon">🚌</span>
+        <div>
+          <h1>BUSpek AI Frontend Generator</h1>
+          <p class="subtitle">Upload a prototype → Get production-ready React using your Design System</p>
+        </div>
+      </div>
+      <button id="btn-print" class="btn btn-outline" onclick="window.print()" style="display:none;">📄 Download PDF</button>
+    </header>
+
+    <!-- Step 1: Upload -->
+    <section class="step" id="step-upload">
+      <h2 class="step-title">Step 1: Upload Prototype</h2>
+      <div class="upload-zone">
+        <div class="upload-options">
+          <div>
+            <label class="field-label">HTML File</label>
+            <input type="file" id="file-html" accept=".html,.htm" class="file-input">
+          </div>
+          <div>
+            <label class="field-label">CSS File (optional)</label>
+            <input type="file" id="file-css" accept=".css" class="file-input">
+          </div>
+        </div>
+        <p class="or-text">— or paste HTML directly —</p>
+        <textarea id="html-input" class="html-input" placeholder="Paste your prototype HTML here..." rows="5"></textarea>
+        <div class="actions">
+          <button id="btn-generate" class="btn btn-primary" disabled>Generate React →</button>
+          <button id="btn-tree-demo" class="btn btn-outline">Quick Demo (Active Inspections)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Loading -->
+    <section class="step hidden" id="step-loading">
+      <div class="loader">
+        <div class="spinner"></div>
+        <p id="loading-text">Uploading prototype...</p>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section class="step hidden" id="step-results">
+      <div class="tabs">
+        <button class="tab active" data-tab="preview">👁️ Live Preview</button>
+        <button class="tab" data-tab="code">📄 React Code</button>
+        <button class="tab" data-tab="review">✅ Review Report</button>
+        <button class="tab" data-tab="analysis">🔍 Analysis</button>
+      </div>
+
+      <!-- Preview Tab -->
+      <div class="tab-content active" id="tab-preview">
+        <div class="preview-header">
+          <h3>Live React Preview</h3>
+          <span class="badge badge-info">Generated using BUSKvalitet Design System</span>
+        </div>
+        <iframe id="preview-frame" class="preview-frame" title="React Preview"></iframe>
+      </div>
+
+      <!-- Code Tab -->
+      <div class="tab-content" id="tab-code">
+        <div id="code-files"></div>
+      </div>
+
+      <!-- Review Tab -->
+      <div class="tab-content" id="tab-review">
+        <div id="review-content"></div>
+      </div>
+
+      <!-- Analysis Tab -->
+      <div class="tab-content" id="tab-analysis">
+        <div id="analysis-content"></div>
+      </div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

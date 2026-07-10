@@ -34,7 +34,7 @@ AI_FE_ENG/
     Aife.Ai/                    Prototype Analyzer, Prototype Conformance Reviewer, Prototype Generator, Component Mapper, React Generator, AI Reviewer
     Aife.Knowledge/             IKnowledgeProvider, JsonKnowledgeProvider
     Aife.Infrastructure/        MVP file/in-memory repositories; post-MVP Cosmos repositories. LLM provider clients, file storage
-    Aife.Api/                   REST API, authentication, validation
+    Aife.Api/                   REST API, authentication, validation, wwwroot/ dashboard (ADR-007)
     Aife.Cli/                   minimal CLI for MVP runs
   tests/
     Aife.Domain.Tests/
