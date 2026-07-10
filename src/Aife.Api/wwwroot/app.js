@@ -240,12 +240,7 @@ function renderPreview(artifacts) {
 
   iframe.srcdoc = html;
 }
-  <\/script>
-</body>
-</html>`;
 
-  iframe.srcdoc = html;
-}
 
 function renderReview(review) {
   const container = document.getElementById('review-content');
