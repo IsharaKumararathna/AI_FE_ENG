@@ -64,6 +64,7 @@ diagrams, then cross-cutting.
 | `02-ai-modules/04-react-generation-strategy.md` | React Generation Strategy | C | Approved |
 | `02-ai-modules/05-ai-review-strategy.md` | AI Review Strategy | C | Approved |
 | `02-ai-modules/06-prototype-generation-strategy.md` | Prototype Generation Strategy | C | Approved |
+| `02-ai-modules/07-handling-unknown-elements.md` | Handling Unknown Elements | C | Approved |
 | `03-diagrams/01-class-diagrams.md` | Class Diagrams | D | Approved |
 | `03-diagrams/02-sequence-diagrams.md` | Sequence Diagrams | D | Approved |
 | `04-cross-cutting/01-mcp-server-design.md` | MCP Server Design and Tool Definitions | E | Approved |

@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using Aife.Application.AI;
 using Aife.Application.AI.Stages;
 using Aife.Application.Knowledge;
@@ -9,6 +10,7 @@ using Aife.Domain.Generation;
 using Aife.Infrastructure.AI;
 using Aife.Infrastructure.Persistence;
 using Aife.Knowledge;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 // ── Paths ──
@@ -21,7 +23,41 @@ Directory.CreateDirectory(dataPath);
 var services = new ServiceCollection();
 
 services.AddSingleton<IKnowledgeProvider>(_ => new JsonKnowledgeProvider(knowledgePath));
-services.AddSingleton<ILlmProvider, StubLlmProvider>();
+
+// ── LLM: try reading DeepSeek config from src/Aife.Api/appsettings.Development.json ──
+var configPath = Path.Combine(repoRoot, "src", "Aife.Api", "appsettings.Development.json");
+var llmProviders = new List<ILlmProvider>();
+
+if (File.Exists(configPath))
+{
+    var config = new ConfigurationBuilder().AddJsonFile(configPath).Build();
+    var llmSection = config.GetSection("LLM:Providers");
+    foreach (var child in llmSection.GetChildren())
+    {
+        var name = child.Key;
+        var endpoint = child.GetValue<string>("Endpoint");
+        var apiKey = child.GetValue<string>("ApiKey");
+        var model = child.GetValue<string>("Model");
+        var priority = child.GetValue("Priority", 10);
+
+        if (!string.IsNullOrWhiteSpace(endpoint) && !string.IsNullOrWhiteSpace(apiKey) && !string.IsNullOrWhiteSpace(model))
+        {
+            var httpClient = new HttpClient { BaseAddress = new Uri(endpoint.TrimEnd('/') + "/") };
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            llmProviders.Add(new OpenAiCompatibleProvider(httpClient, name, model, priority));
+            Console.WriteLine($"Registered LLM: {name} ({model})");
+        }
+    }
+}
+
+if (llmProviders.Count == 0)
+{
+    llmProviders.Add(new StubLlmProvider());
+    Console.WriteLine("No LLM keys found. Using StubLlmProvider.");
+}
+
+services.AddSingleton(llmProviders.AsEnumerable());
 services.AddSingleton<LlmRouter>();
 
 services.AddSingleton<IPromptRepository>(_ => new FilePromptRepository(dataPath));

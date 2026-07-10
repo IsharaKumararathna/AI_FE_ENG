@@ -14,7 +14,7 @@ public class JsonKnowledgeProviderTests
     {
         var results = await _provider.SearchComponentsAsync(new ComponentQuery(), CancellationToken.None);
 
-        results.Should().HaveCount(6);
+        results.Should().HaveCount(7);
         results.Should().Contain(c => c.ComponentId == "BUSButton");
         results.Should().Contain(c => c.ComponentId == "DataGrid");
     }

@@ -56,8 +56,19 @@ public sealed class ReactGenerator : IReactGenerator
 
         var response = await _router.CompleteAsync(request, ct);
 
-        var artifacts = JsonConvert.DeserializeObject<List<GeneratedArtifact>>(response.Text)
-            ?? throw new InvalidOperationException("Failed to deserialize GeneratedArtifact[] from LLM response.");
+        var text = response.Text;
+
+        // Extract JSON from DeepSeek's response
+        var jsonStart = text.IndexOfAny(new[] { '[', '{' });
+        if (jsonStart > 0)
+            text = text[jsonStart..];
+
+        text = TrimAfterJsonClose(text);
+
+        Console.WriteLine($"[ReactGenerator] LLM response ({response.Text.Length} raw, {text.Length} extracted): {text[..Math.Min(text.Length, 200)]}");
+
+        var artifacts = JsonConvert.DeserializeObject<List<GeneratedArtifact>>(text)
+            ?? throw new InvalidOperationException($"Failed to deserialize GeneratedArtifact[] from LLM response: {text[..Math.Min(text.Length, 200)]}");
 
         ValidateArtifacts(artifacts, tree);
 
@@ -115,5 +126,30 @@ public sealed class ReactGenerator : IReactGenerator
                 throw new InvalidOperationException(
                     $"Artifact '{artifact.Path}' contains an inline style. Use design tokens only.");
         }
+    }
+
+    private static string TrimAfterJsonClose(string text)
+    {
+        var trimmed = text.Trim();
+        if (trimmed.Length == 0 || (trimmed[0] != '{' && trimmed[0] != '['))
+            return trimmed;
+
+        var depth = 0;
+        var inString = false;
+        var escaped = false;
+
+        for (var i = 0; i < trimmed.Length; i++)
+        {
+            var ch = trimmed[i];
+            if (escaped) { escaped = false; continue; }
+            if (ch == '\\') { escaped = true; continue; }
+            if (ch == '"') { inString = !inString; continue; }
+            if (inString) continue;
+
+            if (ch == '{' || ch == '[') depth++;
+            else if (ch == '}' || ch == ']') { depth--; if (depth == 0) return trimmed[..(i + 1)]; }
+        }
+
+        return trimmed;
     }
 }

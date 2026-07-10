@@ -1,0 +1,17 @@
+{
+  "componentId": "BUSInput",
+  "name": "BUS Input",
+  "category": "input",
+  "status": "approved",
+  "description": "BUSKvalitet text input. Built on react-bootstrap Form.Control. Supports disabled, placeholder, width, defaultValue.",
+  "props": [
+    { "name": "value", "type": "string", "required": false },
+    { "name": "placeholder", "type": "string", "required": false },
+    { "name": "onChange", "type": "function", "required": false },
+    { "name": "disabled", "type": "boolean", "required": false, "default": false },
+    { "name": "width", "type": "string", "required": false }
+  ],
+  "tokensConsumed": ["color.text.primary", "color.border.default", "color.primary"],
+  "accessibility": { "role": "textbox", "keyboardSupport": true },
+  "mapsFromHtml": ["input", "input.bus-input"]
+}

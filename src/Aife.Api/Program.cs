@@ -43,7 +43,41 @@ builder.Services.AddProblemDetails();
 builder.Services.AddSingleton<IKnowledgeProvider>(_ => new JsonKnowledgeProvider(knowledgePath));
 
 // ── LLM ──
-builder.Services.AddSingleton<ILlmProvider, StubLlmProvider>();
+var llmProviders = new List<ILlmProvider>();
+var llmSection = builder.Configuration.GetSection("LLM:Providers");
+
+Console.WriteLine($"LLM config section exists: {llmSection.Exists()}, children: {llmSection.GetChildren().Count()}");
+
+foreach (var child in llmSection.GetChildren())
+{
+    var name = child.Key;
+    var endpoint = child.GetValue<string>("Endpoint");
+    var apiKey = child.GetValue<string>("ApiKey");
+    var model = child.GetValue<string>("Model");
+    var priority = child.GetValue("Priority", 10);
+
+    Console.WriteLine($"  Provider '{name}': endpoint={endpoint}, model={model}, hasKey={!string.IsNullOrEmpty(apiKey)}");
+
+    if (!string.IsNullOrWhiteSpace(endpoint) && !string.IsNullOrWhiteSpace(apiKey) && !string.IsNullOrWhiteSpace(model))
+    {
+        var httpClient = new HttpClient { BaseAddress = new Uri(endpoint.TrimEnd('/') + "/") };
+        httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
+        httpClient.DefaultRequestHeaders.Accept.Add(
+            new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+        llmProviders.Add(new OpenAiCompatibleProvider(httpClient, name, model, priority));
+        Console.WriteLine($"  => REGISTERED: {name} ({model}) at {endpoint}");
+    }
+}
+
+if (llmProviders.Count == 0)
+{
+    llmProviders.Add(new StubLlmProvider());
+    Console.WriteLine("No LLM providers configured. Using StubLlmProvider.");
+}
+
+builder.Services.AddSingleton(llmProviders.AsEnumerable());
 builder.Services.AddSingleton<LlmRouter>();
 
 // ── Prompts ──

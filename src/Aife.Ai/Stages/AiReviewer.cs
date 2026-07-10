@@ -56,9 +56,33 @@ public sealed class AiReviewer : IAiReviewer
 
         var response = await _router.CompleteAsync(request, ct);
 
-        var report = JsonConvert.DeserializeObject<ReviewReport>(response.Text)
+        var text = response.Text;
+        var jsonStart = text.IndexOfAny(new[] { '[', '{' });
+        if (jsonStart > 0) text = text[jsonStart..];
+        text = TrimAfterJsonClose(text);
+
+        var report = JsonConvert.DeserializeObject<ReviewReport>(text)
             ?? throw new InvalidOperationException("Failed to deserialize ReviewReport from LLM response.");
 
         return report;
+    }
+
+    private static string TrimAfterJsonClose(string text)
+    {
+        var trimmed = text.Trim();
+        if (trimmed.Length == 0 || (trimmed[0] != '{' && trimmed[0] != '['))
+            return trimmed;
+        var depth = 0; var inString = false; var escaped = false;
+        for (var i = 0; i < trimmed.Length; i++)
+        {
+            var ch = trimmed[i];
+            if (escaped) { escaped = false; continue; }
+            if (ch == '\\') { escaped = true; continue; }
+            if (ch == '"') { inString = !inString; continue; }
+            if (inString) continue;
+            if (ch == '{' || ch == '[') depth++;
+            else if (ch == '}' || ch == ']') { depth--; if (depth == 0) return trimmed[..(i + 1)]; }
+        }
+        return trimmed;
     }
 }

@@ -1,9 +1,10 @@
 {
-  "version": "3.0.0-bustest",
+  "version": "4.0.0-kvalitet",
   "components": [
     "components/BUSButton.json", "components/DataGrid.json",
-    "components/BUSPanel.json", "components/BUSTabStrip.json",
-    "components/BUSSearchInput.json", "components/BUSFormField.json"
+    "components/BUSInput.json", "components/BUSTabStrip.json",
+    "components/BUSFormField.json", "components/BUSCheckbox.json",
+    "components/BUSSwitch.json"
   ],
   "tokens": "tokens/tokens.json",
   "layouts": ["layouts/AppLayout.json"],

@@ -1,0 +1,15 @@
+{
+  "componentId": "BUSSwitch",
+  "name": "BUS Switch / Toggle",
+  "category": "input",
+  "status": "approved",
+  "description": "BUSKvalitet toggle switch built on react-bootstrap Form.Check type=switch. Supports sm/md/lg sizes.",
+  "props": [
+    { "name": "checked", "type": "boolean", "required": false },
+    { "name": "value", "type": "boolean", "required": false },
+    { "name": "size", "type": "string", "required": false, "enum": ["small", "medium", "large"] }
+  ],
+  "tokensConsumed": ["color.primary"],
+  "accessibility": { "role": "switch", "ariaProps": ["aria-checked"] },
+  "mapsFromHtml": ["div.bus-switch"]
+}
