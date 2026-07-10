@@ -144,11 +144,11 @@ public class ApiIntegrationTests : IClassFixture<CustomWebApplicationFactory>
                     layout = "AppLayout",
                     regions = new[]
                     {
-                        new { slot = "main", component = "DataTable" }
+                        new { slot = "main", component = "DataGrid" }
                     },
                     actions = new[]
                     {
-                        new { slot = "main", component = "PrimaryButton", label = "Add" }
+                        new { slot = "main", component = "BUSButton", label = "Add" }
                     }
                 }
             }

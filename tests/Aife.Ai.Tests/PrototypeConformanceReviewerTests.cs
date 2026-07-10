@@ -168,6 +168,6 @@ public class PrototypeConformanceReviewerTests
 
         var report = await reviewer.ReviewAsync(prototype, analysis, CancellationToken.None);
 
-        report.Suggestions.Should().Contain(s => s.Contains("DashboardPage"));
+        report.Suggestions.Should().Contain(s => s.Contains("ActiveInspectionsPage"));
     }
 }

@@ -1,0 +1,25 @@
+{
+  "componentId": "BUSTabStrip",
+  "name": "BUS Tab Strip",
+  "category": "navigation",
+  "status": "approved",
+  "description": "Scrollable tab navigation built on KendoReact TabStrip. Supports horizontal mouse-wheel scrolling, overflow detection, and arrow hiding. Used for settings sections and inspection checkpoints.",
+  "props": [
+    { "name": "tabs", "type": "array", "required": true, "description": "Array of { title, content, disabled? }" },
+    { "name": "selected", "type": "number", "required": true },
+    { "name": "onSelect", "type": "function", "required": true },
+    { "name": "scrollable", "type": "boolean", "required": false, "default": false },
+    { "name": "keepTabsMounted", "type": "boolean", "required": false, "default": false },
+    { "name": "renderAllContent", "type": "boolean", "required": false, "default": false },
+    { "name": "tabStripDisabled", "type": "boolean", "required": false, "default": false },
+    { "name": "hideArrows", "type": "boolean", "required": false, "default": false }
+  ],
+  "tokensConsumed": ["color.primary", "color.text.secondary", "color.background.surface"],
+  "accessibility": {
+    "role": "tablist",
+    "keyboardSupport": true,
+    "ariaProps": ["aria-selected"],
+    "notes": ["Active tab has 5px bottom border in primary color.", "Kendo TabStrip handles Left/Right arrow keyboard navigation."]
+  },
+  "mapsFromHtml": ["div.tab-section", "div.k-tabstrip"]
+}

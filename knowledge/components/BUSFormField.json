@@ -1,0 +1,20 @@
+{
+  "componentId": "BUSFormField",
+  "name": "BUS Form Field",
+  "category": "input",
+  "status": "approved",
+  "description": "Wrapper component for form fields with label, required indicator, validation message, and hint text. Supports horizontal and vertical layout via .form-fields-horizontal / .form-fields-vertical.",
+  "props": [
+    { "name": "label", "type": "string", "required": true },
+    { "name": "required", "type": "boolean", "required": false, "default": false },
+    { "name": "validationMessage", "type": "string", "required": false },
+    { "name": "hint", "type": "string", "required": false },
+    { "name": "children", "type": "ReactNode", "required": true }
+  ],
+  "tokensConsumed": ["color.text.primary", "color.text.secondary", "color.error", "color.border.default", "spacing.xs", "spacing.sm", "spacing.md", "spacing.xl"],
+  "accessibility": {
+    "ariaProps": ["aria-required", "aria-invalid"],
+    "notes": ["Required fields show red asterisk (color: $red-300).", "Validation message in red below the field.", "Label in bold."]
+  },
+  "mapsFromHtml": ["div.bus-field-wrapper", "label.field"]
+}

@@ -1,0 +1,15 @@
+{
+  "componentId": "DataGrid",
+  "name": "BUS Data Grid",
+  "category": "table",
+  "status": "approved",
+  "description": "Sortable data table using .bus-table styling from BUSTest. Header in grey-50, rows with 15px padding and grey-200 borders.",
+  "props": [
+    { "name": "columns", "type": "array", "required": true },
+    { "name": "rows", "type": "array", "required": true },
+    { "name": "sortable", "type": "boolean", "required": false, "default": false }
+  ],
+  "tokensConsumed": ["color.table.header.bg", "color.text.secondary", "color.table.row.border", "color.background.surface", "spacing.sm", "spacing.md"],
+  "accessibility": { "role": "table", "ariaProps": ["aria-sort"], "notes": ["Header labels in bold."] },
+  "mapsFromHtml": ["table", "table.bus-table"]
+}

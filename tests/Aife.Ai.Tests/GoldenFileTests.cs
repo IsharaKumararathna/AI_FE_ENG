@@ -48,7 +48,7 @@ public class GoldenFileTests
             [
               {
                 "path": "src/Dashboard.tsx",
-                "content": "import { PrimaryButton, DataTable } from '@org/ds/react'; export const Dashboard = () => null;"
+                "content": "import { BUSButton, DataGrid } from '@org/ds/react'; export const Dashboard = () => null;"
               }
             ]
             """;
@@ -66,8 +66,8 @@ public class GoldenFileTests
             Layout = "AppLayout",
             Children = new List<UiNode>
             {
-                new() { NodeId = "n1", ComponentId = "PrimaryButton" },
-                new() { NodeId = "n2", ComponentId = "DataTable" }
+                new() { NodeId = "n1", ComponentId = "BUSButton" },
+                new() { NodeId = "n2", ComponentId = "DataGrid" }
             }
         };
 
@@ -93,17 +93,17 @@ public class GoldenFileTests
         var cannedResponse = """
             {
               "html": "<html><body><button>Submit</button><table></table></body></html>",
-              "css": ":root { --color-action-primary: #0066cc; }",
+              "css": ":root { --color-primary: #1548be; }",
               "intermediateUiTree": {
                 "page": "Dashboard",
                 "layout": "AppLayout",
                 "children": [
-                  { "componentId": "PrimaryButton" },
-                  { "componentId": "DataTable" }
+                  { "componentId": "BUSButton" },
+                  { "componentId": "DataGrid" }
                 ]
               },
-              "tokensUsed": ["color.action.primary", "spacing.button.padding"],
-              "componentsUsed": ["PrimaryButton", "DataTable"]
+              "tokensUsed": ["color.primary", "spacing.md"],
+              "componentsUsed": ["BUSButton", "DataGrid"]
             }
             """;
 
@@ -125,11 +125,11 @@ public class GoldenFileTests
                     Layout = "AppLayout",
                     Regions = new List<RegionSpec>
                     {
-                        new() { Slot = "main", Component = "DataTable" }
+                        new() { Slot = "main", Component = "DataGrid" }
                     },
                     Actions = new List<ActionSpec>
                     {
-                        new() { Slot = "main", Component = "PrimaryButton", Label = "Add" }
+                        new() { Slot = "main", Component = "BUSButton", Label = "Add" }
                     }
                 }
             }
@@ -139,10 +139,10 @@ public class GoldenFileTests
 
         // Compare meaningful fields (ignore the generated prototype ID which is random)
         result.Prototype.Html.Should().Be("<html><body><button>Submit</button><table></table></body></html>");
-        result.Prototype.Css.Should().Be(":root { --color-action-primary: #0066cc; }");
+        result.Prototype.Css.Should().Be(":root { --color-primary: #1548be; }");
         result.Tree.Page.Should().Be("Dashboard");
         result.Tree.Children.Should().HaveCount(2);
-        result.TokensUsed.Should().Contain("color.action.primary");
-        result.ComponentsUsed.Should().Contain("PrimaryButton");
+        result.TokensUsed.Should().Contain("color.primary");
+        result.ComponentsUsed.Should().Contain("BUSButton");
     }
 }

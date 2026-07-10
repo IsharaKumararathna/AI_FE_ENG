@@ -29,12 +29,12 @@ public class PrototypeGeneratorTests
                 "page": "Dashboard",
                 "layout": "AppLayout",
                 "children": [
-                  { "componentId": "PrimaryButton" },
-                  { "componentId": "DataTable" }
+                  { "componentId": "BUSButton" },
+                  { "componentId": "DataGrid" }
                 ]
               },
-              "tokensUsed": ["color.action.primary", "spacing.button.padding"],
-              "componentsUsed": ["PrimaryButton", "DataTable"]
+              "tokensUsed": ["color.primary", "spacing.md"],
+              "componentsUsed": ["BUSButton", "DataGrid"]
             }
             """
         });
@@ -74,11 +74,11 @@ public class PrototypeGeneratorTests
                     Layout = "AppLayout",
                     Regions = new List<RegionSpec>
                     {
-                        new() { Slot = "main", Component = "DataTable" }
+                        new() { Slot = "main", Component = "DataGrid" }
                     },
                     Actions = new List<ActionSpec>
                     {
-                        new() { Slot = "main", Component = "PrimaryButton", Label = "Add Customer" }
+                        new() { Slot = "main", Component = "BUSButton", Label = "Add Customer" }
                     }
                 }
             }
@@ -97,13 +97,13 @@ public class PrototypeGeneratorTests
         result.Tree.Page.Should().Be("Dashboard");
         result.Tree.Layout.Should().Be("AppLayout");
         result.Tree.Children.Should().HaveCount(2);
-        result.Tree.Children.Should().Contain(n => n.ComponentId == "PrimaryButton");
-        result.Tree.Children.Should().Contain(n => n.ComponentId == "DataTable");
+        result.Tree.Children.Should().Contain(n => n.ComponentId == "BUSButton");
+        result.Tree.Children.Should().Contain(n => n.ComponentId == "DataGrid");
 
         // Provenance
-        result.TokensUsed.Should().Contain("color.action.primary");
-        result.ComponentsUsed.Should().Contain("PrimaryButton");
-        result.ComponentsUsed.Should().Contain("DataTable");
+        result.TokensUsed.Should().Contain("color.primary");
+        result.ComponentsUsed.Should().Contain("BUSButton");
+        result.ComponentsUsed.Should().Contain("DataGrid");
     }
 
     [Fact]

@@ -9,24 +9,24 @@ public class ComponentCatalogSchemaTests
         Path.Combine(TestPaths.Schemas, "component-catalog.schema.json");
 
     [Fact]
-    public void PrimaryButton_validates_against_component_catalog_schema()
+    public void BUSButton_validates_against_component_catalog_schema()
     {
         var (isValid, errors) = SchemaValidator.ValidateFile(
             SchemaPath,
-            Path.Combine(TestPaths.Knowledge, "components", "PrimaryButton.json"));
+            Path.Combine(TestPaths.Knowledge, "components", "BUSButton.json"));
 
         isValid.Should().BeTrue(
-            "PrimaryButton must conform to the component catalog schema. Errors:\n{0}", errors);
+            "BUSButton must conform to the component catalog schema. Errors:\n{0}", errors);
     }
 
     [Fact]
-    public void DataTable_validates_against_component_catalog_schema()
+    public void DataGrid_validates_against_component_catalog_schema()
     {
         var (isValid, errors) = SchemaValidator.ValidateFile(
             SchemaPath,
-            Path.Combine(TestPaths.Knowledge, "components", "DataTable.json"));
+            Path.Combine(TestPaths.Knowledge, "components", "DataGrid.json"));
 
         isValid.Should().BeTrue(
-            "DataTable must conform to the component catalog schema. Errors:\n{0}", errors);
+            "DataGrid must conform to the component catalog schema. Errors:\n{0}", errors);
     }
 }

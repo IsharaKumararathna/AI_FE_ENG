@@ -1,9 +1,13 @@
 {
-  "version": "1.0.0",
-  "components": ["components/PrimaryButton.json", "components/DataTable.json"],
+  "version": "3.0.0-bustest",
+  "components": [
+    "components/BUSButton.json", "components/DataGrid.json",
+    "components/BUSPanel.json", "components/BUSTabStrip.json",
+    "components/BUSSearchInput.json", "components/BUSFormField.json"
+  ],
   "tokens": "tokens/tokens.json",
   "layouts": ["layouts/AppLayout.json"],
-  "referenceUiPatterns": ["referenceUiPatterns/DashboardPage.json"],
+  "referenceUiPatterns": ["referenceUiPatterns/ActiveInspectionsPage.json"],
   "icons": "icons/icons.json",
   "bestPractices": ["best-practices/naming.md"],
   "accessibilityRules": "accessibility/rules.json"

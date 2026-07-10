@@ -21,7 +21,7 @@ public class IntermediateUiSchemaTests
         },
         {
           "nodeId": "n2",
-          "componentId": "DataTable",
+          "componentId": "DataGrid",
           "variant": "default",
           "props": {
             "columns": ["Name", "Status", "Updated"],
@@ -34,9 +34,9 @@ public class IntermediateUiSchemaTests
         },
         {
           "nodeId": "n3",
-          "componentId": "PrimaryButton",
+          "componentId": "BUSButton",
           "props": { "label": "Refresh", "size": "medium" },
-          "tokenBindings": { "background": "color.action.primary" }
+          "tokenBindings": { "background": "color.primary" }
         }
       ]
     }

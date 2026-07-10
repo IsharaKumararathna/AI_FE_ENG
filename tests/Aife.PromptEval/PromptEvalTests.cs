@@ -10,15 +10,15 @@ public class PromptEvalTests
     {
         var dataset = new List<ScoredDatasetEntry>
         {
-            new() { Input = "button", ExpectedOutput = "PrimaryButton", Category = "mapper" },
-            new() { Input = "table", ExpectedOutput = "DataTable", Category = "mapper" },
+            new() { Input = "button", ExpectedOutput = "BUSButton", Category = "mapper" },
+            new() { Input = "table", ExpectedOutput = "DataGrid", Category = "mapper" },
             new() { Input = "unknown", ExpectedOutput = "null", Category = "mapper" }
         };
 
         var harness = new PromptEvaluationHarness(input => input switch
         {
-            "button" => ("PrimaryButton", 100, 50),
-            "table" => ("DataTable", 120, 60),
+            "button" => ("BUSButton", 100, 50),
+            "table" => ("DataGrid", 120, 60),
             _ => ("null", 80, 40)
         });
 
@@ -36,14 +36,14 @@ public class PromptEvalTests
     {
         var dataset = new List<ScoredDatasetEntry>
         {
-            new() { Input = "button", ExpectedOutput = "PrimaryButton", Category = "mapper" },
+            new() { Input = "button", ExpectedOutput = "BUSButton", Category = "mapper" },
             new() { Input = "table", ExpectedOutput = "WrongComponent", Category = "mapper" }
         };
 
         var harness = new PromptEvaluationHarness(input => input switch
         {
-            "button" => ("PrimaryButton", 100, 50),
-            _ => ("DataTable", 120, 60)
+            "button" => ("BUSButton", 100, 50),
+            _ => ("DataGrid", 120, 60)
         });
 
         var result = harness.Evaluate("component.mapper", "1.0.0", dataset, threshold: 0.8);

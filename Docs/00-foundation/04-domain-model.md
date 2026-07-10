@@ -17,8 +17,8 @@ consistently across schemas, API contracts, and diagrams.
 | PrototypeRequest | An intent spec (pages, regions, components, content) used by the Prototype Generator to produce a conformant Prototype. |
 | PrototypeAnalysis | Structured result of analyzing a prototype: layout and detected elements. |
 | DetectedElement | A UI primitive found in a prototype (button, table, form, and so on). |
-| ComponentMapping | A mapping from a detected element to an approved Design System component, with confidence. |
-| IntermediateUiTree | A framework-neutral tree of UI nodes produced from mappings. |
+| ComponentMapping | A mapping from a detected element to an approved Design System component, with confidence. A null `ComponentId` with confidence 0 means no KB match exists. |
+| IntermediateUiTree | A framework-neutral tree of UI nodes produced from mappings. Only auto-applied mappings (confidence ≥ 0.5, non-null ComponentId) appear in the tree. |
 | UiNode | One node in the intermediate tree: a component reference, props, and token bindings. |
 | GeneratedArtifact | A generated React or TypeScript file. |
 | ReviewReport | The AI Reviewer output: score, violations, suggestions. |
@@ -156,6 +156,21 @@ classDiagram
 - Persistence goes through repository interfaces in the application layer. The
   MVP uses file/in-memory implementations; Cosmos is the post-MVP target
   (ADR-004 amendment).
+
+## Behavior on novel/unmapped elements
+
+When a prototype contains HTML elements with no `mapsFromHtml` match in the
+Knowledge Base (for example, `<carousel>`, `<timeline>`, or any custom element
+not recognized by any approved component):
+
+| Flow | Behavior | PO experience |
+|---|---|---|
+| Upload (PO authors HTML) | Unmapped elements get `componentId = null, confidence = 0.0`. Conformance review produces advisory `CONF_UNMAPPED_ELEMENT` findings (non-blocking). Assembler skips them; React output is partial. | PO receives incomplete React — recognized components only. Conformance report lists what was skipped. |
+| Generate from intent (PO describes UI) | If the `PrototypeRequest` references an unknown `componentId`, the generator throws an `InvalidOperationException` before the LLM call. | PO receives an immediate error: "Component 'X' is not approved or not found." Must fix the request and retry. |
+
+The platform never invents components. Every element must have a Knowledge Base
+entry before it can appear in generated output. See the component mapping
+strategy for details.
 
 ## What is not shown
 

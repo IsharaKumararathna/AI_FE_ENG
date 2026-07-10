@@ -9,13 +9,31 @@
     {
       "ruleId": "A11Y_INPUT_LABEL",
       "category": "Accessibility",
-      "statement": "Inputs must have an associated label.",
+      "statement": "Inputs must have an associated label or aria-label.",
       "severity": "blocking"
     },
     {
       "ruleId": "A11Y_TABLE_HEADER_SCOPE",
       "category": "Accessibility",
-      "statement": "Table header cells must declare scope.",
+      "statement": "Table header cells (<th>) must declare scope.",
+      "severity": "advisory"
+    },
+    {
+      "ruleId": "A11Y_MODAL_FOCUS_TRAP",
+      "category": "Accessibility",
+      "statement": "Modal dialogs must trap focus inside and close on Escape.",
+      "severity": "blocking"
+    },
+    {
+      "ruleId": "A11Y_TOGGLE_SWITCH_ROLE",
+      "category": "Accessibility",
+      "statement": "Toggle switches must have role=switch and aria-checked.",
+      "severity": "blocking"
+    },
+    {
+      "ruleId": "A11Y_SEARCH_COMBOBOX",
+      "category": "Accessibility",
+      "statement": "Search inputs with autocomplete must have role=combobox, aria-autocomplete, and aria-expanded.",
       "severity": "advisory"
     }
   ]

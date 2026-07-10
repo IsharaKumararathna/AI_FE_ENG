@@ -66,6 +66,41 @@ can override:
   optional `props`, and updates the Intermediate UI Tree.
 - Overrides record the reviewer identity and timestamp for traceability.
 
+## Novel elements with no KB mapping
+
+When a PO creates a prototype containing HTML elements that have no
+`mapsFromHtml` match in the Knowledge Base (for example, a `<carousel>`,
+`<timeline>`, or `<heatmap>` that no approved component claims), the platform
+does **not invent a mapping** and does **not block the pipeline**:
+
+**Upload flow** (`POST /prototypes` → `POST /sessions`):
+1. The Prototype Conformance Review (ADR-005) returns an advisory
+   `CONF_UNMAPPED_ELEMENT` finding per novel element, warning the PO of the gap.
+   The report is advisory — the pipeline is not blocked.
+2. The Component Mapper assigns `componentId = null, confidence = 0.0`.
+3. The UI Tree Assembler skips the element (confidence < 0.5 or null
+   componentId). The element is absent from the Intermediate UI Tree.
+4. The React Generator produces code only for the mapped elements. The novel
+   elements are silently absent from the generated React.
+5. The AI Reviewer scores whatever was generated; unmapped elements may be noted
+   in the review report.
+
+**Result**: the PO receives partial output — the page renders only the
+recognized components. The conformance report tells them which elements were
+unrecognized. The pipeline does not fail.
+
+**Generate-from-intent flow** (`POST /prototypes/generate`):
+1. If the `PrototypeRequest` references a componentId that does not exist in the
+   Knowledge Base, the Prototype Generator throws an `InvalidOperationException`
+   **before** any LLM call. The request is rejected with a 500 error and a
+   message: `"Component 'X' is not approved or not found in the Knowledge Base."`
+2. The PO corrects the componentId and resubmits.
+
+**Guidance for POs and KB maintainers**: every novel UI element type must have a
+KB entry with the correct `mapsFromHtml` tag before the upload flow can handle
+it, and a valid `componentId` before the generate flow can reference it. See the
+enterprise adoption document for the roll-out process.
+
 ## Intermediate UI Tree assembly
 
 Mappings are assembled into the `IntermediateUiTree` by an application-layer

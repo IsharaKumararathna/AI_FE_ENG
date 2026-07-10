@@ -72,6 +72,20 @@ Before artifacts reach the AI Reviewer, the generator validates:
 Failed validation blocks the review step and fails the session with a clear
 reason.
 
+## Handling partial trees (unmapped elements)
+
+When a prototype contains HTML elements with no `mapsFromHtml` match in the
+Knowledge Base (see the component mapping strategy), the Intermediate UI Tree
+arrives at the React Generator with only the recognized components. The generator
+produces code **only for what is in the tree** — it does not generate
+placeholders, stubs, or warnings for the missing elements.
+
+The AI Reviewer is the downstream catch: it receives the partial output and may
+flag the structural gap, but the generator itself produces clean, compilable
+React limited to the recognized components. The conformance report (available
+via `GET /prototypes/{id}/conformance`) is the recommended pre-conversion check
+for catching unmapped elements before starting a session.
+
 ## What is not shown
 
 - Review of generated code: see `02-ai-modules/05-ai-review-strategy.md`.

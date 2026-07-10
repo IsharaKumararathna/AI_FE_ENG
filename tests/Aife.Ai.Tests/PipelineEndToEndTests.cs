@@ -39,7 +39,7 @@ public class PipelineEndToEndTests
             [
               {
                 "path": "src/Dashboard.tsx",
-                "content": "import { PrimaryButton, DataTable } from '@org/ds/react'; export const Dashboard = () => null;"
+                "content": "import { BUSButton, DataGrid } from '@org/ds/react'; export const Dashboard = () => null;"
               }
             ]
             """,
@@ -117,21 +117,21 @@ public class PipelineEndToEndTests
         // ── Assert: mappings (baseline, no LLM needed) ──
         result.Mappings.Should().NotBeNull();
         result.Mappings!.Should().Contain(m =>
-            m.ComponentId == "PrimaryButton" && m.Confidence >= 0.95);
+            m.ComponentId == "BUSButton" && m.Confidence >= 0.95);
         result.Mappings.Should().Contain(m =>
-            m.ComponentId == "DataTable" && m.Confidence >= 0.95);
+            m.ComponentId == "DataGrid" && m.Confidence >= 0.95);
 
         // ── Assert: intermediate UI tree ──
         result.Tree.Should().NotBeNull();
         result.Tree!.Layout.Should().Be("AppLayout");
         result.Tree.Children.Should().HaveCount(2);
-        result.Tree.Children.Should().Contain(n => n.ComponentId == "PrimaryButton");
-        result.Tree.Children.Should().Contain(n => n.ComponentId == "DataTable");
+        result.Tree.Children.Should().Contain(n => n.ComponentId == "BUSButton");
+        result.Tree.Children.Should().Contain(n => n.ComponentId == "DataGrid");
 
         // ── Assert: generated artifacts ──
         result.Artifacts.Should().NotBeEmpty();
         result.Artifacts!.Should().Contain(a => a.Path == "src/Dashboard.tsx");
-        result.Artifacts.Should().Contain(a => a.Content.Contains("PrimaryButton"));
+        result.Artifacts.Should().Contain(a => a.Content.Contains("BUSButton"));
 
         // ── Assert: review report ──
         result.Review.Should().NotBeNull();

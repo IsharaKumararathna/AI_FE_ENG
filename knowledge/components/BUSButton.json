@@ -1,0 +1,29 @@
+{
+  "componentId": "BUSButton",
+  "name": "BUS Button",
+  "category": "button",
+  "status": "approved",
+  "description": "Primary action button from the BUS Design System. Supports sm/lg sizes, primary/secondary variants, and icon mode. Built on KendoReact Button with BUS theming overrides.",
+  "props": [
+    { "name": "children", "type": "ReactNode", "required": true },
+    { "name": "onClick", "type": "function", "required": false },
+    { "name": "disabled", "type": "boolean", "required": false, "default": false },
+    { "name": "className", "type": "string", "required": false },
+    { "name": "id", "type": "string", "required": false }
+  ],
+  "variants": [
+    { "name": "primary", "description": "bus-btn-primary — filled blue, white text" },
+    { "name": "secondary", "description": "bus-btn-add-defect-secondary — white bg, grey border, grey text" },
+    { "name": "icon", "description": "bus-btn-icon — icon-only button" },
+    { "name": "sm", "description": "bus-btn-sm — compact padding ($sp-base $sp-8)" },
+    { "name": "lg", "description": "bus-btn-lg — large padding ($sp-16 $sp-24), 17px font" }
+  ],
+  "tokensConsumed": ["color.primary", "color.primary.hover", "color.text.white", "color.text.primary", "color.border.default", "spacing.xs", "spacing.sm", "spacing.md", "spacing.lg", "radius.md"],
+  "accessibility": {
+    "role": "button",
+    "keyboardSupport": true,
+    "ariaProps": ["aria-disabled"],
+    "notes": ["Disabled state uses grey-500 text color.", "data-testid='bus-button' for testing."]
+  },
+  "mapsFromHtml": ["button", "button.bus-btn", "button.bus-btn-primary"]
+}

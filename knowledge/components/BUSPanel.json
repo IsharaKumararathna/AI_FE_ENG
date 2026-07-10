@@ -1,0 +1,24 @@
+{
+  "componentId": "BUSPanel",
+  "name": "BUS Panel (Sliding Overlay)",
+  "category": "dialog",
+  "status": "approved",
+  "description": "Sliding overlay panel from the right side. Used for inspection details, vehicle overview, and settings. Portal-based rendering to document root with backdrop overlay. Header with close button.",
+  "props": [
+    { "name": "isOpen", "type": "boolean", "required": true },
+    { "name": "closePanel", "type": "function", "required": true },
+    { "name": "renderPanelHeader", "type": "function", "required": true, "description": "Returns ReactNode for the header" },
+    { "name": "renderPanelContent", "type": "function", "required": true, "description": "Returns ReactNode for the body" },
+    { "name": "showCloseIcon", "type": "boolean", "required": false, "default": true },
+    { "name": "closeOnOutsideClick", "type": "boolean", "required": false, "default": true },
+    { "name": "panelClassName", "type": "string", "required": false }
+  ],
+  "tokensConsumed": ["color.background.surface", "color.primary", "shadow.component"],
+  "accessibility": {
+    "role": "dialog",
+    "keyboardSupport": true,
+    "ariaProps": ["aria-modal"],
+    "notes": ["Body overflow hidden when panel is open.", "Close via ESC key.", "Close via overlay click via useInactiveHiding hook."]
+  },
+  "mapsFromHtml": ["div.bus-panel", "aside.panel"]
+}

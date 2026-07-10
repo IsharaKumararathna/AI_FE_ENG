@@ -39,13 +39,13 @@ public class KnowledgeBaseSchemaTests
     }
 
     [Fact]
-    public void DashboardPage_validates_against_reference_ui_pattern_schema()
+    public void ActiveInspectionsPage_validates_against_reference_ui_pattern_schema()
     {
         var (isValid, errors) = SchemaValidator.ValidateFile(
             Path.Combine(TestPaths.Schemas, "reference-ui-pattern.schema.json"),
-            Path.Combine(TestPaths.Knowledge, "referenceUiPatterns", "DashboardPage.json"));
+            Path.Combine(TestPaths.Knowledge, "referenceUiPatterns", "ActiveInspectionsPage.json"));
 
         isValid.Should().BeTrue(
-            "DashboardPage.json must conform to the reference UI pattern schema. Errors:\n{0}", errors);
+            "ActiveInspectionsPage.json must conform to the reference UI pattern schema. Errors:\n{0}", errors);
     }
 }

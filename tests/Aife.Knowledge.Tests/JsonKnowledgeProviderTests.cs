@@ -14,9 +14,9 @@ public class JsonKnowledgeProviderTests
     {
         var results = await _provider.SearchComponentsAsync(new ComponentQuery(), CancellationToken.None);
 
-        results.Should().HaveCount(2);
-        results.Should().Contain(c => c.ComponentId == "PrimaryButton");
-        results.Should().Contain(c => c.ComponentId == "DataTable");
+        results.Should().HaveCount(6);
+        results.Should().Contain(c => c.ComponentId == "BUSButton");
+        results.Should().Contain(c => c.ComponentId == "DataGrid");
     }
 
     [Fact]
@@ -26,18 +26,18 @@ public class JsonKnowledgeProviderTests
             new ComponentQuery { Category = "button" }, CancellationToken.None);
 
         results.Should().HaveCount(1);
-        results[0].ComponentId.Should().Be("PrimaryButton");
+        results[0].ComponentId.Should().Be("BUSButton");
     }
 
     [Fact]
     public async Task GetComponentAsync_returns_full_detail_with_props()
     {
-        var component = await _provider.GetComponentAsync("PrimaryButton", CancellationToken.None);
+        var component = await _provider.GetComponentAsync("BUSButton", CancellationToken.None);
 
         component.Should().NotBeNull();
-        component!.ComponentId.Should().Be("PrimaryButton");
+        component!.ComponentId.Should().Be("BUSButton");
         component.Props.Should().NotBeEmpty();
-        component.Props.Should().Contain(p => p.Name == "label" && p.Required);
+        component.Props.Should().Contain(p => p.Name == "children" && p.Required);
         component.MapsFromHtml.Should().Contain("button");
     }
 
@@ -51,10 +51,10 @@ public class JsonKnowledgeProviderTests
     [Fact]
     public async Task GetComponentPropsAsync_returns_props_for_component()
     {
-        var props = await _provider.GetComponentPropsAsync("DataTable", CancellationToken.None);
+        var props = await _provider.GetComponentPropsAsync("DataGrid", CancellationToken.None);
 
         props.Should().NotBeNull();
-        props!.ComponentId.Should().Be("DataTable");
+        props!.ComponentId.Should().Be("DataGrid");
         props.Props.Should().Contain(p => p.Name == "columns" && p.Required);
     }
 
@@ -64,8 +64,8 @@ public class JsonKnowledgeProviderTests
         var tokens = await _provider.GetDesignTokensAsync(CancellationToken.None);
 
         tokens.Tokens.Should().NotBeEmpty();
-        tokens.Tokens.Should().Contain(t => t.Name == "color.action.primary");
-        tokens.Tokens.Should().Contain(t => t.Name == "spacing.button.padding");
+        tokens.Tokens.Should().Contain(t => t.Name == "color.primary");
+        tokens.Tokens.Should().Contain(t => t.Name == "spacing.md");
     }
 
     [Fact]
@@ -84,7 +84,7 @@ public class JsonKnowledgeProviderTests
         var patterns = await _provider.GetReferenceUiPatternsAsync(CancellationToken.None);
 
         patterns.Should().HaveCount(1);
-        patterns[0].PatternId.Should().Be("DashboardPage");
+        patterns[0].PatternId.Should().Be("ActiveInspectionsPage");
         patterns[0].LayoutId.Should().Be("AppLayout");
         patterns[0].Regions.Should().NotBeEmpty();
     }

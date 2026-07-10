@@ -15,11 +15,11 @@ public class PrototypeRequestSchemaTests
         {
           "name": "Dashboard",
           "layout": "AppLayout",
-          "referencePattern": "DashboardPage",
+          "referencePattern": "ActiveInspectionsPage",
           "regions": [
             { "slot": "header", "component": "AppBar" },
             { "slot": "sidebar", "component": "NavList" },
-            { "slot": "main", "component": "DataTable", "props": { "title": "Customers" } }
+            { "slot": "main", "component": "DataGrid", "props": { "title": "Customers" } }
           ],
           "actions": [
             { "slot": "main", "component": "PrimaryButton", "label": "Add Customer" }

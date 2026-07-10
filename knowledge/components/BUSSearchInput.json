@@ -1,0 +1,20 @@
+{
+  "componentId": "BUSSearchInput",
+  "name": "BUS Search Input",
+  "category": "input",
+  "status": "approved",
+  "description": "Search text input with search icon prefix, clear button suffix (shown when value is non-empty), built on KendoReact TextBox.",
+  "props": [
+    { "name": "value", "type": "string", "required": true },
+    { "name": "handleChange", "type": "function", "required": true, "description": "Callback receiving the new string value" },
+    { "name": "onFocus", "type": "function", "required": false }
+  ],
+  "tokensConsumed": ["color.text.primary", "color.border.default", "color.primary"],
+  "accessibility": {
+    "role": "textbox",
+    "keyboardSupport": true,
+    "ariaProps": ["aria-label"],
+    "notes": ["Placeholder text comes from CultureDictionary.Common_Search.", "Clear button is an icon-only BUSButton."]
+  },
+  "mapsFromHtml": ["input.bus-search-input", "input[type=search]"]
+}

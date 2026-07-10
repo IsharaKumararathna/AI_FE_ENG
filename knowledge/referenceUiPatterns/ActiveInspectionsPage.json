@@ -1,0 +1,13 @@
+{
+  "patternId": "ActiveInspectionsPage",
+  "name": "Active Inspections Page",
+  "description": "BUSpek inspection listing page pattern sourced from BUSTest app.",
+  "layoutId": "AppLayout",
+  "regions": [
+    { "slot": "header", "element": "BUSAppBar" },
+    { "slot": "sidebar", "element": "BUSNav" },
+    { "slot": "main", "element": "DataGrid" }
+  ],
+  "sourceApp": "BUSTest",
+  "sourceVersion": "3.x"
+}

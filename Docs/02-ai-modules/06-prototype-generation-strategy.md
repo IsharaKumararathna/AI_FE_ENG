@@ -111,6 +111,24 @@ generator validates:
 Failed validation fails the generation job with a clear reason; no non-conformant
 prototype is returned.
 
+## Behavior on unknown componentIds
+
+If the `PrototypeRequest` references a `componentId` that does not exist in the
+Knowledge Base, the generator **fails before any LLM call**. The request is
+rejected:
+
+- The server returns an HTTP 500 with a ProblemDetails body.
+- The error message states: `"Component 'X' is not approved or not found in the Knowledge Base."`
+- The PO corrects the componentId and resubmits.
+
+This is a fail-fast behavior — the platform never invents components, and it
+never returns a partial prototype for the generate flow. The PO must have a
+Knowledge Base entry for every component they intend to use.
+
+This behavior differs from the upload flow, where novel HTML elements are
+silently skipped and the pipeline still completes (see the component mapping
+strategy for details).
+
 ## Conformance relationship
 
 Because the output is conformant by construction, the Prototype Conformance
