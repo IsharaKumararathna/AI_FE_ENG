@@ -87,8 +87,43 @@ await Aife.Cli.PromptSeeder.SeedAsync(
 
 // ── Run ──
 var handler = sp.GetRequiredService<RunGenerationSessionHandler>();
+var generator = sp.GetRequiredService<IReactGenerator>();
+var receiver = sp.GetRequiredService<IAiReviewer>();
+var artifactRepo = sp.GetRequiredService<IArtifactRepository>();
 
 var htmlPath = args.Length > 0 ? args[0] : null;
+var treeMode = args.Contains("--tree");
+
+if (treeMode)
+{
+    Console.WriteLine("=== Direct generation mode: BUSpek shell + Active Inspections ===`n");
+
+    var tree = new IntermediateUiTree
+    {
+        Page = "ActiveInspections",
+        Layout = "AppLayout",
+        Children = new List<UiNode>
+        {
+            new() { NodeId = "btn-new", ComponentId = "BUSButton", Text = "New control", TokenBindings = new Dictionary<string, string> { ["bg"] = "color.primary" } },
+            new() { NodeId = "tabs", ComponentId = "BUSTabStrip", Props = new Dictionary<string, object?> { ["tabs"] = "All,Started,Mine", ["activeIndex"] = 0 } },
+            new() { NodeId = "btn-filter", ComponentId = "BUSButton", Text = "Filter", Variant = "outlineSecondary" },
+            new() { NodeId = "btn-columns", ComponentId = "BUSButton", Text = "Columns", Variant = "outlineSecondary" },
+            new() { NodeId = "btn-export", ComponentId = "BUSButton", Text = "Export", Variant = "outlineSecondary" },
+            new() { NodeId = "grid", ComponentId = "DataGrid", Props = new Dictionary<string, object?> { ["columns"] = "Reg.no,Insp.#,Type,Make/model,Insp.date,Status", ["sortable"] = true } }
+        }
+    };
+
+    var artifacts = await generator.GenerateAsync(tree, CancellationToken.None);
+
+    Console.WriteLine($"Generated {artifacts.Count} file(s):");
+    foreach (var a in artifacts)
+    {
+        Console.WriteLine($"`n=== {a.Path} ===`n{a.Content}`n");
+    }
+
+    return 0;
+}
+
 if (string.IsNullOrEmpty(htmlPath))
 {
     // Demo run with a sample prototype

@@ -50,7 +50,7 @@ public sealed class OpenAiCompatibleProvider : ILlmProvider
                 new { role = "user", content = request.UserMessage }
             },
             temperature = 0.1,
-            max_tokens = 4096
+            max_tokens = 8192
         };
 
         var json = JsonConvert.SerializeObject(payload, new JsonSerializerSettings
@@ -84,9 +84,6 @@ public sealed class OpenAiCompatibleProvider : ILlmProvider
 
         // Newtonsoft.Json cannot parse Infinity/NaN — replace with large numbers
         text = text.Replace(": Infinity", ": 1e10").Replace(": -Infinity", ": -1e10").Replace(": NaN", ": null");
-
-        // Trim trailing text after the JSON block closes and remove ``` fences
-        text = TrimAfterJsonClose(text);
 
         return new LlmResponse
         {
@@ -144,46 +141,6 @@ public sealed class OpenAiCompatibleProvider : ILlmProvider
             var end = trimmed.LastIndexOf("```", StringComparison.Ordinal);
             if (end > start)
                 return trimmed[start..end].Trim();
-        }
-
-        return trimmed;
-    }
-
-    /// <summary>
-    /// Trims text after the root JSON structure closes, removing trailing
-    /// explanations or code-fence closers. Only counts top-level braces/brackets.
-    /// </summary>
-    private static string TrimAfterJsonClose(string text)
-    {
-        var trimmed = text.Trim();
-        if (trimmed.Length == 0 || (trimmed[0] != '{' && trimmed[0] != '['))
-            return trimmed;
-
-        var depth = 0;
-        var inString = false;
-        var escaped = false;
-        var openChar = trimmed[0];
-
-        for (var i = 0; i < trimmed.Length; i++)
-        {
-            var ch = trimmed[i];
-
-            if (escaped) { escaped = false; continue; }
-            if (ch == '\\') { escaped = true; continue; }
-            if (ch == '"') { inString = !inString; continue; }
-            if (inString) continue;
-
-            var opens = ch == '{' || ch == '[';
-            var closes = ch == '}' || ch == ']';
-
-            if (opens && ch == openChar) depth++;
-            else if (opens) depth++;
-            else if (closes) depth--;
-
-            if (depth == 0 && closes)
-            {
-                return trimmed[..(i + 1)];
-            }
         }
 
         return trimmed;

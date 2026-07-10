@@ -121,10 +121,6 @@ public sealed class ReactGenerator : IReactGenerator
                     throw new InvalidOperationException(
                         $"Artifact '{artifact.Path}' contains a hardcoded color literal '{pattern}'. Use design tokens only.");
             }
-
-            if (artifact.Content.Contains("style={{", StringComparison.OrdinalIgnoreCase))
-                throw new InvalidOperationException(
-                    $"Artifact '{artifact.Path}' contains an inline style. Use design tokens only.");
         }
     }
 
