@@ -21,5 +21,5 @@
   ],
   "tokensConsumed": ["color.primary", "color.primary.hover", "color.text.white", "color.text.primary", "spacing.xs", "spacing.md", "spacing.lg", "radius.md"],
   "accessibility": { "role": "button", "keyboardSupport": true, "ariaProps": ["aria-disabled"] },
-  "mapsFromHtml": ["button", "button.bus-btn", "button.bus-btn-primary"]
+  "mapsFromHtml": ["button", "btn", "primary-btn", "outline-btn", "secondary-btn", "icon-button", "menu-btn"]
 }

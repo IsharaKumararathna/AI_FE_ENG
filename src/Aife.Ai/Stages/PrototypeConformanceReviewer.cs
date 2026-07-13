@@ -130,12 +130,24 @@ public sealed class PrototypeConformanceReviewer : IPrototypeConformanceReviewer
 
         foreach (var element in analysis.Elements)
         {
+            if (string.IsNullOrWhiteSpace(element.Kind))
+                continue;
+
             var hasMapping = false;
             foreach (var summary in allComponents)
             {
                 var detail = await _knowledgeProvider.GetComponentAsync(summary.ComponentId, ct);
+
+                // Check mapsFromHtml exact match
                 if (detail?.MapsFromHtml is not null &&
                     detail.MapsFromHtml.Any(h => h.Equals(element.Kind, StringComparison.OrdinalIgnoreCase)))
+                {
+                    hasMapping = true;
+                    break;
+                }
+
+                // Check semantic fallback match
+                if (MatchesSemantically(element.Kind, summary.Category))
                 {
                     hasMapping = true;
                     break;
@@ -154,6 +166,27 @@ public sealed class PrototypeConformanceReviewer : IPrototypeConformanceReviewer
                 });
             }
         }
+    }
+
+    private static bool MatchesSemantically(string elementKind, string category)
+    {
+        var fallback = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["button"] = "button",
+            ["table"] = "table", ["datagrid"] = "table", ["grid"] = "table",
+            ["input"] = "input", ["search"] = "input", ["textbox"] = "input",
+            ["tabs"] = "navigation", ["tab"] = "navigation", ["sidebar"] = "navigation",
+            ["navigation"] = "navigation", ["nav"] = "navigation",
+            ["form"] = "form", ["formfield"] = "form", ["checkbox"] = "form",
+            ["switch"] = "form", ["toggle"] = "form",
+            ["chips"] = "display", ["chip"] = "display", ["badge"] = "display",
+            ["typography"] = "display", ["avatar"] = "display",
+        };
+
+        if (!fallback.TryGetValue(elementKind, out var expectedCategory))
+            return false;
+
+        return string.Equals(category, expectedCategory, StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task CheckLayoutConformanceAsync(

@@ -87,46 +87,8 @@ await Aife.Cli.PromptSeeder.SeedAsync(
 
 // ── Run ──
 var handler = sp.GetRequiredService<RunGenerationSessionHandler>();
-var generator = sp.GetRequiredService<IReactGenerator>();
-var receiver = sp.GetRequiredService<IAiReviewer>();
-var artifactRepo = sp.GetRequiredService<IArtifactRepository>();
 
 var htmlPath = args.Length > 0 ? args[0] : null;
-var treeMode = args.Contains("--tree");
-
-if (treeMode)
-{
-    Console.WriteLine("=== Direct generation mode: BUSpek shell + Active Inspections ===`n");
-
-    var tree = new IntermediateUiTree
-    {
-        Page = "ActiveInspections",
-        Layout = "AppLayout",
-        Children = new List<UiNode>
-        {
-            // Page header: title + "New control" button
-            new() { NodeId = "page-header", ComponentId = "BUSButton", Text = "Active inspections — New control", Props = new Dictionary<string, object?> { ["variant"] = "primary", ["label"] = "New control" }, TokenBindings = new Dictionary<string, string> { ["bg"] = "color.primary", ["text"] = "color.text.white" } },
-            // Filter tabs: All (23), Started (8), Mine (5)
-            new() { NodeId = "filter-tabs", ComponentId = "BUSTabStrip", Props = new Dictionary<string, object?> { ["tabs"] = "All (23),Started (8),Mine (5)", ["activeIndex"] = 0 } },
-            // Toolbar: Filter, Columns, Export
-            new() { NodeId = "btn-filter", ComponentId = "BUSButton", Text = "Filter", Variant = "outlineSecondary" },
-            new() { NodeId = "btn-columns", ComponentId = "BUSButton", Text = "Columns", Variant = "outlineSecondary" },
-            new() { NodeId = "btn-export", ComponentId = "BUSButton", Text = "Export", Variant = "outlineSecondary" },
-            // Data grid with 9 sortable columns from the prototype
-            new() { NodeId = "grid", ComponentId = "DataGrid", Props = new Dictionary<string, object?> { ["columns"] = "Reg.no,Insp.#,Type,Make/model,Insp.date,Remaining,Sev,Inspector,Status", ["sortable"] = true }, TokenBindings = new Dictionary<string, string> { ["headerBg"] = "color.table.header.bg", ["border"] = "color.table.row.border" } }
-        }
-    };
-
-    var artifacts = await generator.GenerateAsync(tree, CancellationToken.None);
-
-    Console.WriteLine($"Generated {artifacts.Count} file(s):");
-    foreach (var a in artifacts)
-    {
-        Console.WriteLine($"`n=== {a.Path} ===`n{a.Content}`n");
-    }
-
-    return 0;
-}
 
 if (string.IsNullOrEmpty(htmlPath))
 {

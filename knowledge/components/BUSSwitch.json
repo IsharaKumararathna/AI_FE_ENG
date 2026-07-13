@@ -3,13 +3,14 @@
   "name": "BUS Switch / Toggle",
   "category": "input",
   "status": "approved",
-  "description": "BUSKvalitet toggle switch built on react-bootstrap Form.Check type=switch. Supports sm/md/lg sizes.",
+  "description": "BUSTest toggle switch. KendoReact Switch wrapper. Supported via BUSFormField type=Switch. Sm/md/lg sizes.",
   "props": [
     { "name": "checked", "type": "boolean", "required": false },
-    { "name": "value", "type": "boolean", "required": false },
-    { "name": "size", "type": "string", "required": false, "enum": ["small", "medium", "large"] }
+    { "name": "onChange", "type": "function", "required": false },
+    { "name": "size", "type": "string", "required": false, "enum": ["small", "medium", "large"] },
+    { "name": "disabled", "type": "boolean", "required": false, "default": false }
   ],
   "tokensConsumed": ["color.primary"],
   "accessibility": { "role": "switch", "ariaProps": ["aria-checked"] },
-  "mapsFromHtml": ["div.bus-switch"]
+  "mapsFromHtml": ["switch", "toggle", "toggle-switch", "div.bus-switch"]
 }

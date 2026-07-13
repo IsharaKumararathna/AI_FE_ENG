@@ -33,15 +33,19 @@ public sealed class PrototypeAnalyzer : IPrototypeAnalyzer
             },
             ct);
 
-        // Truncate aggressively — DeepSeek has 8K output limit. Ask for summary, not per-element detail.
-        var htmlTrimmed = prototype.Html.Length > 2000
-            ? prototype.Html[..2000]
-            : prototype.Html;
+        // Send the FULL prototype — LLM needs to see the complete structure
+        // to correctly identify layout regions and element hierarchy.
+        // Compress whitespace to fit within context window limits.
+        var compressedHtml = System.Text.RegularExpressions.Regex.Replace(prototype.Html, @"\s+", " ").Trim();
+        var compressedCss = System.Text.RegularExpressions.Regex.Replace(prototype.Css, @"\s+", " ").Trim();
 
+        // Limit to 8K chars each to stay within reasonable context window
+        if (compressedHtml.Length > 8000) compressedHtml = compressedHtml[..8000];
+        if (compressedCss.Length > 4000) compressedCss = compressedCss[..4000];
         var request = new LlmRequest
         {
             SystemMessage = prompt.SystemMessage,
-            UserMessage = $"List the DISTINCT UI element TYPES found (not every instance) — e.g. \"table\", \"button\", \"search input\". Return ONLY {{\"layout\":\"AppLayout\",\"elements\":[...]}}: {htmlTrimmed}",
+            UserMessage = $"Analyze this HTML/CSS prototype. Identify: (1) the LAYOUT — is it a sidebar+content shell, single-column, or other? (2) ALL UI elements with their hierarchy and purpose. For each element include kind (sidebar/header/navigation/button/table/input/tabs/chips/search/filter/badge), the visible text, and its location context. Return JSON: {{\"layout\":\"AppLayout\",\"elements\":[{{\"kind\":\"sidebar\",\"text\":\"Sidebar navigation\",\"context\":\"left sidebar\"}},{{\"kind\":\"button\",\"text\":\"New control\",\"context\":\"page header\"}},{{\"kind\":\"tabs\",\"text\":\"All,Started,Mine\",\"context\":\"below header, filter tabs\"}},{{\"kind\":\"table\",\"text\":\"Reg.no,Insp.#,Type,Make/model,Insp.date,Remaining,Sev,Inspector,Status\",\"context\":\"main content area\"}},...]}}. Include EVERY distinct UI region — don't summarize.\n\nHTML:\n{compressedHtml}\n\nCSS:\n{compressedCss}",
             JsonMode = true,
             StageContext = new StageContext { StageName = "Analyze" }
         };

@@ -28,27 +28,94 @@ public sealed class UiTreeAssembler : IUiTreeAssembler
             Children = new List<UiNode>()
         };
 
-        foreach (var mapping in mappings.Where(m => m.Confidence >= 0.5 && m.ComponentId is not null))
+        var nodeIndex = 0;
+        var seenComponents = new HashSet<string>(); // deduplicate by component+kind
+
+        foreach (var mapping in mappings)
         {
-            var component = await _knowledgeProvider.GetComponentAsync(mapping.ComponentId!, ct);
-            var tokenBindings = new Dictionary<string, string>();
-
-            if (component?.TokensConsumed is not null)
+            if (mapping.Confidence >= 0.5 && mapping.ComponentId is not null)
             {
-                foreach (var token in component.TokensConsumed)
-                {
-                    tokenBindings[token] = token;
-                }
-            }
+                var key = $"confident:{mapping.ComponentId}";
+                if (seenComponents.Contains(key))
+                    continue;
+                seenComponents.Add(key);
 
+                nodeIndex++;
+                var component = await _knowledgeProvider.GetComponentAsync(mapping.ComponentId!, ct);
+                var tokenBindings = new Dictionary<string, string>();
+
+                if (component?.TokensConsumed is not null)
+                {
+                    foreach (var token in component.TokensConsumed)
+                    {
+                        tokenBindings[token] = token;
+                    }
+                }
+
+                tree.Children.Add(new UiNode
+                {
+                    NodeId = $"n-{nodeIndex}",
+                    ComponentId = mapping.ComponentId!,
+                    TokenBindings = tokenBindings
+                });
+            }
+            else
+            {
+                // Fallback: add as generic element with best-guess component
+                var fallbackId = GetFallbackComponentId(mapping.ElementRef!);
+                var key = $"fallback:{fallbackId}:{mapping.ElementRef!}";
+                if (seenComponents.Contains(key))
+                    continue;
+                seenComponents.Add(key);
+
+                nodeIndex++;
+                tree.Children.Add(new UiNode
+                {
+                    NodeId = $"n-{nodeIndex}",
+                    ComponentId = fallbackId,
+                    Props = new Dictionary<string, object?>
+                    {
+                        ["label"] = mapping.ElementRef ?? "element"
+                    }
+                });
+
+                Console.WriteLine($"[Assembler] Unmapped element '{mapping.ElementRef}' → fallback '{fallbackId}' (confidence={mapping.Confidence:F2})");
+            }
+        }
+
+        if (tree.Children.Count == 0)
+        {
+            // Never leave an empty tree — add minimal structure
             tree.Children.Add(new UiNode
             {
-                NodeId = $"n-{tree.Children.Count + 1}",
-                ComponentId = mapping.ComponentId!,
-                TokenBindings = tokenBindings
+                NodeId = "n-1",
+                ComponentId = "BUSButton",
+                Props = new Dictionary<string, object?> { ["label"] = "Generated" }
             });
         }
 
+        Console.WriteLine($"[Assembler] Tree assembled: layout={tree.Layout}, {tree.Children.Count} unique nodes");
+
         return tree;
+    }
+
+    private static string GetFallbackComponentId(string elementRef)
+    {
+        return (elementRef ?? string.Empty).ToLowerInvariant() switch
+        {
+            "table" or "datagrid" or "grid" => "DataGrid",
+            "button" or "btn" => "BUSButton",
+            "input" or "search" or "textbox" => "BUSInput",
+            "tabs" or "tab" or "tabstrip" => "BUSTabStrip",
+            "sidebar" or "nav" or "navigation" => "BUSTabStrip",
+            "checkbox" => "BUSCheckbox",
+            "switch" or "toggle" => "BUSSwitch",
+            "form" or "formfield" => "BUSFormField",
+            "header" => "BUSButton", // header regions use buttons/toolbar items
+            "typography" => "BUSButton", // fallback for text regions
+            "chips" or "chip" or "badge" => "BUSButton",
+            "avatar" => "BUSButton",
+            _ => "BUSButton" // last resort
+        };
     }
 }

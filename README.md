@@ -28,9 +28,6 @@ dotnet run --project src\Aife.Api --launch-profile "Aife.API.Development"
 
 # 5. Run the CLI (demo mode)
 dotnet run --project src\Aife.Cli
-
-# 6. Run the CLI with --tree for Active Inspections view
-dotnet run --project src\Aife.Cli -- --tree
 ```
 
 ## VS Code Launch Configurations (F5)
@@ -41,7 +38,6 @@ dotnet run --project src\Aife.Cli -- --tree
 | **API — No LLM (Stub)** | Starts the API without real LLM (uses stub provider), opens browser |
 | **API — Production** | Starts the API in Production mode |
 | **CLI — Run Default** | Runs the CLI with the demo prototype |
-| **CLI — Active Inspections (--tree)** | Generates the Active Inspections React view directly |
 | **CLI — Run Prototype** | Runs the BUSpek prototype through the full pipeline |
 
 **Using `dotnet run` profiles:**

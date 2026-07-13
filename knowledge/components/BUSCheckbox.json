@@ -3,15 +3,15 @@
   "name": "BUS Checkbox",
   "category": "input",
   "status": "approved",
-  "description": "BUSKvalitet custom checkbox with label. Not KendoReact — uses native input[type=checkbox] with custom styling.",
+  "description": "BUSTest custom checkbox with label. Uses native input[type=checkbox] with custom styling. Supported via BUSFormField type=Checkbox.",
   "props": [
     { "name": "label", "type": "string", "required": true },
     { "name": "name", "type": "string", "required": false },
-    { "name": "value", "type": "boolean", "required": false },
+    { "name": "checked", "type": "boolean", "required": false },
     { "name": "disabled", "type": "boolean", "required": false, "default": false },
     { "name": "onChange", "type": "function", "required": false }
   ],
   "tokensConsumed": ["color.text.primary"],
   "accessibility": { "role": "checkbox", "ariaProps": ["aria-checked"] },
-  "mapsFromHtml": ["input[type=checkbox]", "label.bus-checkbox"]
+  "mapsFromHtml": ["checkbox", "check", "check-box", "input[type=checkbox]"]
 }

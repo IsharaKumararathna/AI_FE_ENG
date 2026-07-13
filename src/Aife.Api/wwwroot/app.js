@@ -18,7 +18,6 @@ document.querySelectorAll('.tab').forEach(tab => {
 const fileHtml = document.getElementById('file-html');
 const htmlInput = document.getElementById('html-input');
 const btnGenerate = document.getElementById('btn-generate');
-const btnTreeDemo = document.getElementById('btn-tree-demo');
 
 function checkReady() {
   btnGenerate.disabled = !fileHtml.files[0] && !htmlInput.value.trim();
@@ -82,42 +81,6 @@ btnGenerate.addEventListener('click', async () => {
   }
 });
 
-// ── Quick demo: direct tree generation ──
-btnTreeDemo.addEventListener('click', async () => {
-  showLoading('Generating Active Inspections view...');
-  try {
-    // Upload a simple prototype
-    const demoHtml = '<html><body><button>New control</button><table><tr><th>Reg.no</th></tr></table></body></html>';
-    const uploadRes = await fetch(`${API}/prototypes`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ html: demoHtml, css: '' })
-    });
-    const proto = await uploadRes.json();
-    currentPrototypeId = proto.id;
-
-    const sessionRes = await fetch(`${API}/sessions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prototypeId: proto.id })
-    });
-    const session = await sessionRes.json();
-    currentSessionId = session.sessionId;
-
-    const [artifactsRes, reviewRes] = await Promise.all([
-      fetch(`${API}/sessions/${currentSessionId}/artifacts`),
-      fetch(`${API}/sessions/${currentSessionId}/review`)
-    ]);
-    const artifacts = await artifactsRes.json();
-    const review = await reviewRes.json();
-
-    showResults(artifacts, review, null);
-  } catch (err) {
-    showError(err.message);
-    console.error(err);
-  }
-});
-
 // ── UI helpers ──
 function showLoading(text) {
   document.getElementById('step-upload').classList.add('hidden');
@@ -162,83 +125,128 @@ function renderPreview(artifacts) {
   const mainFile = artifacts.find(a => a.path.endsWith('.tsx')) || artifacts[0];
   if (!mainFile) return;
 
-  let code = mainFile.content
-    .replace(/import\s+.*from\s+['"].*['"];?\s*/g, '')
-    .replace(/:\s*React\.FC[^=]*/g, '')
-    .replace(/\bexport default\b/g, '')
-    .replace(/const\s+ActiveInspections/g, 'function ActiveInspections');
+  // Extract meaningful info from the generated TSX for a clean preview
+  const content = mainFile.content;
 
-  const html = `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8">
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"><\/script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"><\/script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter','Segoe UI',sans-serif; background: #f9fafb; color: #111928; font-size: 14px; padding: 24px; }
-  .bus-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-  .bus-btn-primary { background: #1548be; color: white; }
-  .bus-btn-primary:hover { background: #1e429f; }
-  .bus-btn-outline-secondary { background: white; color: #1f2a37; box-shadow: inset 0 0 0 1px #9ca3af; border-radius: 8px; }
-  .bus-tab-strip { display: flex; gap: 4px; border-bottom: 2px solid #e5e7eb; margin-bottom: 16px; }
-  .bus-tab { padding: 8px 16px; font-size: 13px; font-weight: 600; color: #6b7280; border: none; border-bottom: 2px solid transparent; background: none; cursor: pointer; }
-  .bus-tab.active { color: #1548be; border-bottom-color: #1548be; }
-  .bus-table { width: 100%; border-collapse: collapse; background: white; border: 1px solid #e5e7eb; border-radius: 8px; }
-  .bus-table th { background: #f4f6f9; padding: 12px 8px; font-size: 14px; font-weight: 600; color: #6b7280; text-align: left; border-bottom: 1px solid #e5e7eb; }
-  .bus-table td { padding: 16px 8px; font-size: 12px; border-bottom: 1px solid #e5e7eb; }
-  .app-shell { display: grid; grid-template-columns: 240px 1fr; grid-template-rows: 56px 1fr; min-height: 100vh; }
-  .toolbar { display: flex; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
-</style></head>
-<body>
-  <div id="root"><div style="text-align:center;padding:48px;color:#6b7280;">⏳ Loading preview...</div></div>
-  <script type="text/babel">
-    var e = React.createElement;
-    var BUSButton = function(p) {
-      var cls = p.variant === 'outlineSecondary' ? 'bus-btn bus-btn-outline-secondary' : 'bus-btn bus-btn-primary';
-      return e('button', { className: cls }, p.children || p.label || '');
-    };
-    var BUSTabStrip = function(p) {
-      var items = p.tabs ? p.tabs.split(',') : ['Tab 1', 'Tab 2'];
-      return e('div', { className: 'bus-tab-strip' },
-        items.map(function(t, i) { return e('button', { key: i, className: 'bus-tab' + (i === (p.activeIndex||0) ? ' active' : '') }, t.trim()); })
-      );
-    };
-    var DataGrid = function(p) {
-      var cols = p.columns ? p.columns.split(',') : ['Col 1', 'Col 2'];
-      return e('div', {},
-        e('table', { className: 'bus-table' },
-          e('thead', null, e('tr', null, cols.map(function(c, i) { return e('th', { key: i }, c.trim()); }))),
-          e('tbody', null, e('tr', null, cols.map(function(c, i) { return e('td', { key: i }, '—'); })))
-        )
-      );
-    };
-    var BUSInput = function(p) {
-      return e('input', { placeholder: p.placeholder || '', style: { padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px', fontSize: '13px', width: '200px' } });
-    };
-    var BUSFormField = function(p) { return e('div', {}, p.children); };
-    var BUSCheckbox = function(p) { return e('label', {}, e('input', { type: 'checkbox' }), p.label); };
-    var BUSSwitch = function(p) { return e('input', { type: 'checkbox', defaultChecked: p.checked }); };
-    var AppLayout = function(p) { return e('div', {}, p.children); };
+  // Extract component name
+  const nameMatch = content.match(/(?:const|function)\s+([A-Z]\w*)/);
+  const compName = nameMatch ? nameMatch[1] : 'Generated';
 
-    ${code}
+  // Extract JSX elements used
+  const imports = (content.match(/import\s+\{([^}]+)\}\s+from/g) || [''])[0] || '';
+  const comps = imports.replace(/import\s*\{|\}\s*from.*/g, '').trim();
 
-    function App() {
-      var Comp = ActiveInspections || Generated;
-      if (!Comp) return e('div', { style: { padding: '24px', color: '#c81e1e' } }, 'No component found in generated code.');
-      return e(Comp);
+  // Extract column headers if DataGrid used
+  const colMatch = content.match(/columns=\{(?:\[([^\]]+)\]|["']([^"']+)["'])/);
+  const cols = colMatch ? (colMatch[1] || colMatch[2]).replace(/["']/g, '').split(',').map(c => c.trim()) : [];
+
+  // Extract row data if present
+  const rowMatch = content.match(/rows=\{(?:\[([^\]]*\{[^}]*\}[^\]]*)\])/);
+  let rows = [];
+  if (rowMatch) {
+    const rowStr = rowMatch[1];
+    rows = [...rowStr.matchAll(/\{[^}]+\}/g)].map(m => {
+      try { return JSON.parse(m[0].replace(/'/g, '"')); } catch { return {}; }
+    });
+  }
+
+  // Build clean preview HTML
+  let previewHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>';
+  previewHtml += `
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter','Segoe UI',sans-serif; background: #f9fafb; color: #172b4d; font-size: 14px; }
+    .app-shell { display: grid; grid-template-columns: 240px 1fr; grid-template-rows: 56px 1fr 40px; min-height: 100vh; }
+    .app-header { grid-column: 1/-1; background: #fff; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; padding: 0 20px; }
+    .app-sidebar { background: #fff; border-right: 1px solid #e5e7eb; padding: 16px; }
+    .app-sidebar a { display: flex; align-items: center; gap: 10px; padding: 12px 16px; color: #374151; text-decoration: none; border-radius: 8px; cursor: pointer; }
+    .app-sidebar a.active { background: #f5f9ff; color: #1548be; font-weight: 600; }
+    .app-main { padding: 24px; overflow: auto; }
+    .app-footer { grid-column: 1/-1; background: #fff; border-top: 1px solid #e5e7eb; display: flex; align-items: center; padding: 0 24px; font-size: 12px; color: #6b7280; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .page-header h1 { font-size: 28px; color: #111928; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .btn-primary { background: #1548be; color: #fff; }
+    .btn-outline { background: #fff; color: #1f2a37; box-shadow: inset 0 0 0 1px #9ca3af; }
+    .tabs { display: flex; gap: 8px; border-bottom: 2px solid #e5e7eb; margin-bottom: 24px; }
+    .tab { padding: 10px 16px; font-size: 13px; font-weight: 600; color: #6b7280; border: none; border-bottom: 2px solid transparent; background: none; cursor: pointer; }
+    .tab.active { color: #1548be; border-bottom-color: #1548be; }
+    .bus-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+    .bus-table th { background: #f4f6f9; padding: 12px 16px; font-size: 12px; font-weight: 600; color: #6b7280; text-align: left; border-bottom: 1px solid #e5e7eb; }
+    .bus-table td { padding: 16px; font-size: 13px; border-bottom: 1px solid #e5e7eb; }
+    .toolbar { display: flex; gap: 8px; margin-bottom: 16px; }
+  `;
+  previewHtml += '</style></head><body><div class="app-shell">';
+
+  // Sidebar
+  if (comps.includes('AppLayout') || comps.includes('BUSTabStrip')) {
+    previewHtml += '<div class="app-sidebar"><div style="font-weight:700;font-size:18px;color:#1548be;margin-bottom:24px;">📋 BUSpek</div>';
+    previewHtml += '<a class="active">📋 Active inspections</a>';
+    previewHtml += '<a>📄 Control register</a>';
+    previewHtml += '<a>🔔 Follow-up</a>';
+    previewHtml += '<a>👤 Customers</a>';
+    previewHtml += '<a>⚙️ Settings</a>';
+    previewHtml += '</div>';
+  }
+
+  // Header
+  previewHtml += '<div class="app-header">';
+  previewHtml += '<input type="text" placeholder="Search reg. no. or VIN..." style="width:320px;padding:8px 14px;border:1px solid #d1d5db;border-radius:8px;">';
+  previewHtml += '<div style="margin-left:auto;display:flex;align-items:center;gap:12px;">';
+  previewHtml += '<div style="width:36px;height:36px;background:#dbeafe;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#1548be;font-weight:700;">TS</div>';
+  previewHtml += '<span>Tomas Setsä</span>';
+  previewHtml += '</div></div>';
+
+  // Main content
+  previewHtml += '<div class="app-main">';
+
+  // Page header
+  previewHtml += '<div class="page-header"><h1>' + compName + '</h1>';
+  if (comps.includes('BUSButton')) previewHtml += '<button class="btn btn-primary">+ New control</button>';
+  previewHtml += '</div>';
+
+  // Tabs
+  if (comps.includes('BUSTabStrip')) {
+    previewHtml += '<div class="tabs"><button class="tab active">All <span style="background:#eef2f7;padding:2px 8px;border-radius:50px;margin-left:4px;">23</span></button>';
+    previewHtml += '<button class="tab">Started <span style="background:#eef2f7;padding:2px 8px;border-radius:50px;margin-left:4px;">8</span></button>';
+    previewHtml += '<button class="tab">Mine <span style="background:#eef2f7;padding:2px 8px;border-radius:50px;margin-left:4px;">5</span></button></div>';
+  }
+
+  // Toolbar
+  if (content.includes('outline') || content.includes('Filter') || content.includes('Export')) {
+    previewHtml += '<div class="toolbar">';
+    previewHtml += '<button class="btn btn-outline">Filter ▼</button>';
+    previewHtml += '<button class="btn btn-outline">Columns ▼</button>';
+    previewHtml += '<button class="btn btn-outline" style="margin-left:auto;">Export ▼</button>';
+    previewHtml += '</div>';
+  }
+
+  // Table
+  if (cols.length > 0 || comps.includes('DataGrid')) {
+    const headers = cols.length > 0 ? cols : ['Reg.no', 'Insp.#', 'Type', 'Make/model', 'Insp.date', 'Status'];
+    previewHtml += '<table class="bus-table"><thead><tr>';
+    headers.forEach(h => { previewHtml += '<th>' + h + '</th>'; });
+    previewHtml += '</tr></thead><tbody>';
+    for (let i = 0; i < 5; i++) {
+      previewHtml += '<tr>';
+      headers.forEach((h, j) => {
+        const sample = rows[i] ? (rows[i][h] || rows[i][h.replace(/\s/g,'')] || '—') : (j === 0 ? 'AB' + (12345 + i) : '—');
+        previewHtml += '<td>' + sample + '</td>';
+      });
+      previewHtml += '</tr>';
     }
+    previewHtml += '</tbody></table>';
+  }
 
-    var root = document.getElementById('root');
-    try {
-      ReactDOM.createRoot(root).render(e(App));
-    } catch(ex) {
-      root.innerHTML = '<div style=\"padding:24px;color:#c81e1e;\">Preview render error: ' + ex.message + '<br><pre style=\"font-size:11px;margin-top:8px;color:#374151;\">' + decodeURIComponent(\"%3Ccode%3E\") + mainFile.content.replace(/</g, '&lt;').replace(/>/g, '&gt;').substring(0, 500) + '</pre></div>';
-    }
-  <\/script>
-</body></html>`;
+  previewHtml += '</div>'; // main
 
-  iframe.srcdoc = html;
+  // Footer
+  if (content.includes('footer') || content.includes('Footer')) {
+    previewHtml += '<div class="app-footer">BUS Design System · Generated Preview</div>';
+  }
+
+  previewHtml += '</div></body></html>';
+
+  iframe.srcdoc = previewHtml;
 }
 
 

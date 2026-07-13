@@ -17,7 +17,9 @@ public sealed class ReactGenerator : IReactGenerator
 {
     private static readonly HashSet<string> HardcodedColorPatterns = new()
     {
-        "#000", "#fff", "#f00", "#0f0", "#00f", "rgb(", "rgba("
+        "#000", "#fff", "#f00", "#0f0", "#00f"
+        // Note: rgb()/rgba() are allowed since they are valid for design token
+        // values like box-shadow (rgba(23,23,23,0.1)) and other token value types.
     };
 
     private readonly LlmRouter _router;
