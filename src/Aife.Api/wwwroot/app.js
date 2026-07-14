@@ -67,6 +67,10 @@ btnGenerate.addEventListener('click', async () => {
     const artifacts = await artifactsRes.json();
     const review = await reviewRes.json();
 
+    // Handle different response formats — API may return array or { artifacts: [...] }
+    const artifactList = Array.isArray(artifacts) ? artifacts : (artifacts.artifacts || [artifacts]);
+    const reviewData = review || { score: 0, outcome: 'Unknown', violations: [], suggestions: [] };
+
     // 4. Try conformance
     let conformance = null;
     try {
@@ -74,7 +78,7 @@ btnGenerate.addEventListener('click', async () => {
       conformance = await confRes.json();
     } catch (e) { /* conformance is optional */ }
 
-    showResults(artifacts, review, conformance);
+    showResults(artifactList, reviewData, conformance);
   } catch (err) {
     showError(err.message || 'Generation failed. Check console for details.');
     console.error(err);
@@ -161,7 +165,11 @@ function showResults(artifacts, review, conformance) {
 function renderCode(artifacts) {
   const container = document.getElementById('code-files');
   container.innerHTML = '';
-  artifacts.forEach(a => {
+  if (!artifacts || !Array.isArray(artifacts) || artifacts.length === 0) {
+    container.innerHTML = '<p style="color:var(--gray-500);">No artifacts generated.</p>';
+    return;
+  }
+  artifacts.filter(a => a && a.path).forEach(a => {
     const div = document.createElement('div');
     div.className = 'code-file';
     div.innerHTML = `
@@ -174,8 +182,15 @@ function renderCode(artifacts) {
 
 function renderPreview(artifacts) {
   const iframe = document.getElementById('preview-frame');
-  const mainFile = artifacts.find(a => a.path.endsWith('.tsx')) || artifacts[0];
-  if (!mainFile) return;
+  if (!artifacts || !Array.isArray(artifacts) || artifacts.length === 0) {
+    iframe.srcdoc = '<div style="padding:48px;text-align:center;color:#6b7280;">No preview available.</div>';
+    return;
+  }
+  const mainFile = artifacts.find(a => a && a.path && a.path.endsWith('.tsx')) || artifacts.find(a => a && a.path) || artifacts[0];
+  if (!mainFile || !mainFile.content) {
+    iframe.srcdoc = '<div style="padding:48px;text-align:center;color:#c81e1e;">No preview content available.</div>';
+    return;
+  }
 
   // Extract meaningful info from the generated TSX for a clean preview
   const content = mainFile.content;

@@ -110,8 +110,14 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
             }
             result = result with { ComponentsExtracted = components.Count };
 
-            // 3. Update manifest
-            UpdateManifest(components);
+            // 3. Update manifest — but only if we found a meaningful set
+            // of components (more than the baseline 7 handcrafted ones).
+            // For Kvalitet (18 components) or BUSTest (20+ components), this
+            // is a real scan worth trusting. For bad scans (< 10), skip.
+            if (components.Count >= 10)
+                UpdateManifest(components);
+            else
+                Console.WriteLine($"[Trainer] Only {components.Count} components found (need >= 10) — keeping existing manifest.");
 
             result = result with
             {

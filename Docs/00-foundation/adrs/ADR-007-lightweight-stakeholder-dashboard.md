@@ -58,7 +58,7 @@ production portal** — it is a demo and evaluation tool that:
 | Authentication | ❌ None | ✅ Entra ID |
 | SignalR live updates | ❌ Polling only | ✅ Real-time |
 | Artifact browser | ✅ Code viewer | ✅ (with download, diff) |
-| Generate from intent | ❌ (use CLI `--tree`) | ✅ (form-based UI) |
+| Generate from intent | ❌ (use API endpoint) | ✅ (form-based UI) |
 
 ### What this does NOT change
 
