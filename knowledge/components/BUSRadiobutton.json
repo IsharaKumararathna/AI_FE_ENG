@@ -1,0 +1,15 @@
+{
+  "ComponentId": "BUSRadiobutton",
+  "Name": "BUSRadiobutton",
+  "Category": "button",
+  "Status": "approved",
+  "Description": "Extracted from BUSRadiobutton.jsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "button"
+  ]
+}

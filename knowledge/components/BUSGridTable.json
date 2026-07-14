@@ -1,0 +1,21 @@
+{
+  "ComponentId": "BUSGridTable",
+  "Name": "BUSGrid Table",
+  "Category": "table",
+  "Status": "approved",
+  "Description": "Extracted from bus-grid-table.jsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [
+    "color.table.header.bg",
+    "color.text.primary",
+    "color.table.row.border"
+  ],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "table",
+    "tabs",
+    "tab"
+  ]
+}

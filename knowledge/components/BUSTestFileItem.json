@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSTestFileItem",
+  "Name": "Test File Item",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from TestFileItem.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

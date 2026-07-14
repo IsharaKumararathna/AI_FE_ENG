@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseGetPreTestTypes",
+  "Name": "use Get Pre Test Types",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from PreTestSettingsOperator.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

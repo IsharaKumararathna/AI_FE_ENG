@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSWindow",
+  "Name": "BUSWindow",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from BUSWindow.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

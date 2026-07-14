@@ -1,0 +1,22 @@
+{
+  "ComponentId": "BUSWorkOrderReportBasicInfo",
+  "Name": "Work Order Report Basic Info",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from WorkOrderReportBasicInfo.tsx",
+  "Props": [
+    {
+      "Name": "vehicleData",
+      "Type": "any",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    }
+  ],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

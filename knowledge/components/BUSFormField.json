@@ -1,17 +1,16 @@
 {
-  "componentId": "BUSFormField",
-  "name": "BUS Form Field",
-  "category": "input",
-  "status": "approved",
-  "description": "BUSKvalitet form field adapter. Renders Text, Numeric, TextArea, Dropdown, MultiSelect, RadioButton, Checkbox, Switch, Date, RichText, DateTime, MobileNumber. Uses react-bootstrap Form and BUS components.",
-  "props": [
-    { "name": "label", "type": "string", "required": true },
-    { "name": "required", "type": "boolean", "required": false, "default": false },
-    { "name": "type", "type": "string", "required": true, "description": "FormFieldsEnum: Text, Numeric, Dropdown, etc." },
-    { "name": "validationMessage", "type": "string", "required": false },
-    { "name": "children", "type": "ReactNode", "required": false }
-  ],
-  "tokensConsumed": ["color.text.primary", "color.text.secondary", "color.error", "spacing.xs", "spacing.sm", "spacing.md"],
-  "accessibility": { "ariaProps": ["aria-required", "aria-invalid"] },
-  "mapsFromHtml": ["div.bus-field-wrapper", "div.bus-field"]
+  "ComponentId": "BUSFormField",
+  "Name": "BUSForm Field",
+  "Category": "form",
+  "Status": "approved",
+  "Description": "Extracted from BUSFormField.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "form",
+    "formfield"
+  ]
 }

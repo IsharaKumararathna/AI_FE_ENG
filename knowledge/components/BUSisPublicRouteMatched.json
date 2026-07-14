@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSisPublicRouteMatched",
+  "Name": "is Public Route Matched",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from PublicRouteMatchHelper.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

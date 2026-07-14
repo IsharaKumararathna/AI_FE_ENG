@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSOBDResults",
+  "Name": "OBDResults",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from OBDResults.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

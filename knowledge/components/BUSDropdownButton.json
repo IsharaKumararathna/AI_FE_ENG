@@ -1,0 +1,21 @@
+{
+  "ComponentId": "BUSDropdownButton",
+  "Name": "BUSDropdown Button",
+  "Category": "button",
+  "Status": "approved",
+  "Description": "Extracted from BUSDropdownButton.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [
+    "color.primary",
+    "color.primary.hover",
+    "color.text.white",
+    "spacing.xs",
+    "radius.md"
+  ],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "button"
+  ]
+}

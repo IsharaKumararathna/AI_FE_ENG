@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseGetTyresInfoObservable",
+  "Name": "use Get Tyres Info Observable",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from TyresOperator.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseGetVehicleIdentification",
+  "Name": "use Get Vehicle Identification",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from OnBoardDiagnosticsOperator.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSMultiselectAdvanced",
+  "Name": "BUSMultiselect Advanced",
+  "Category": "input",
+  "Status": "approved",
+  "Description": "Extracted from BUSMultiselectAdvanced.jsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

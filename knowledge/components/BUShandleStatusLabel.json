@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUShandleStatusLabel",
+  "Name": "handle Status Label",
+  "Category": "display",
+  "Status": "approved",
+  "Description": "Extracted from ExistingTestsHelpers.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

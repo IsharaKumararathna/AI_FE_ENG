@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSTestTypePriceCatalogSettingsSkeleton",
+  "Name": "Test Type Price Catalog Settings Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from TestTypePriceCatalogSettingsSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

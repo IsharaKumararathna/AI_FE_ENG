@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSLoadingSkeleton",
+  "Name": "BUSLoading Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from BUSLoadingSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

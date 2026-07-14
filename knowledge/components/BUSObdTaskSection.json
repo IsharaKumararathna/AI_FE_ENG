@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSObdTaskSection",
+  "Name": "Obd Task Section",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from ObdTaskSection.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

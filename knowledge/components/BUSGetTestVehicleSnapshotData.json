@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSGetTestVehicleSnapshotData",
+  "Name": "Get Test Vehicle Snapshot Data",
+  "Category": "form",
+  "Status": "approved",
+  "Description": "Extracted from VehicleInformationOperator.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

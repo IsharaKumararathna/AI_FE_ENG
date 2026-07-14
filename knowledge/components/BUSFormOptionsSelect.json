@@ -1,0 +1,16 @@
+{
+  "ComponentId": "BUSFormOptionsSelect",
+  "Name": "Form Options Select",
+  "Category": "form",
+  "Status": "approved",
+  "Description": "Extracted from FormOptionsSelect.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "form",
+    "formfield"
+  ]
+}

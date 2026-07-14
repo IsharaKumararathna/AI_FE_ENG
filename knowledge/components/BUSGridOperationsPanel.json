@@ -1,0 +1,19 @@
+{
+  "ComponentId": "BUSGridOperationsPanel",
+  "Name": "BUSGrid Operations Panel",
+  "Category": "table",
+  "Status": "approved",
+  "Description": "Extracted from bus-grid-operations-panel.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [
+    "color.table.header.bg",
+    "color.text.primary",
+    "color.table.row.border"
+  ],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "table"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSFilterSelectionsModal",
+  "Name": "Filter Selections Modal",
+  "Category": "dialog",
+  "Status": "approved",
+  "Description": "Extracted from FilterSelectionsModal.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

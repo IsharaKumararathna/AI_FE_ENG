@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSTextArea",
+  "Name": "BUSText Area",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from BUSTextArea.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

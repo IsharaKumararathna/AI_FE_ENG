@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseDeleteCommentActions",
+  "Name": "use Delete Comment Actions",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from useDeleteCommentActions.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSFullRectangleSkeleton",
+  "Name": "BUSFull Rectangle Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from BUSFullRectangleSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

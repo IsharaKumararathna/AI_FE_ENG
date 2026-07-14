@@ -1,0 +1,54 @@
+{
+  "ComponentId": "BUSMobileInfoPopup",
+  "Name": "BUSMobile Info Popup",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from BUSMobileInfoPopup.tsx",
+  "Props": [
+    {
+      "Name": "isOpen",
+      "Type": "boolean",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "imageUrl",
+      "Type": "string",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "width",
+      "Type": "number",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "className",
+      "Type": "string",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "title",
+      "Type": "string",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    }
+  ],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

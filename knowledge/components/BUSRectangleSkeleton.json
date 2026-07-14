@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSRectangleSkeleton",
+  "Name": "BUSRectangle Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from BUSRectangleSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

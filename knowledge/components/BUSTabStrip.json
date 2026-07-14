@@ -1,17 +1,16 @@
 {
-  "componentId": "BUSTabStrip",
-  "name": "BUS Tab Strip",
-  "category": "navigation",
-  "status": "approved",
-  "description": "BUSTest Kendo TabStrip (.tab-section .k-tabstrip). Tabs: $font-family, 500 weight, $body-text color. Active: 5px $primary bottom border, 700 weight, $primary color. Badges supported. Header bar: white bg, box-shadow.",
-  "props": [
-    { "name": "tabs", "type": "array", "required": true },
-    { "name": "selected", "type": "string", "required": true },
-    { "name": "onSelect", "type": "function", "required": true },
-    { "name": "keepTabsMounted", "type": "boolean", "required": false, "default": false },
-    { "name": "badgeCounts", "type": "object", "required": false, "description": "Map of tab key to badge count number" }
-  ],
-  "tokensConsumed": ["color.primary", "color.text.primary", "color.background.surface", "shadow.sm"],
-  "accessibility": { "role": "tablist", "keyboardSupport": true },
-  "mapsFromHtml": ["tabs", "tab", "tabstrip", "tab-section", "div.tab-section"]
+  "ComponentId": "BUSTabStrip",
+  "Name": "BUSTab Strip",
+  "Category": "navigation",
+  "Status": "approved",
+  "Description": "Extracted from BUSTabStrip.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "tabs",
+    "tab"
+  ]
 }

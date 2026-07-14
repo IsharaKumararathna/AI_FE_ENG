@@ -1,0 +1,46 @@
+{
+  "ComponentId": "BUSPreTestCreate",
+  "Name": "Pre Test Create",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from PreTestCreate.tsx",
+  "Props": [
+    {
+      "Name": "isFromVehicleSearch",
+      "Type": "boolean",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "prefilledRegNo",
+      "Type": "string",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "prefilledUnitId",
+      "Type": "number",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "testRunId",
+      "Type": "number",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    }
+  ],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

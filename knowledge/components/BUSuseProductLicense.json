@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseProductLicense",
+  "Name": "use Product License",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from useProductLicense.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

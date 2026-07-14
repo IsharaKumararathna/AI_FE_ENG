@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSErrorImage",
+  "Name": "Error Image",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from ErrorImage.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

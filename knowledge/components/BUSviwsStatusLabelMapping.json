@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSviwsStatusLabelMapping",
+  "Name": "viws Status Label Mapping",
+  "Category": "display",
+  "Status": "approved",
+  "Description": "Extracted from OnBoardDiagnosticsHelpers.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

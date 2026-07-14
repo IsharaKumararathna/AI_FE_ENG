@@ -1,0 +1,17 @@
+{
+  "ComponentId": "BUSStandardJobsTableSkeleton",
+  "Name": "Standard Jobs Table Skeleton",
+  "Category": "table",
+  "Status": "approved",
+  "Description": "Extracted from StandardJobsTableSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "table",
+    "tabs",
+    "tab"
+  ]
+}

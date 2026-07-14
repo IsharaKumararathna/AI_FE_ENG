@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSContextMenuMobile",
+  "Name": "BUSContext Menu Mobile",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from BUSContextMenuMobile.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseGetSalesReportDetails",
+  "Name": "use Get Sales Report Details",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from SalesReportOperator.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

@@ -1,0 +1,30 @@
+{
+  "ComponentId": "BUSVehicleOverview",
+  "Name": "Vehicle Overview",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from VehicleOverview.tsx",
+  "Props": [
+    {
+      "Name": "testId",
+      "Type": "number",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "reportType",
+      "Type": "number",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    }
+  ],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

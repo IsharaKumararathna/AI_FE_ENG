@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSBatteryResultsSkeleton",
+  "Name": "Battery Results Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from BatteryResultsSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

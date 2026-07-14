@@ -41,6 +41,7 @@ builder.Services.AddProblemDetails();
 
 // ── Knowledge ──
 builder.Services.AddSingleton<IKnowledgeProvider>(_ => new JsonKnowledgeProvider(knowledgePath));
+builder.Services.AddSingleton<IKnowledgeTrainer>(_ => new KnowledgeTrainerService(knowledgePath));
 
 // ── LLM ──
 var llmProviders = new List<ILlmProvider>();

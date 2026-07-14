@@ -1,0 +1,16 @@
+{
+  "ComponentId": "BUSTestBasicInformation",
+  "Name": "Test Basic Information",
+  "Category": "form",
+  "Status": "approved",
+  "Description": "Extracted from TestBasicInformation.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "form",
+    "formfield"
+  ]
+}

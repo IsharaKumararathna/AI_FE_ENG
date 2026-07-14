@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSServiceHistory",
+  "Name": "Service History",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from ServiceHistory.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

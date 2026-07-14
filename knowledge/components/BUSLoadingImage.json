@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSLoadingImage",
+  "Name": "Loading Image",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from LoadingImage.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

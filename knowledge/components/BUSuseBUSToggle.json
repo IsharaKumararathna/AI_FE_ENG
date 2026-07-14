@@ -1,0 +1,15 @@
+{
+  "ComponentId": "BUSuseBUSToggle",
+  "Name": "use BUSToggle",
+  "Category": "form",
+  "Status": "approved",
+  "Description": "Extracted from useToggle.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "switch"
+  ]
+}

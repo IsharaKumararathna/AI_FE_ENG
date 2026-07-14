@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSUserDropdownSkeleton",
+  "Name": "User Dropdown Skeleton",
+  "Category": "input",
+  "Status": "approved",
+  "Description": "Extracted from UserDropdownSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

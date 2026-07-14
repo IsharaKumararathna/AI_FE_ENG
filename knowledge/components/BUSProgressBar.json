@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSProgressBar",
+  "Name": "BUSProgress Bar",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from BUSProgressBar.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

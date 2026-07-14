@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSMileageSuffix",
+  "Name": "Mileage Suffix",
+  "Category": "form",
+  "Status": "approved",
+  "Description": "Extracted from BUSFormFieldSuffixes.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

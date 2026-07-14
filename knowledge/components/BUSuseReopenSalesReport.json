@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseReopenSalesReport",
+  "Name": "use Reopen Sales Report",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from SalesReportHeaderOperator.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

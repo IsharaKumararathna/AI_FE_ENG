@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSqueryGetPreTestTypes",
+  "Name": "query Get Pre Test Types",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from PreTestSettings.queries.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

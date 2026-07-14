@@ -1,0 +1,30 @@
+{
+  "ComponentId": "BUSImagesContainerSkeleton",
+  "Name": "Images Container Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from ImagesContainerSkeleton.tsx",
+  "Props": [
+    {
+      "Name": "layoutMode",
+      "Type": "any",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "testRunScope",
+      "Type": "any",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    }
+  ],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

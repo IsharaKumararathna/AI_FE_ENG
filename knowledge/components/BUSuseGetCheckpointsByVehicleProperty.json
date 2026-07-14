@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseGetCheckpointsByVehicleProperty",
+  "Name": "use Get Checkpoints By Vehicle Property",
+  "Category": "form",
+  "Status": "approved",
+  "Description": "Extracted from CheckpointOperator.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUScustomCellClasses",
+  "Name": "custom Cell Classes",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from ValuationDefaults.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

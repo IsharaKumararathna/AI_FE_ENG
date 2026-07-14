@@ -45,6 +45,36 @@
       </div>
     </section>
 
+    <!-- Training Section -->
+    <section class="step" id="step-train">
+      <h2 class="step-title">🔧 Knowledge Base Training</h2>
+      <div class="upload-zone">
+        <p style="margin-bottom:12px;color:var(--gray-500);font-size:13px;">
+          Train or update the Design System Knowledge Base from a source code repository.
+          Provide a local folder path or a Git URL to scan SCSS variables and React components.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div>
+            <label class="field-label">Folder Path</label>
+            <input type="text" id="train-folder" class="file-input" placeholder="e.g. C:\Projects\my-design-system">
+          </div>
+          <p class="or-text">— or —</p>
+          <div>
+            <label class="field-label">Git URL</label>
+            <input type="text" id="train-git-url" class="file-input" placeholder="e.g. https://github.com/org/design-system.git">
+          </div>
+          <div>
+            <label class="field-label">Git Branch (optional)</label>
+            <input type="text" id="train-git-branch" class="file-input" placeholder="main">
+          </div>
+        </div>
+        <div class="actions" style="justify-content:space-between;">
+          <button id="btn-train" class="btn btn-primary" disabled>🚀 Train Knowledge Base</button>
+        </div>
+        <div id="train-result" style="margin-top:12px;display:none;"></div>
+      </div>
+    </section>
+
     <!-- Loading -->
     <section class="step hidden" id="step-loading">
       <div class="loader">

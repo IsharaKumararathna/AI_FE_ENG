@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSOBDResultSkeleton",
+  "Name": "OBDResult Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from OBDResultsSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSPreTestTypeEditConfirmationWindow",
+  "Name": "Pre Test Type Edit Confirmation Window",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from PreTestSettingsConfirmationWindows.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

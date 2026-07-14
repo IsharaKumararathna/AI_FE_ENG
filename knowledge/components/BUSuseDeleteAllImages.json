@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseDeleteAllImages",
+  "Name": "use Delete All Images",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from useDeleteFilesForTest.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseGetUnitTestSettings",
+  "Name": "use Get Unit Test Settings",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from TestSettingsOperator.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSNormalView",
+  "Name": "Normal View",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from ItemCard.stories.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

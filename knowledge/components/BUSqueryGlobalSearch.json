@@ -1,0 +1,16 @@
+{
+  "ComponentId": "BUSqueryGlobalSearch",
+  "Name": "query Global Search",
+  "Category": "input",
+  "Status": "approved",
+  "Description": "Extracted from BUSMenuQueries.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "input",
+    "search"
+  ]
+}

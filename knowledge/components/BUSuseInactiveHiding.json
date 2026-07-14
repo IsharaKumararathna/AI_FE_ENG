@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseInactiveHiding",
+  "Name": "use Inactive Hiding",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from useInactiveHiding.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

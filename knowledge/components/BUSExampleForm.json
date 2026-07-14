@@ -1,0 +1,16 @@
+{
+  "ComponentId": "BUSExampleForm",
+  "Name": "Example Form",
+  "Category": "form",
+  "Status": "approved",
+  "Description": "Extracted from ExampleForm.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "form",
+    "formfield"
+  ]
+}

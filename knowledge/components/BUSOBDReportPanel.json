@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSOBDReportPanel",
+  "Name": "OBDReport Panel",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from OBDReportPanel.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

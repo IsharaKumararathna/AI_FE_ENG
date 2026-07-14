@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseGetCombinedSecurityInfo",
+  "Name": "use Get Combined Security Info",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from SecurityInfoOperator.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

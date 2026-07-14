@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSExistingTestsWindow",
+  "Name": "Existing Tests Window",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from ExistingTestsWindow.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseGetUnitWorkOrderSettings",
+  "Name": "use Get Unit Work Order Settings",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from WorkOrderSettingsOperator.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

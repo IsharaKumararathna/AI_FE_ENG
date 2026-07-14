@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSTextSkeleton",
+  "Name": "BUSText Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from BUSTextSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

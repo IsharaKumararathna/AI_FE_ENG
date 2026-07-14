@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSExpansionPanel",
+  "Name": "BUSExpansion Panel",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from BUSExpansionPanel.jsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

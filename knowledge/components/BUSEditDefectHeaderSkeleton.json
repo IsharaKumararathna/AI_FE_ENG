@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSEditDefectHeaderSkeleton",
+  "Name": "Edit Defect Header Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from EditDefectHeaderSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

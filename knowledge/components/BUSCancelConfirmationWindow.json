@@ -1,0 +1,22 @@
+{
+  "ComponentId": "BUSCancelConfirmationWindow",
+  "Name": "Cancel Confirmation Window",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from EditorConfirmationWindows.tsx",
+  "Props": [
+    {
+      "Name": "isOpen",
+      "Type": "boolean",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    }
+  ],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

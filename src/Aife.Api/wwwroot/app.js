@@ -95,6 +95,58 @@ function showError(msg) {
   alert(msg);
 }
 
+// ── Knowledge Base Training ──
+const trainFolder = document.getElementById('train-folder');
+const trainGitUrl = document.getElementById('train-git-url');
+const trainGitBranch = document.getElementById('train-git-branch');
+const btnTrain = document.getElementById('btn-train');
+const trainResult = document.getElementById('train-result');
+
+function checkTrainReady() {
+  btnTrain.disabled = !trainFolder.value.trim() && !trainGitUrl.value.trim();
+}
+trainFolder.addEventListener('input', checkTrainReady);
+trainGitUrl.addEventListener('input', checkTrainReady);
+
+btnTrain.addEventListener('click', async () => {
+  const body = {};
+  if (trainFolder.value.trim()) body.folderPath = trainFolder.value.trim();
+  if (trainGitUrl.value.trim()) body.gitUrl = trainGitUrl.value.trim();
+  if (trainGitBranch.value.trim()) body.gitBranch = trainGitBranch.value.trim();
+
+  trainResult.style.display = 'block';
+  trainResult.innerHTML = '<div class="loader"><div class="spinner"></div><p>Training knowledge base...</p></div>';
+  btnTrain.disabled = true;
+
+  try {
+    const res = await fetch(`${API}/knowledge/train`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (res.ok) {
+      trainResult.innerHTML = `<div style="padding:12px;background:#f3faf7;border:1px solid #bcf0da;border-radius:8px;">
+        <strong style="color:#057a55;">✅ Training Complete</strong><br>
+        Tokens extracted: <strong>${data.tokensExtracted}</strong><br>
+        Components extracted: <strong>${data.componentsExtracted}</strong><br>
+        ${data.warnings?.length ? '<br><strong>Warnings:</strong><br>' + data.warnings.join('<br>') : ''}
+        <br><small style="color:#6b7280;">KB path: ${data.knowledgeBasePath || 'N/A'}</small>
+      </div>`;
+    } else {
+      trainResult.innerHTML = `<div style="padding:12px;background:#fdf2f2;border:1px solid #fbd5d5;border-radius:8px;color:#c81e1e;">
+        <strong>❌ Training Failed</strong><br>${data.detail || data.title || 'Unknown error'}
+      </div>`;
+    }
+  } catch (err) {
+    trainResult.innerHTML = `<div style="padding:12px;background:#fdf2f2;border:1px solid #fbd5d5;border-radius:8px;color:#c81e1e;">
+      <strong>❌ Error</strong><br>${err.message}
+    </div>`;
+  } finally {
+    btnTrain.disabled = false;
+  }
+});
+
 function showResults(artifacts, review, conformance) {
   document.getElementById('step-loading').classList.add('hidden');
   document.getElementById('step-results').classList.remove('hidden');
@@ -150,100 +202,145 @@ function renderPreview(artifacts) {
     });
   }
 
-  // Build clean preview HTML
+  // Build clean preview HTML matching the prototype structure
   let previewHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>';
   previewHtml += `
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter','Segoe UI',sans-serif; background: #f9fafb; color: #172b4d; font-size: 14px; }
-    .app-shell { display: grid; grid-template-columns: 240px 1fr; grid-template-rows: 56px 1fr 40px; min-height: 100vh; }
-    .app-header { grid-column: 1/-1; background: #fff; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; padding: 0 20px; }
-    .app-sidebar { background: #fff; border-right: 1px solid #e5e7eb; padding: 16px; }
-    .app-sidebar a { display: flex; align-items: center; gap: 10px; padding: 12px 16px; color: #374151; text-decoration: none; border-radius: 8px; cursor: pointer; }
-    .app-sidebar a.active { background: #f5f9ff; color: #1548be; font-weight: 600; }
-    .app-main { padding: 24px; overflow: auto; }
-    .app-footer { grid-column: 1/-1; background: #fff; border-top: 1px solid #e5e7eb; display: flex; align-items: center; padding: 0 24px; font-size: 12px; color: #6b7280; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .page-header h1 { font-size: 28px; color: #111928; }
-    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
-    .btn-primary { background: #1548be; color: #fff; }
-    .btn-outline { background: #fff; color: #1f2a37; box-shadow: inset 0 0 0 1px #9ca3af; }
-    .tabs { display: flex; gap: 8px; border-bottom: 2px solid #e5e7eb; margin-bottom: 24px; }
-    .tab { padding: 10px 16px; font-size: 13px; font-weight: 600; color: #6b7280; border: none; border-bottom: 2px solid transparent; background: none; cursor: pointer; }
-    .tab.active { color: #1548be; border-bottom-color: #1548be; }
-    .bus-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
-    .bus-table th { background: #f4f6f9; padding: 12px 16px; font-size: 12px; font-weight: 600; color: #6b7280; text-align: left; border-bottom: 1px solid #e5e7eb; }
-    .bus-table td { padding: 16px; font-size: 13px; border-bottom: 1px solid #e5e7eb; }
-    .toolbar { display: flex; gap: 8px; margin-bottom: 16px; }
+    body { font-family: 'Inter','Segoe UI',sans-serif; background: #f6f8fb; color: #1e293b; font-size: 14px; }
+    .layout { display: flex; height: 100vh; }
+    .sidebar { width: 280px; background: #fff; border-right: 1px solid #e5e7eb; flex-shrink: 0; }
+    .logo { display: flex; align-items: center; gap: 15px; padding: 16px 18px; border-bottom: 1px solid #eee; }
+    .menu-btn { width: 38px; height: 38px; border: 1px solid #ddd; background: #fff; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-size: 22px; color: #1155cc; font-weight: 700; }
+    nav { padding: 15px 0; }
+    nav a { display: flex; align-items: center; gap: 14px; padding: 15px 20px; color: #334155; text-decoration: none; cursor: pointer; font-size: 14px; }
+    nav a.active { background: #e8f2ff; color: #1155cc; font-weight: 600; }
+    main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    header.topbar { background: #fff; height: 66px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; flex-shrink: 0; }
+    .search { width: 330px; background: #fff; border: 1px solid #d9dee7; border-radius: 10px; display: flex; align-items: center; padding: 0 14px; }
+    .search input { width: 100%; border: none; height: 40px; outline: none; font-size: 14px; }
+    .user { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 36px; height: 36px; background: #dbeafe; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1155cc; font-weight: 700; font-size: 14px; }
+    .content { padding: 30px; overflow: auto; flex: 1; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    h1 { font-size: 38px; color: #111928; font-weight: 700; }
+    .primary-btn { background: #0d5bd7; color: #fff; border: none; border-radius: 10px; padding: 14px 22px; font-size: 15px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .primary-btn:hover { background: #1548be; }
+    .tabs { display: flex; gap: 25px; margin-bottom: 25px; border-bottom: 1px solid #e4e7ed; }
+    .tab-btn { padding: 14px 2px; border: none; background: none; font-size: 16px; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .tab-btn.active { color: #1155cc; border-bottom: 3px solid #1155cc; font-weight: 600; margin-bottom: -1px; }
+    .tab-btn span { background: #eef2f7; padding: 3px 9px; border-radius: 50px; font-size: 13px; font-weight: 500; }
+    .toolbar { display: flex; justify-content: space-between; margin-bottom: 18px; }
+    .toolbar-left { display: flex; gap: 12px; }
+    .outline-btn { background: #fff; border: 1px solid #d7dce5; padding: 11px 16px; border-radius: 10px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 6px; color: #374151; }
+    .outline-btn:hover { background: #f9fafb; }
+    .chips { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+    .chip { background: #eef6ff; color: #0d5bd7; border: 1px solid #bcd8ff; padding: 8px 14px; border-radius: 100px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+    .chips a { color: #0d5bd7; text-decoration: none; font-weight: 600; font-size: 13px; }
+    .table-wrapper { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: #f8fafc; }
+    th { text-align: left; padding: 16px; font-size: 14px; color: #64748b; font-weight: 600; white-space: nowrap; }
+    td { padding: 18px 16px; border-top: 1px solid #edf0f4; font-size: 14px; }
+    .status-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+    .status-started { background: #e7f0ff; color: #0d5bd7; }
+    .status-progress { background: #fff8e1; color: #b45309; }
+    .status-completed { background: #e6f7ed; color: #057a55; }
   `;
-  previewHtml += '</style></head><body><div class="app-shell">';
+  previewHtml += '</style></head><body><div class="layout">';
 
   // Sidebar
-  if (comps.includes('AppLayout') || comps.includes('BUSTabStrip')) {
-    previewHtml += '<div class="app-sidebar"><div style="font-weight:700;font-size:18px;color:#1548be;margin-bottom:24px;">📋 BUSpek</div>';
-    previewHtml += '<a class="active">📋 Active inspections</a>';
-    previewHtml += '<a>📄 Control register</a>';
-    previewHtml += '<a>🔔 Follow-up</a>';
-    previewHtml += '<a>👤 Customers</a>';
-    previewHtml += '<a>⚙️ Settings</a>';
-    previewHtml += '</div>';
-  }
+  previewHtml += '<aside class="sidebar">';
+  previewHtml += '<div class="logo"><div class="menu-btn">☰</div><div class="brand">📋 BUSpek</div></div>';
+  previewHtml += '<nav>';
+  previewHtml += '<a class="active">📋 Active inspections</a>';
+  previewHtml += '<a>📄 Control register</a>';
+  previewHtml += '<a>🔔 Follow-up</a>';
+  previewHtml += '<a>👤 Customer register</a>';
+  previewHtml += '<a>⚙️ Settings</a>';
+  previewHtml += '</nav></aside>';
 
-  // Header
-  previewHtml += '<div class="app-header">';
-  previewHtml += '<input type="text" placeholder="Search reg. no. or VIN..." style="width:320px;padding:8px 14px;border:1px solid #d1d5db;border-radius:8px;">';
-  previewHtml += '<div style="margin-left:auto;display:flex;align-items:center;gap:12px;">';
-  previewHtml += '<div style="width:36px;height:36px;background:#dbeafe;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#1548be;font-weight:700;">TS</div>';
-  previewHtml += '<span>Tomas Setsä</span>';
-  previewHtml += '</div></div>';
+  // Main area
+  previewHtml += '<main>';
 
-  // Main content
-  previewHtml += '<div class="app-main">';
+  // Header - search on LEFT, user on RIGHT
+  previewHtml += '<header class="topbar">';
+  previewHtml += '<div class="search">🔍 <input type="text" placeholder="Search reg. no. or VIN..."></div>';
+  previewHtml += '<div class="user"><div class="avatar">TS</div><span>Tomas Setsä</span> ▼</div>';
+  previewHtml += '</header>';
+
+  // Content
+  previewHtml += '<section class="content">';
 
   // Page header
-  previewHtml += '<div class="page-header"><h1>' + compName + '</h1>';
-  if (comps.includes('BUSButton')) previewHtml += '<button class="btn btn-primary">+ New control</button>';
+  const title = content.includes('Active inspections') ? 'Active inspections' : compName;
+  previewHtml += '<div class="page-header"><h1>' + title + '</h1>';
+  if (comps.includes('BUSButton')) previewHtml += '<button class="primary-btn">+ New control</button>';
   previewHtml += '</div>';
 
   // Tabs
   if (comps.includes('BUSTabStrip')) {
-    previewHtml += '<div class="tabs"><button class="tab active">All <span style="background:#eef2f7;padding:2px 8px;border-radius:50px;margin-left:4px;">23</span></button>';
-    previewHtml += '<button class="tab">Started <span style="background:#eef2f7;padding:2px 8px;border-radius:50px;margin-left:4px;">8</span></button>';
-    previewHtml += '<button class="tab">Mine <span style="background:#eef2f7;padding:2px 8px;border-radius:50px;margin-left:4px;">5</span></button></div>';
-  }
-
-  // Toolbar
-  if (content.includes('outline') || content.includes('Filter') || content.includes('Export')) {
-    previewHtml += '<div class="toolbar">';
-    previewHtml += '<button class="btn btn-outline">Filter ▼</button>';
-    previewHtml += '<button class="btn btn-outline">Columns ▼</button>';
-    previewHtml += '<button class="btn btn-outline" style="margin-left:auto;">Export ▼</button>';
+    previewHtml += '<div class="tabs">';
+    previewHtml += '<button class="tab-btn active">All <span>23</span></button>';
+    previewHtml += '<button class="tab-btn">Started <span>8</span></button>';
+    previewHtml += '<button class="tab-btn">Mine <span>5</span></button>';
+    previewHtml += '<button class="tab-btn">+</button>';
     previewHtml += '</div>';
   }
 
-  // Table
-  if (cols.length > 0 || comps.includes('DataGrid')) {
-    const headers = cols.length > 0 ? cols : ['Reg.no', 'Insp.#', 'Type', 'Make/model', 'Insp.date', 'Status'];
-    previewHtml += '<table class="bus-table"><thead><tr>';
-    headers.forEach(h => { previewHtml += '<th>' + h + '</th>'; });
-    previewHtml += '</tr></thead><tbody>';
-    for (let i = 0; i < 5; i++) {
-      previewHtml += '<tr>';
-      headers.forEach((h, j) => {
-        const sample = rows[i] ? (rows[i][h] || rows[i][h.replace(/\s/g,'')] || '—') : (j === 0 ? 'AB' + (12345 + i) : '—');
-        previewHtml += '<td>' + sample + '</td>';
-      });
-      previewHtml += '</tr>';
-    }
-    previewHtml += '</tbody></table>';
+  // Toolbar
+  if (content.includes('outline') || content.includes('Filter') || content.includes('Export') || content.includes('Columns')) {
+    previewHtml += '<div class="toolbar">';
+    previewHtml += '<div class="toolbar-left">';
+    previewHtml += '<button class="outline-btn">Filter ▼</button>';
+    previewHtml += '<button class="outline-btn">Columns ▼</button>';
+    previewHtml += '</div>';
+    previewHtml += '<button class="outline-btn">Export ▼</button>';
+    previewHtml += '</div>';
   }
 
-  previewHtml += '</div>'; // main
-
-  // Footer
-  if (content.includes('footer') || content.includes('Footer')) {
-    previewHtml += '<div class="app-footer">BUS Design System · Generated Preview</div>';
+  // Chips / filters
+  if (content.includes('chip') || content.includes('chips') || content.includes('filter') || content.includes('Filter')) {
+    previewHtml += '<div class="chips">';
+    previewHtml += '<span class="chip">Type: PKK ✕</span>';
+    previewHtml += '<span class="chip">Status: Started ✕</span>';
+    previewHtml += '<a href="#">Remove all filters</a>';
+    previewHtml += '</div>';
   }
 
+  // Table - use the ACTUAL column count from prototype (10 columns)
+  const allColumns = ['Reg.no', 'Insp.#', 'Type', 'Make / model', 'Insp.date', 'Remaining', 'Sev', 'Inspector', 'Status', ''];
+  const headers = cols.length > 0 ? cols : allColumns;
+  previewHtml += '<div class="table-wrapper"><table><thead><tr>';
+  headers.forEach(h => { previewHtml += '<th>' + h + '</th>'; });
+  previewHtml += '</tr></thead><tbody>';
+
+  const sampleData = [
+    ['AB12345', 'PKK-2026-001234', 'PKK', 'Volvo FH', '2026-07-10', '2 days', 'L', 'TS', 'Started', '⋯'],
+    ['CD67890', 'PKK-2026-001235', 'PKK', 'Scania R450', '2026-07-11', '5 days', 'M', 'AH', 'In progress', '⋯'],
+    ['EF11223', 'PKK-2026-001236', 'EU', 'Mercedes Actros', '2026-07-09', 'Done', '', 'TS', 'Completed', '⋯'],
+    ['GH44556', 'PKK-2026-001237', 'PKK', 'MAN TGX', '2026-07-15', '7 days', '', 'KJ', 'Started', '⋯'],
+    ['IJ77889', 'PKK-2026-001238', 'EU', 'DAF XF', '2026-07-12', '1 day', 'H', 'TS', 'In progress', '⋯'],
+  ];
+
+  for (let i = 0; i < 5; i++) {
+    previewHtml += '<tr>';
+    const row = sampleData[i];
+    headers.forEach((h, j) => {
+      let val = row[j] || '—';
+      // Style status column
+      if (h === 'Status') {
+        const cls = val === 'Completed' ? 'status-completed' : val === 'In progress' ? 'status-progress' : 'status-started';
+        val = '<span class="status-badge ' + cls + '">' + val + '</span>';
+      }
+      previewHtml += '<td>' + val + '</td>';
+    });
+    previewHtml += '</tr>';
+  }
+  previewHtml += '</tbody></table></div>';
+
+  previewHtml += '</section>'; // content
+  previewHtml += '</main>'; // main
   previewHtml += '</div></body></html>';
 
   iframe.srcdoc = previewHtml;

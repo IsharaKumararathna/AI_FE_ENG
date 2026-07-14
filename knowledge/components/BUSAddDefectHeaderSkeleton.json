@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSAddDefectHeaderSkeleton",
+  "Name": "Add Defect Header Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from AddDefectHeaderSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

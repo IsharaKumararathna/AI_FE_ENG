@@ -1,0 +1,16 @@
+{
+  "ComponentId": "BUSrequiredFieldValidator",
+  "Name": "required Field Validator",
+  "Category": "form",
+  "Status": "approved",
+  "Description": "Extracted from ProcedureDetailValidators.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "form",
+    "formfield"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSTestTypeSettingsSkeleton",
+  "Name": "Test Type Settings Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from TestTypeSettingsSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

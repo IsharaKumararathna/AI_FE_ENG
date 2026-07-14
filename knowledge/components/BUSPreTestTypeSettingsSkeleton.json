@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSPreTestTypeSettingsSkeleton",
+  "Name": "Pre Test Type Settings Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from PreTestTypeSettingsSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

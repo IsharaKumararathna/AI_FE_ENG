@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSAutocomInfoWindow",
+  "Name": "Autocom Info Window",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from AutocomInfoWindow.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

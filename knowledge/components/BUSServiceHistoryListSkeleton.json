@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSServiceHistoryListSkeleton",
+  "Name": "Service History List Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from ServiceHistoryListSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

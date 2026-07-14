@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSPreTestTypesListSkeleton",
+  "Name": "Pre Test Types List Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from PreTestTypesListSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

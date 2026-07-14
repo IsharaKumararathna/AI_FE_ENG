@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSqueryGetProcedures",
+  "Name": "query Get Procedures",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from ProcedureListQueries.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

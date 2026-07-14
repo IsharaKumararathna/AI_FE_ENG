@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseGetDefectsListObservable",
+  "Name": "use Get Defects List Observable",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from DefectsListOperator.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

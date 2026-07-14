@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSEditServiceWindow",
+  "Name": "Edit Service Window",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from EditServiceWindow.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

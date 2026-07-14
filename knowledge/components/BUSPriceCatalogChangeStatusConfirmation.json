@@ -1,0 +1,30 @@
+{
+  "ComponentId": "BUSPriceCatalogChangeStatusConfirmation",
+  "Name": "Price Catalog Change Status Confirmation",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from PriceCatalogConfirmationWindows.tsx",
+  "Props": [
+    {
+      "Name": "isOpen",
+      "Type": "boolean",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "status",
+      "Type": "any",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    }
+  ],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSInspectionDefectsPanel",
+  "Name": "Inspection Defects Panel",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from InspectionDefectsPanel.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

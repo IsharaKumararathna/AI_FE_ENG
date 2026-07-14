@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSMultiSelect",
+  "Name": "BUSMulti Select",
+  "Category": "input",
+  "Status": "approved",
+  "Description": "Extracted from BUSMultiSelect.jsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

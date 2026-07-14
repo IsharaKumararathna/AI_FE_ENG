@@ -1,0 +1,86 @@
+{
+  "ComponentId": "BUSEmptyTestInfo",
+  "Name": "Empty Test Info",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from EmptyTestInfo.tsx",
+  "Props": [
+    {
+      "Name": "title",
+      "Type": "string",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "subtitle",
+      "Type": "string",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "createText",
+      "Type": "string",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "isTestConcluded",
+      "Type": "boolean",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "isCreateDisabled",
+      "Type": "boolean",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "isStandaloneWorkOrder",
+      "Type": "boolean",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "isP2Version",
+      "Type": "boolean",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "isPreTestLicenseValid",
+      "Type": "boolean",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "isShowPreTestCreateButton",
+      "Type": "boolean",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    }
+  ],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

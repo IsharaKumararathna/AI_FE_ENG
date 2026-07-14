@@ -1,0 +1,16 @@
+{
+  "ComponentId": "BUSVehicleGeneralInformationForm",
+  "Name": "Vehicle General Information Form",
+  "Category": "form",
+  "Status": "approved",
+  "Description": "Extracted from VehicleGeneralInformationForm.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "form",
+    "formfield"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSLabel",
+  "Name": "BUSLabel",
+  "Category": "display",
+  "Status": "approved",
+  "Description": "Extracted from BUSLabel.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

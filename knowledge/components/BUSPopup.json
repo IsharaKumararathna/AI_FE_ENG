@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSPopup",
+  "Name": "BUSPopup",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from BUSPopup.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

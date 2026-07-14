@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSusePanelState",
+  "Name": "use Panel State",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from usePanelState.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

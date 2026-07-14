@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSMultiselectAdvancedGroupingTypeEnum",
+  "Name": "BUSMultiselect Advanced Grouping Type Enum",
+  "Category": "input",
+  "Status": "approved",
+  "Description": "Extracted from BUSMultiselectAdvancedGroupingTypeEnum.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

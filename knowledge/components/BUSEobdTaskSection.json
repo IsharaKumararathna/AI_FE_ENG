@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSEobdTaskSection",
+  "Name": "Eobd Task Section",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from EobdTaskSection.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

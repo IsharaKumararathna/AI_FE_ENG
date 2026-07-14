@@ -1,0 +1,30 @@
+{
+  "ComponentId": "BUSWorkOrderCreate",
+  "Name": "Work Order Create",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from WorkOrderCreate.tsx",
+  "Props": [
+    {
+      "Name": "isFromVehicleSearch",
+      "Type": "boolean",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "primaryUnitId",
+      "Type": "number",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    }
+  ],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

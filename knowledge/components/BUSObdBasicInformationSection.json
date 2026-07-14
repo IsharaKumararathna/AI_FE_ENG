@@ -1,0 +1,16 @@
+{
+  "ComponentId": "BUSObdBasicInformationSection",
+  "Name": "Obd Basic Information Section",
+  "Category": "form",
+  "Status": "approved",
+  "Description": "Extracted from ObdBasicInformationSection.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "form",
+    "formfield"
+  ]
+}

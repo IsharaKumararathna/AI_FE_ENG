@@ -1,0 +1,30 @@
+{
+  "ComponentId": "BUSImageEditor",
+  "Name": "Image Editor",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from ImageEditor.tsx",
+  "Props": [
+    {
+      "Name": "currentImage",
+      "Type": "any",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "saveImg",
+      "Type": "string",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    }
+  ],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

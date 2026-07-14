@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseScrollView",
+  "Name": "use Scroll View",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from useScrollViewOptions.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

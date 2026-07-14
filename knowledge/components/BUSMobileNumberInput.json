@@ -1,0 +1,16 @@
+{
+  "ComponentId": "BUSMobileNumberInput",
+  "Name": "BUSMobile Number Input",
+  "Category": "input",
+  "Status": "approved",
+  "Description": "Extracted from BUSMobileNumberInput.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "input",
+    "search"
+  ]
+}

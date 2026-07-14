@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSCreateOBDReadingSkeleton",
+  "Name": "Create OBDReading Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from CreateOBDReadingSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

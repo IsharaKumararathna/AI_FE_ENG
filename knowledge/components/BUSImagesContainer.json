@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSImagesContainer",
+  "Name": "Images Container",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from ImagesContainer.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

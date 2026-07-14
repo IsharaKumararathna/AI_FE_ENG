@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSCopyTestTypeSettingsConfirmation",
+  "Name": "Copy Test Type Settings Confirmation",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from TestSettingsConfirmationWindows.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

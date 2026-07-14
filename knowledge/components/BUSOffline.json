@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSOffline",
+  "Name": "Offline",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from Offline.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

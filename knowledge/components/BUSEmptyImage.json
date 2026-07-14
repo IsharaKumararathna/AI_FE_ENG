@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSEmptyImage",
+  "Name": "Empty Image",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from EmptyImage.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

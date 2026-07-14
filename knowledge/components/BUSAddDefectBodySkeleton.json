@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSAddDefectBodySkeleton",
+  "Name": "Add Defect Body Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from AddDefectBodySkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

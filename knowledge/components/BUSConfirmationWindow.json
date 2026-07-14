@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSConfirmationWindow",
+  "Name": "BUSConfirmation Window",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from BUSConfirmationWindow.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

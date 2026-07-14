@@ -1,0 +1,57 @@
+{
+  "ComponentId": "BUSUnitDropdownField",
+  "Name": "Unit Dropdown Field",
+  "Category": "form",
+  "Status": "approved",
+  "Description": "Extracted from UnitDropdownField.tsx",
+  "Props": [
+    {
+      "Name": "name",
+      "Type": "string",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "label",
+      "Type": "string",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "placeholder",
+      "Type": "string",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "key",
+      "Type": "number",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    },
+    {
+      "Name": "value",
+      "Type": "string",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    }
+  ],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "form",
+    "formfield"
+  ]
+}

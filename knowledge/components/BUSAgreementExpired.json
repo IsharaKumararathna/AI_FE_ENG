@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSAgreementExpired",
+  "Name": "Agreement Expired",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from AgreementExpired.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

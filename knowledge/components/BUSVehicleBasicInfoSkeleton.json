@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSVehicleBasicInfoSkeleton",
+  "Name": "Vehicle Basic Info Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from VehicleBasicInfoSkeleton.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

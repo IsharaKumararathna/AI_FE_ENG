@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseGetGeneralInfo",
+  "Name": "use Get General Info",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from GeneralInfoOperator.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

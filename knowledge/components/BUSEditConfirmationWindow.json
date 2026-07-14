@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSEditConfirmationWindow",
+  "Name": "Edit Confirmation Window",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from TestTypeSettingConfirmationWindows.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

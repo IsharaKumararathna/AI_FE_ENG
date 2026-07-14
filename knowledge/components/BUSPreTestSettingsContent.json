@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSPreTestSettingsContent",
+  "Name": "Pre Test Settings Content",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from PreTestSettingsContent.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

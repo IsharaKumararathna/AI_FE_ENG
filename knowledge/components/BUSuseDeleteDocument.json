@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseDeleteDocument",
+  "Name": "use Delete Document",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from useDeleteDocument.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

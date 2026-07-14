@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSTestTypeMultiSelectDropdownSkeleton",
+  "Name": "Test Type Multi Select Dropdown Skeleton",
+  "Category": "input",
+  "Status": "approved",
+  "Description": "Extracted from TestTypeMultiSelectDropdownSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

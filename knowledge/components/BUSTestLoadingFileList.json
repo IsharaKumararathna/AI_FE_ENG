@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSTestLoadingFileList",
+  "Name": "Test Loading File List",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from TestLoadingFileList.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

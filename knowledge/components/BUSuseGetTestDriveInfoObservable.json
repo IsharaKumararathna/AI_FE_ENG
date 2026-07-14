@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseGetTestDriveInfoObservable",
+  "Name": "use Get Test Drive Info Observable",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from TestDriveOperator.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

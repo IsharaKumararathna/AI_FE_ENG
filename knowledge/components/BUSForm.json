@@ -1,0 +1,16 @@
+{
+  "ComponentId": "BUSForm",
+  "Name": "Form",
+  "Category": "form",
+  "Status": "approved",
+  "Description": "Extracted from BUSFormAdapter.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "form",
+    "formfield"
+  ]
+}

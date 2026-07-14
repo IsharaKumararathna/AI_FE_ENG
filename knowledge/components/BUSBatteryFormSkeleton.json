@@ -1,0 +1,16 @@
+{
+  "ComponentId": "BUSBatteryFormSkeleton",
+  "Name": "Battery Form Skeleton",
+  "Category": "form",
+  "Status": "approved",
+  "Description": "Extracted from BatteryFormSkeleton.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "form",
+    "formfield"
+  ]
+}

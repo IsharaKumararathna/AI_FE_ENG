@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSTestImagePreviewer",
+  "Name": "Test Image Previewer",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from TestImagePreviewer.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

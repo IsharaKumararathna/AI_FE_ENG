@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSSaveFilterWindow",
+  "Name": "BUSSave Filter Window",
+  "Category": "table",
+  "Status": "approved",
+  "Description": "Extracted from bus-save-filter-window.jsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

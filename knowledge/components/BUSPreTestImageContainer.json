@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSPreTestImageContainer",
+  "Name": "Pre Test Image Container",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from PreTestImageContainer.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

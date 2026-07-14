@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseGetPackageInfo",
+  "Name": "use Get Package Info",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from EquipmentVerificationOperator.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

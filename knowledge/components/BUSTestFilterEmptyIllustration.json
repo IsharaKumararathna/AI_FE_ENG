@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSTestFilterEmptyIllustration",
+  "Name": "Test Filter Empty Illustration",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from TestFilterEmptyIllustration.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

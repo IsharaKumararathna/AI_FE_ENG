@@ -1,0 +1,22 @@
+{
+  "ComponentId": "BUSAvilooInfoSkeleton",
+  "Name": "Aviloo Info Skeleton",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from AvilooInfoSkeleton.tsx",
+  "Props": [
+    {
+      "Name": "rows",
+      "Type": "number",
+      "Required": true,
+      "Default": null,
+      "Description": null,
+      "Enum": null
+    }
+  ],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

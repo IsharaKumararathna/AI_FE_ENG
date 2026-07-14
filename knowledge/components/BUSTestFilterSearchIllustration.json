@@ -1,0 +1,16 @@
+{
+  "ComponentId": "BUSTestFilterSearchIllustration",
+  "Name": "Test Filter Search Illustration",
+  "Category": "input",
+  "Status": "approved",
+  "Description": "Extracted from TestFilterSearchIllustration.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "input",
+    "search"
+  ]
+}

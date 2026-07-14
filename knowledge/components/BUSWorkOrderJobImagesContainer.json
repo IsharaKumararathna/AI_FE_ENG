@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSWorkOrderJobImagesContainer",
+  "Name": "Work Order Job Images Container",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from WorkOrderJobImagesContainer.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

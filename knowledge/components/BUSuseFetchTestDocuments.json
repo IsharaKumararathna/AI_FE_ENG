@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseFetchTestDocuments",
+  "Name": "use Fetch Test Documents",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from useFetchTestDocuments.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

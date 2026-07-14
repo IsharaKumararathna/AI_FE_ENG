@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseTestCommonUtilities",
+  "Name": "use Test Common Utilities",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from useTestCommonUtilities.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

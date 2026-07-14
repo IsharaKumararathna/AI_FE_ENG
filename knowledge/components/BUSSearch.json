@@ -1,0 +1,16 @@
+{
+  "ComponentId": "BUSSearch",
+  "Name": "BUSSearch",
+  "Category": "input",
+  "Status": "approved",
+  "Description": "Extracted from BUSSearch.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "input",
+    "search"
+  ]
+}

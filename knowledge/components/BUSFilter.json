@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSFilter",
+  "Name": "BUSFilter",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from BUSFilter.jsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

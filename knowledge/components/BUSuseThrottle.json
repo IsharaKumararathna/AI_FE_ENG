@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseThrottle",
+  "Name": "use Throttle",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from useThrottle.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

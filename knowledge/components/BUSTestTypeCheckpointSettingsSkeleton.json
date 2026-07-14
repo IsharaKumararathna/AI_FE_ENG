@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSTestTypeCheckpointSettingsSkeleton",
+  "Name": "Test Type Checkpoint Settings Skeleton",
+  "Category": "form",
+  "Status": "approved",
+  "Description": "Extracted from TestTypeCheckpointSettingsSkeleton.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}

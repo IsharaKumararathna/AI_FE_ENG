@@ -1,0 +1,16 @@
+{
+  "ComponentId": "BUSStaticPreTestTabs",
+  "Name": "Static Pre Test Tabs",
+  "Category": "navigation",
+  "Status": "approved",
+  "Description": "Extracted from PreTestListDefaults.tsx",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "tabs",
+    "tab"
+  ]
+}

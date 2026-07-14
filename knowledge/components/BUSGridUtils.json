@@ -1,0 +1,19 @@
+{
+  "ComponentId": "BUSGridUtils",
+  "Name": "BUSGrid Utils",
+  "Category": "table",
+  "Status": "approved",
+  "Description": "Extracted from bus-grid-utils.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [
+    "color.table.header.bg",
+    "color.text.primary",
+    "color.table.row.border"
+  ],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": [
+    "table"
+  ]
+}

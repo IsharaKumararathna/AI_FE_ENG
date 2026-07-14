@@ -1,0 +1,13 @@
+{
+  "ComponentId": "BUSuseGetDefectPrediction",
+  "Name": "use Get Defect Prediction",
+  "Category": "other",
+  "Status": "approved",
+  "Description": "Extracted from DefectPredictionOperator.js",
+  "Props": [],
+  "Variants": null,
+  "TokensConsumed": [],
+  "Examples": null,
+  "Accessibility": null,
+  "MapsFromHtml": []
+}
