@@ -1,0 +1,15 @@
+{
+  "componentId": "DataGrid",
+  "name": "BUS Data Grid",
+  "category": "table",
+  "status": "approved",
+  "description": "BUSKvalitet data table (.bus-table). Header grey-100 bg, 600 weight, 14px. Cells 12px, 400 weight, white bg. Row borders on non-first/last rows.",
+  "props": [
+    { "name": "columns", "type": "array", "required": true },
+    { "name": "rows", "type": "array", "required": true },
+    { "name": "sortable", "type": "boolean", "required": false, "default": false }
+  ],
+  "tokensConsumed": ["color.table.header.bg", "color.text.primary", "color.table.row.border", "color.background.surface", "spacing.xs", "spacing.md"],
+  "accessibility": { "role": "table", "ariaProps": ["aria-sort"] },
+  "mapsFromHtml": ["table", "table.bus-table", "table-wrapper"]
+}

@@ -7,6 +7,7 @@
     <Project Path="src/Aife.Domain/Aife.Domain.csproj" />
     <Project Path="src/Aife.Infrastructure/Aife.Infrastructure.csproj" />
     <Project Path="src/Aife.Knowledge/Aife.Knowledge.csproj" />
+    <Project Path="src/Aife.Mcp/Aife.Mcp.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Aife.Ai.Tests/Aife.Ai.Tests.csproj" />

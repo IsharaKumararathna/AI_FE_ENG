@@ -507,7 +507,11 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         var filePath = Path.Combine(_knowledgePath, "tokens", "tokens.json");
         Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
 
-        var json = JsonConvert.SerializeObject(new { tokens }, Formatting.Indented);
+        var json = JsonConvert.SerializeObject(new { tokens }, new JsonSerializerSettings
+        {
+            Formatting = Formatting.Indented,
+            ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
+        });
         File.WriteAllText(filePath, json);
     }
 
@@ -517,7 +521,11 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         Directory.CreateDirectory(dir);
         var filePath = Path.Combine(dir, $"{component.ComponentId}.json");
 
-        var json = JsonConvert.SerializeObject(component, Formatting.Indented);
+        var json = JsonConvert.SerializeObject(component, new JsonSerializerSettings
+        {
+            Formatting = Formatting.Indented,
+            ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
+        });
         File.WriteAllText(filePath, json);
     }
 

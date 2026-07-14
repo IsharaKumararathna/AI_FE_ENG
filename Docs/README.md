@@ -78,6 +78,7 @@ diagrams, then cross-cutting.
 | `04-cross-cutting/07-extension-strategy.md` | Extension Strategy | E | Approved |
 | `04-cross-cutting/08-enterprise-adoption.md` | Enterprise Adoption Strategy | E | Approved |
 | `04-cross-cutting/09-future-roadmap.md` | Future Roadmap | E | Approved |
+| `04-cross-cutting/10-mcp-vscode-extension.md` | MCP Server — VS Code Extension Integration | E | Approved |
 
 ## Coverage matrix (vision deliverables)
 

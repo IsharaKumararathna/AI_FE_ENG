@@ -1,16 +1,15 @@
 {
-  "ComponentId": "BUSTabStrip",
-  "Name": "BUSTab Strip",
-  "Category": "navigation",
-  "Status": "approved",
-  "Description": "Extracted from BUSTabStrip.js",
-  "Props": [],
-  "Variants": null,
-  "TokensConsumed": [],
-  "Examples": null,
-  "Accessibility": null,
-  "MapsFromHtml": [
-    "tabs",
-    "tab"
-  ]
+  "componentId": "BUSTabStrip",
+  "name": "BUS Tab Strip",
+  "category": "navigation",
+  "status": "approved",
+  "description": "BUSKvalitet tab strip built on react-bootstrap Tabs/Tab. Supports count badges and colored labels.",
+  "props": [
+    { "name": "tabs", "type": "array", "required": true },
+    { "name": "selected", "type": "string", "required": true },
+    { "name": "onSelect", "type": "function", "required": true }
+  ],
+  "tokensConsumed": ["color.primary", "color.background.surface"],
+  "accessibility": { "role": "tablist", "keyboardSupport": true },
+  "mapsFromHtml": ["tabs", "tab", "tabstrip", "div.tab-section"]
 }

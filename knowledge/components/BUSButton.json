@@ -1,21 +1,17 @@
 {
-  "ComponentId": "BUSButton",
-  "Name": "BUSButton",
-  "Category": "button",
-  "Status": "approved",
-  "Description": "Extracted from BUSButton.js",
-  "Props": [],
-  "Variants": null,
-  "TokensConsumed": [
-    "color.primary",
-    "color.primary.hover",
-    "color.text.white",
-    "spacing.xs",
-    "radius.md"
+  "componentId": "BUSButton",
+  "name": "BUS Button",
+  "category": "button",
+  "status": "approved",
+  "description": "BUSKvalitet custom button. Supports primary, outline-primary, outline-secondary, and text-primary variants.",
+  "props": [
+    { "name": "children", "type": "ReactNode", "required": true },
+    { "name": "onClick", "type": "function", "required": false },
+    { "name": "disabled", "type": "boolean", "required": false, "default": false },
+    { "name": "className", "type": "string", "required": false },
+    { "name": "id", "type": "string", "required": false }
   ],
-  "Examples": null,
-  "Accessibility": null,
-  "MapsFromHtml": [
-    "button"
-  ]
+  "tokensConsumed": ["color.primary", "color.primary.hover", "color.text.white", "color.text.primary", "spacing.xs", "spacing.md", "spacing.lg", "radius.md"],
+  "accessibility": { "role": "button", "keyboardSupport": true, "ariaProps": ["aria-disabled"] },
+  "mapsFromHtml": ["button", "btn", "primary-btn", "outline-btn", "secondary-btn", "icon-button", "menu-btn"]
 }
