@@ -31,56 +31,62 @@ public sealed class UiTreeAssembler : IUiTreeAssembler
         var nodeIndex = 0;
         var seenComponents = new HashSet<string>(); // deduplicate by component+kind
 
-        foreach (var mapping in mappings)
+        // First pass: add confident mappings
+        foreach (var mapping in mappings.Where(m => m.Confidence >= 0.5 && m.ComponentId is not null))
         {
-            if (mapping.Confidence >= 0.5 && mapping.ComponentId is not null)
+            var key = $"confident:{mapping.ComponentId}";
+            if (seenComponents.Contains(key))
+                continue;
+            seenComponents.Add(key);
+
+            nodeIndex++;
+            var component = await _knowledgeProvider.GetComponentAsync(mapping.ComponentId!, ct);
+            var tokenBindings = new Dictionary<string, string>();
+
+            if (component?.TokensConsumed is not null)
             {
-                var key = $"confident:{mapping.ComponentId}";
-                if (seenComponents.Contains(key))
-                    continue;
-                seenComponents.Add(key);
-
-                nodeIndex++;
-                var component = await _knowledgeProvider.GetComponentAsync(mapping.ComponentId!, ct);
-                var tokenBindings = new Dictionary<string, string>();
-
-                if (component?.TokensConsumed is not null)
+                foreach (var token in component.TokensConsumed)
                 {
-                    foreach (var token in component.TokensConsumed)
-                    {
-                        tokenBindings[token] = token;
-                    }
+                    tokenBindings[token] = token;
                 }
-
-                tree.Children.Add(new UiNode
-                {
-                    NodeId = $"n-{nodeIndex}",
-                    ComponentId = mapping.ComponentId!,
-                    TokenBindings = tokenBindings
-                });
             }
-            else
+
+            tree.Children.Add(new UiNode
             {
-                // Fallback: add as generic element with best-guess component
-                var fallbackId = GetFallbackComponentId(mapping.ElementRef!);
-                var key = $"fallback:{fallbackId}:{mapping.ElementRef!}";
-                if (seenComponents.Contains(key))
-                    continue;
-                seenComponents.Add(key);
+                NodeId = $"n-{nodeIndex}",
+                ComponentId = mapping.ComponentId!,
+                TokenBindings = tokenBindings
+            });
+        }
 
-                nodeIndex++;
-                tree.Children.Add(new UiNode
+        // Second pass: add best-guess fallbacks for unmapped elements.
+        // Limit to one per component type (not one per element) to keep
+        // the tree focused and avoid overwhelming the generator.
+        var fallbackSeen = new HashSet<string>();
+        foreach (var mapping in mappings.Where(m => m.Confidence < 0.5 || m.ComponentId is null))
+        {
+            var fallbackId = GetFallbackComponentId(mapping.ElementRef ?? "");
+            if (fallbackSeen.Contains(fallbackId))
+                continue;
+            fallbackSeen.Add(fallbackId);
+
+            // Skip elements that are purely structural (sidebar, header, etc.)
+            // — the generator should produce the full layout structure itself.
+            if (mapping.ElementRef is "sidebar" or "header" or "footer" or "typography" or "avatar" or "")
+                continue;
+
+            nodeIndex++;
+            tree.Children.Add(new UiNode
+            {
+                NodeId = $"n-{nodeIndex}",
+                ComponentId = fallbackId,
+                Props = new Dictionary<string, object?>
                 {
-                    NodeId = $"n-{nodeIndex}",
-                    ComponentId = fallbackId,
-                    Props = new Dictionary<string, object?>
-                    {
-                        ["label"] = mapping.ElementRef ?? "element"
-                    }
-                });
+                    ["label"] = mapping.ElementRef ?? "element"
+                }
+            });
 
-                Console.WriteLine($"[Assembler] Unmapped element '{mapping.ElementRef}' → fallback '{fallbackId}' (confidence={mapping.Confidence:F2})");
-            }
+            Console.WriteLine($"[Assembler] Unmapped element '{mapping.ElementRef}' → fallback '{fallbackId}' (confidence={mapping.Confidence:F2})");
         }
 
         if (tree.Children.Count == 0)

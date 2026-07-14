@@ -34,6 +34,24 @@ public sealed class JsonKnowledgeProvider : IKnowledgeProvider
         _knowledgePath = knowledgePath;
     }
 
+    /// <summary>
+    /// Force reload from disk. Called after training to pick up new components.
+    /// </summary>
+    public void Reload()
+    {
+        lock (_loadLock)
+        {
+            _loaded = false;
+            _components.Clear();
+            _tokens = new();
+            _layouts = new();
+            _referenceUiPatterns = new();
+            _icons = new();
+            _bestPractices = new();
+            _accessibilityRules = new();
+        }
+    }
+
     public Task<IReadOnlyList<ComponentSummary>> SearchComponentsAsync(ComponentQuery query, CancellationToken ct)
     {
         EnsureLoaded();

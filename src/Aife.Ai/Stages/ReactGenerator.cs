@@ -17,8 +17,9 @@ public sealed class ReactGenerator : IReactGenerator
 {
     private static readonly HashSet<string> HardcodedColorPatterns = new()
     {
-        "#000", "#fff", "#f00", "#0f0", "#00f"
-        // Note: rgb()/rgba() are allowed since they are valid for design token
+        "#000", "#f00", "#0f0", "#00f"
+        // #fff is allowed — it's the standard color.text.white token value.
+        // rgb()/rgba() are allowed since they are valid for design token
         // values like box-shadow (rgba(23,23,23,0.1)) and other token value types.
     };
 

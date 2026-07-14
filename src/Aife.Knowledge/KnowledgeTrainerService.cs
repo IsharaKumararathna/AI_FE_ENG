@@ -90,6 +90,9 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
             }
 
             // 2. Find component definitions (CustomUI folder)
+            // Clean old training artifacts so only current run's results remain
+            CleanComponentFiles();
+
             var componentFiles = FindComponentFiles(folderPath);
             var components = new List<ComponentDetail>();
             foreach (var file in componentFiles)
@@ -134,6 +137,18 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         }
 
         return Task.FromResult(result);
+    }
+
+    private void CleanComponentFiles()
+    {
+        var compDir = Path.Combine(_knowledgePath, "components");
+        if (!Directory.Exists(compDir))
+            return;
+
+        foreach (var file in Directory.GetFiles(compDir, "*.json"))
+        {
+            try { File.Delete(file); } catch { /* skip locked files */ }
+        }
     }
 
     public async Task<TrainResult> TrainFromGitAsync(string gitUrl, string? branch, CancellationToken ct)
@@ -297,9 +312,40 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
 
             try
             {
-                results.AddRange(Directory.EnumerateFiles(sp, "*.tsx", SearchOption.AllDirectories));
-                results.AddRange(Directory.EnumerateFiles(sp, "*.jsx", SearchOption.AllDirectories));
-                results.AddRange(Directory.EnumerateFiles(sp, "*.js", SearchOption.AllDirectories));
+                // Scan direct child folders of CustomUIs (each = one DS component group).
+                // For each child folder: pick .tsx/.jsx files at the root level,
+                // but skip nested sub-folders (those are internal pieces, not DS components).
+                foreach (var dir in Directory.GetDirectories(sp))
+                {
+                    // Collect files directly in this component folder (not in sub-folders)
+                    var topFiles = Directory.GetFiles(dir, "*.tsx")
+                        .Concat(Directory.GetFiles(dir, "*.jsx"))
+                        .Concat(Directory.GetFiles(dir, "*.js"));
+                    results.AddRange(topFiles);
+
+                    // Only recurse into BUS sub-folders if this parent folder is NOT
+                    // a BUS component folder itself (avoid double-counting).
+                    var parentName = Path.GetFileName(dir);
+                    foreach (var subDir in Directory.GetDirectories(dir))
+                    {
+                        var subName = Path.GetFileName(subDir);
+                        // Skip internal sub-components like bus-grids/bus-grid/, BUSButtons/BUSDropdownButton/
+                        if (subName.StartsWith("bus-", StringComparison.OrdinalIgnoreCase)
+                            || (parentName.StartsWith("BUS", StringComparison.OrdinalIgnoreCase)
+                                && subName.StartsWith("BUS", StringComparison.OrdinalIgnoreCase)))
+                            continue;
+
+                        var subFiles = Directory.GetFiles(subDir, "*.tsx")
+                            .Concat(Directory.GetFiles(subDir, "*.jsx"))
+                            .Concat(Directory.GetFiles(subDir, "*.js"));
+                        results.AddRange(subFiles);
+                    }
+                }
+
+                // Also include loose files at the CustomUIs root level
+                results.AddRange(Directory.GetFiles(sp, "*.tsx"));
+                results.AddRange(Directory.GetFiles(sp, "*.jsx"));
+                results.AddRange(Directory.GetFiles(sp, "*.js"));
             }
             catch { /* skip inaccessible directories */ }
         }

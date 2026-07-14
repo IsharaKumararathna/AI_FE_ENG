@@ -1,4 +1,5 @@
 using Aife.Application.Knowledge;
+using Aife.Knowledge;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Aife.Api.Controllers;
@@ -59,6 +60,12 @@ public class KnowledgeController : ControllerBase
                 Status = 500,
                 Detail = string.Join("; ", result.Errors)
             });
+        }
+
+        // Force the singleton provider to reload from disk after training
+        if (HttpContext.RequestServices.GetRequiredService<IKnowledgeProvider>() is JsonKnowledgeProvider jsonProvider)
+        {
+            jsonProvider.Reload();
         }
 
         return Ok(new
