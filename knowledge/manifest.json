@@ -26,7 +26,8 @@
     "components/BUSusePrompt.json",
     "components/BUSuseSaveOnclickOutside.json",
     "components/BUSuseThrottle.json",
-    "components/BUSWindow.json"
+    "components/BUSWindow.json",
+    "components/DataGrid.json"
   ],
   "tokens": "tokens/tokens.json",
   "layouts": [

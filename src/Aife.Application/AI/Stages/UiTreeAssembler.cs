@@ -111,12 +111,12 @@ public sealed class UiTreeAssembler : IUiTreeAssembler
         {
             "table" or "datagrid" or "grid" => "DataGrid",
             "button" or "btn" => "BUSButton",
-            "input" or "search" or "textbox" => "BUSInput",
+            "input" or "search" or "textbox" => "BUSSearch",
             "tabs" or "tab" or "tabstrip" => "BUSTabStrip",
             "sidebar" or "nav" or "navigation" => "BUSTabStrip",
             "checkbox" => "BUSCheckbox",
             "switch" or "toggle" => "BUSSwitch",
-            "form" or "formfield" => "BUSFormField",
+            "form" or "formfield" => "BUSForm",
             "header" => "BUSButton", // header regions use buttons/toolbar items
             "typography" => "BUSButton", // fallback for text regions
             "chips" or "chip" or "badge" => "BUSButton",
