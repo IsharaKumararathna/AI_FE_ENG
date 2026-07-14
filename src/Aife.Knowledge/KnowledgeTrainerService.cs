@@ -90,9 +90,6 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
             }
 
             // 2. Find component definitions (CustomUI folder)
-            // Clean old training artifacts so only current run's results remain
-            CleanComponentFiles();
-
             var componentFiles = FindComponentFiles(folderPath);
             var components = new List<ComponentDetail>();
             foreach (var file in componentFiles)
@@ -137,18 +134,6 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         }
 
         return Task.FromResult(result);
-    }
-
-    private void CleanComponentFiles()
-    {
-        var compDir = Path.Combine(_knowledgePath, "components");
-        if (!Directory.Exists(compDir))
-            return;
-
-        foreach (var file in Directory.GetFiles(compDir, "*.json"))
-        {
-            try { File.Delete(file); } catch { /* skip locked files */ }
-        }
     }
 
     public async Task<TrainResult> TrainFromGitAsync(string gitUrl, string? branch, CancellationToken ct)
@@ -523,6 +508,21 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
 
     private void UpdateManifest(List<ComponentDetail> components)
     {
+        // Only update manifest if we found a reasonable number of components.
+        if (components.Count < 5)
+        {
+            Console.WriteLine($"[Trainer] Only {components.Count} components found — keeping existing manifest.");
+            return;
+        }
+
+        // Deduplicate by ComponentId — the scanner may find the same file
+        // from multiple search paths (e.g. CustomUIs/ and Components/).
+        var unique = components
+            .GroupBy(c => c.ComponentId)
+            .Select(g => g.First())
+            .OrderBy(c => c.ComponentId)
+            .ToList();
+
         var filePath = Path.Combine(_knowledgePath, "manifest.json");
         var manifest = new
         {
