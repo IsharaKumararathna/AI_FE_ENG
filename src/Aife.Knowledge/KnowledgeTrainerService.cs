@@ -53,7 +53,7 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         _knowledgePath = knowledgePath;
     }
 
-    public Task<TrainResult> TrainFromFolderAsync(string folderPath, CancellationToken ct)
+    public Task<TrainResult> TrainFromFolderAsync(string folderPath, TrainMode mode, CancellationToken ct)
     {
         var result = new TrainResult { Success = true };
         var warnings = new List<string>();
@@ -90,6 +90,19 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
             }
 
             // 2. Find component definitions (CustomUI folder)
+            if (mode == TrainMode.Replace)
+            {
+                // Clean ALL existing component files for a fresh rebuild
+                var compDir = Path.Combine(_knowledgePath, "components");
+                if (Directory.Exists(compDir))
+                {
+                    foreach (var file in Directory.GetFiles(compDir, "*.json"))
+                    {
+                        try { File.Delete(file); } catch { /* skip locked */ }
+                    }
+                }
+            }
+
             var componentFiles = FindComponentFiles(folderPath);
             var components = new List<ComponentDetail>();
             foreach (var file in componentFiles)
@@ -110,14 +123,10 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
             }
             result = result with { ComponentsExtracted = components.Count };
 
-            // 3. Update manifest — but only if we found a meaningful set
-            // of components (more than the baseline 7 handcrafted ones).
-            // For Kvalitet (18 components) or BUSTest (20+ components), this
-            // is a real scan worth trusting. For bad scans (< 10), skip.
-            if (components.Count >= 10)
-                UpdateManifest(components);
-            else
-                Console.WriteLine($"[Trainer] Only {components.Count} components found (need >= 10) — keeping existing manifest.");
+            // 3. Update manifest
+            //    Replace mode: overwrite manifest with only discovered components
+            //    Update mode: merge with existing, keep existing entries
+            UpdateManifest(components, mode);
 
             result = result with
             {
@@ -142,7 +151,7 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         return Task.FromResult(result);
     }
 
-    public async Task<TrainResult> TrainFromGitAsync(string gitUrl, string? branch, CancellationToken ct)
+    public async Task<TrainResult> TrainFromGitAsync(string gitUrl, string? branch, TrainMode mode, CancellationToken ct)
     {
         var tempDir = Path.Combine(Path.GetTempPath(), $"aife-kb-{Guid.NewGuid():N}");
         Directory.CreateDirectory(tempDir);
@@ -172,7 +181,7 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
                 return new TrainResult { Success = false, Errors = new List<string> { $"Git clone failed: {err}" } };
             }
 
-            return await TrainFromFolderAsync(tempDir, ct);
+            return await TrainFromFolderAsync(tempDir, mode, ct);
         }
         finally
         {
@@ -512,28 +521,39 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         File.WriteAllText(filePath, json);
     }
 
-    private void UpdateManifest(List<ComponentDetail> components)
+    private void UpdateManifest(List<ComponentDetail> components, TrainMode mode)
     {
-        // Only update manifest if we found a reasonable number of components.
-        if (components.Count < 5)
-        {
-            Console.WriteLine($"[Trainer] Only {components.Count} components found — keeping existing manifest.");
-            return;
-        }
-
-        // Deduplicate by ComponentId — the scanner may find the same file
-        // from multiple search paths (e.g. CustomUIs/ and Components/).
         var unique = components
             .GroupBy(c => c.ComponentId)
             .Select(g => g.First())
             .OrderBy(c => c.ComponentId)
             .ToList();
 
+        var newEntries = unique.Select(c => $"components/{c.ComponentId}.json").ToList();
+
+        List<string> merged;
+
+        if (mode == TrainMode.Replace)
+        {
+            // Replace: only discovered components
+            merged = newEntries;
+        }
+        else
+        {
+            // Update: merge with existing — keep old components not found in this scan
+            var existingEntries = LoadExistingManifestComponents();
+            merged = existingEntries
+                .Concat(newEntries)
+                .Distinct()
+                .OrderBy(x => x)
+                .ToList();
+        }
+
         var filePath = Path.Combine(_knowledgePath, "manifest.json");
         var manifest = new
         {
             version = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss"),
-            components = components.Select(c => $"components/{c.ComponentId}.json").ToList(),
+            components = merged,
             tokens = "tokens/tokens.json",
             layouts = new[] { "layouts/AppLayout.json" },
             referenceUiPatterns = new[] { "referenceUiPatterns/ActiveInspectionsPage.json" },
@@ -544,5 +564,24 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
 
         var json = JsonConvert.SerializeObject(manifest, Formatting.Indented);
         File.WriteAllText(filePath, json);
+    }
+
+    private List<string> LoadExistingManifestComponents()
+    {
+        var filePath = Path.Combine(_knowledgePath, "manifest.json");
+        if (!File.Exists(filePath))
+            return new List<string>();
+
+        try
+        {
+            var existing = JsonConvert.DeserializeAnonymousType(
+                File.ReadAllText(filePath),
+                new { components = new List<string>() });
+            return existing?.components ?? new List<string>();
+        }
+        catch
+        {
+            return new List<string>();
+        }
     }
 }

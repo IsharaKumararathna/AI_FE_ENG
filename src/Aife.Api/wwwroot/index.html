@@ -69,6 +69,14 @@
           </div>
         </div>
         <div class="actions" style="justify-content:space-between;">
+          <div>
+            <label style="margin-right:16px;font-size:13px;cursor:pointer;">
+              <input type="radio" name="train-mode" value="update" checked style="margin-right:4px;">Update (merge)
+            </label>
+            <label style="font-size:13px;cursor:pointer;">
+              <input type="radio" name="train-mode" value="replace" style="margin-right:4px;">Replace (wipe & rebuild)
+            </label>
+          </div>
           <button id="btn-train" class="btn btn-primary" disabled>🚀 Train Knowledge Base</button>
         </div>
         <div id="train-result" style="margin-top:12px;display:none;"></div>

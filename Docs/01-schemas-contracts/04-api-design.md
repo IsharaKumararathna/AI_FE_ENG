@@ -136,6 +136,69 @@ should back off (for example, two seconds) between calls.
 - `GeneratedArtifact[]` and `ReviewReport`: see the domain model and
   `02-ai-modules/05-ai-review-strategy.md`.
 
+## Knowledge Base endpoints
+
+### Train Knowledge Base
+
+```http
+POST /api/v1/knowledge/train
+Content-Type: application/json
+
+{
+    "folderPath": "C:\\Projects\\my-design-system",
+    "mode": "update"
+}
+```
+
+```http
+POST /api/v1/knowledge/train
+Content-Type: application/json
+
+{
+    "gitUrl": "https://github.com/org/design-system.git",
+    "gitBranch": "main",
+    "mode": "replace"
+}
+```
+
+| Field | Required | Description |
+|---|---|---|
+| `folderPath` | * | Local path to source repository |
+| `gitUrl` | * | Git repository URL (cloned to temp) |
+| `gitBranch` | | Git branch (defaults to default branch) |
+| `mode` | | `"update"` (merge, default) or `"replace"` (wipe & rebuild) |
+
+Response:
+
+```json
+{
+    "success": true,
+    "tokensExtracted": 110,
+    "componentsExtracted": 24,
+    "warnings": [],
+    "knowledgeBasePath": "C:\\...\\knowledge"
+}
+```
+
+### Get KB Summary
+
+```http
+GET /api/v1/knowledge/summary
+```
+
+```json
+{
+    "componentCount": 46,
+    "tokenCount": 24,
+    "components": [
+        { "componentId": "BUSButton", "name": "BUS Button", "category": "button" }
+    ],
+    "tokenCategories": {
+        "color": 14, "spacing": 4, "radius": 3, "shadow": 2
+    }
+}
+```
+
 ## What is not shown
 
 - Storage layout for these resources: see `01-schemas-contracts/05-database-design.md`.

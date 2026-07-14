@@ -32,10 +32,11 @@ public class KnowledgeController : ControllerBase
         }
 
         TrainResult result;
+        var mode = request.Mode?.ToLowerInvariant() == "replace" ? TrainMode.Replace : TrainMode.Update;
 
         if (!string.IsNullOrWhiteSpace(request.GitUrl))
         {
-            result = await _trainer.TrainFromGitAsync(request.GitUrl, request.GitBranch, ct);
+            result = await _trainer.TrainFromGitAsync(request.GitUrl, request.GitBranch, mode, ct);
         }
         else
         {
@@ -49,7 +50,7 @@ public class KnowledgeController : ControllerBase
                 });
             }
 
-            result = await _trainer.TrainFromFolderAsync(request.FolderPath!, ct);
+            result = await _trainer.TrainFromFolderAsync(request.FolderPath!, mode, ct);
         }
 
         if (!result.Success)
@@ -104,4 +105,9 @@ public sealed class TrainRequest
     public string? FolderPath { get; init; }
     public string? GitUrl { get; init; }
     public string? GitBranch { get; init; }
+
+    /// <summary>
+    /// "update" (default) merges with existing KB. "replace" wipes all existing components first.
+    /// </summary>
+    public string? Mode { get; init; }
 }

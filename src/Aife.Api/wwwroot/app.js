@@ -118,6 +118,10 @@ btnTrain.addEventListener('click', async () => {
   if (trainGitUrl.value.trim()) body.gitUrl = trainGitUrl.value.trim();
   if (trainGitBranch.value.trim()) body.gitBranch = trainGitBranch.value.trim();
 
+  // Get selected mode from radio buttons
+  const modeRadio = document.querySelector('input[name="train-mode"]:checked');
+  body.mode = modeRadio ? modeRadio.value : 'update';
+
   trainResult.style.display = 'block';
   trainResult.innerHTML = '<div class="loader"><div class="spinner"></div><p>Training knowledge base...</p></div>';
   btnTrain.disabled = true;
