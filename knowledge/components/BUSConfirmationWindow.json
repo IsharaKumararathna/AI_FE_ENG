@@ -1,13 +1,85 @@
 {
-  "ComponentId": "BUSConfirmationWindow",
-  "Name": "BUSConfirmation Window",
-  "Category": "other",
-  "Status": "approved",
-  "Description": "Extracted from BUSConfirmationWindow.js",
-  "Props": [],
-  "Variants": null,
-  "TokensConsumed": [],
-  "Examples": null,
-  "Accessibility": null,
-  "MapsFromHtml": []
+  "componentId": "BUSConfirmationWindow",
+  "name": "BUSConfirmation Window",
+  "category": "other",
+  "status": "approved",
+  "description": "Extracted from BUSConfirmationWindow.js",
+  "props": [
+    {
+      "name": "isOpen",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "imageUrl",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "title",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "messageHeader",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "messageBody",
+      "type": "any",
+      "required": false
+    },
+    {
+      "name": "onClose",
+      "type": "function",
+      "required": true
+    },
+    {
+      "name": "onSubmit",
+      "type": "function",
+      "required": true
+    },
+    {
+      "name": "okButtonValue",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "isCancelHidden",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "cancelButtonValue",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "onCloseOverride",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "iconHeight",
+      "type": "number",
+      "required": false
+    }
+  ],
+  "tokensConsumed": [],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/BUSConfirmationWindow/BUSConfirmationWindow",
+  "exportName": "BUSConfirmationWindow",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSConfirmationWindow/BUSConfirmationWindow.js"
 }

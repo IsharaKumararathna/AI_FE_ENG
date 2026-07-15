@@ -1,16 +1,17 @@
 {
-  "ComponentId": "BUSExampleForm",
-  "Name": "Example Form",
-  "Category": "form",
-  "Status": "approved",
-  "Description": "Extracted from ExampleForm.js",
-  "Props": [],
-  "Variants": null,
-  "TokensConsumed": [],
-  "Examples": null,
-  "Accessibility": null,
-  "MapsFromHtml": [
+  "componentId": "BUSExampleForm",
+  "name": "Example Form",
+  "category": "form",
+  "status": "approved",
+  "description": "Extracted from ExampleForm.js",
+  "props": [],
+  "tokensConsumed": [],
+  "mapsFromHtml": [
     "form",
     "formfield"
-  ]
+  ],
+  "importPath": "Components/CustomUIs/BUSFormFields/ExampleForm",
+  "exportName": "ExampleForm",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSFormFields/ExampleForm.js"
 }

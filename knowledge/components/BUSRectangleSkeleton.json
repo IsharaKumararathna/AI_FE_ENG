@@ -1,0 +1,14 @@
+{
+  "componentId": "BUSRectangleSkeleton",
+  "name": "BUSRectangle Skeleton",
+  "category": "other",
+  "status": "approved",
+  "description": "Extracted from BUSRectangleSkeleton.js",
+  "props": [],
+  "tokensConsumed": [],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/BUSLoadingSkeletons/BUSRectangleSkeleton/BUSRectangleSkeleton",
+  "exportName": "BUSRectangleSkeleton",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSLoadingSkeletons/BUSRectangleSkeleton/BUSRectangleSkeleton.js"
+}

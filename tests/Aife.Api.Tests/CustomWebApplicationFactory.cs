@@ -52,7 +52,7 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 [
                   {
                     "path": "src/Dashboard.tsx",
-                    "content": "import { BUSButton, DataGrid } from '@org/ds/react'; export const Dashboard = () => null;"
+                    "content": "import { BUSButton, BUSGrid } from '@org/ds/react'; export const Dashboard = () => null;"
                   }
                 ]
                 """,
@@ -81,11 +81,11 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
                     "layout": "AppLayout",
                     "children": [
                       { "componentId": "BUSButton" },
-                      { "componentId": "DataGrid" }
+                      { "componentId": "BUSGrid" }
                     ]
                   },
                   "tokensUsed": ["color.action.primary"],
-                  "componentsUsed": ["BUSButton", "DataGrid"]
+                  "componentsUsed": ["BUSButton", "BUSGrid"]
                 }
                 """
             }));

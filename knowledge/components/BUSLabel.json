@@ -1,13 +1,25 @@
 {
-  "ComponentId": "BUSLabel",
-  "Name": "BUSLabel",
-  "Category": "display",
-  "Status": "approved",
-  "Description": "Extracted from BUSLabel.js",
-  "Props": [],
-  "Variants": null,
-  "TokensConsumed": [],
-  "Examples": null,
-  "Accessibility": null,
-  "MapsFromHtml": []
+  "componentId": "BUSLabel",
+  "name": "BUSLabel",
+  "category": "display",
+  "status": "approved",
+  "description": "Extracted from BUSLabel.js",
+  "props": [
+    {
+      "name": "className",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "children",
+      "type": "ReactNode",
+      "required": false
+    }
+  ],
+  "tokensConsumed": [],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/BUSLabel/BUSLabel",
+  "exportName": "BUSLabel",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSLabel/BUSLabel.js"
 }

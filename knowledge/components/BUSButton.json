@@ -1,17 +1,88 @@
 {
   "componentId": "BUSButton",
-  "name": "BUS Button",
+  "name": "BUSButton",
   "category": "button",
   "status": "approved",
-  "description": "BUSKvalitet custom button. Supports primary, outline-primary, outline-secondary, and text-primary variants.",
+  "description": "Extracted from BUSButton.js",
   "props": [
-    { "name": "children", "type": "ReactNode", "required": true },
-    { "name": "onClick", "type": "function", "required": false },
-    { "name": "disabled", "type": "boolean", "required": false, "default": false },
-    { "name": "className", "type": "string", "required": false },
-    { "name": "id", "type": "string", "required": false }
+    {
+      "name": "onClick",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onMouseOver",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onMouseLeave",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "disabled",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "id",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "color",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "fontWeight",
+      "type": "number",
+      "required": false
+    },
+    {
+      "name": "fontSize",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "borderRadius",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "backgroundColor",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "padding",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "children",
+      "type": "ReactNode",
+      "required": false
+    }
   ],
-  "tokensConsumed": ["color.primary", "color.primary.hover", "color.text.white", "color.text.primary", "spacing.xs", "spacing.md", "spacing.lg", "radius.md"],
-  "accessibility": { "role": "button", "keyboardSupport": true, "ariaProps": ["aria-disabled"] },
-  "mapsFromHtml": ["button", "btn", "primary-btn", "outline-btn", "secondary-btn", "icon-button", "menu-btn"]
+  "tokensConsumed": [
+    "color.primary",
+    "color.primary.hover",
+    "color.text.white",
+    "spacing.xs",
+    "radius.md"
+  ],
+  "mapsFromHtml": [
+    "button"
+  ],
+  "importPath": "Components/CustomUIs/BUSButtons/BUSButton",
+  "exportName": "BUSButton",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSButtons/BUSButton.js"
 }

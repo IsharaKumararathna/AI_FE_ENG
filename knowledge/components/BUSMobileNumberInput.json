@@ -1,0 +1,53 @@
+{
+  "componentId": "BUSMobileNumberInput",
+  "name": "BUSMobile Number Input",
+  "category": "input",
+  "status": "approved",
+  "description": "Extracted from BUSMobileNumberInput.tsx",
+  "props": [
+    {
+      "name": "id",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "data",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "selectedOption",
+      "type": "object",
+      "required": false
+    },
+    {
+      "name": "type",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "component",
+      "type": "object",
+      "required": false
+    },
+    {
+      "name": "value",
+      "type": "any",
+      "required": false
+    }
+  ],
+  "tokensConsumed": [],
+  "mapsFromHtml": [
+    "input",
+    "search"
+  ],
+  "importPath": "Components/CustomUIs/BUSTextBoxes/BUSMobileNumberInput/BUSMobileNumberInput",
+  "exportName": "BUSMobileNumberInput",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSTextBoxes/BUSMobileNumberInput/BUSMobileNumberInput.tsx"
+}

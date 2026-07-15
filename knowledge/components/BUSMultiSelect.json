@@ -1,0 +1,80 @@
+{
+  "componentId": "BUSMultiSelect",
+  "name": "BUSMulti Select",
+  "category": "input",
+  "status": "approved",
+  "description": "Extracted from BUSMultiSelect.jsx",
+  "props": [
+    {
+      "name": "data",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "textField",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "valueField",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "height",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "onChange",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "popupSettings",
+      "type": "object",
+      "required": false
+    },
+    {
+      "name": "ItemStyleClassName",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "ItemStyleClassMapping",
+      "type": "object",
+      "required": false
+    },
+    {
+      "name": "itemRender",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "tagRender",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "value",
+      "type": "array",
+      "required": false
+    }
+  ],
+  "tokensConsumed": [],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/BUSDropdowns/BUSMultiSelect/BUSMultiSelect",
+  "exportName": "BUSMultiSelect",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSDropdowns/BUSMultiSelect/BUSMultiSelect.jsx"
+}

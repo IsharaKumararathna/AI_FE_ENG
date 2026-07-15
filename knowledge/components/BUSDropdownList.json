@@ -1,0 +1,14 @@
+{
+  "componentId": "BUSDropdownList",
+  "name": "BUSDropdown List",
+  "category": "input",
+  "status": "approved",
+  "description": "Extracted from BUSDropdownList.js",
+  "props": [],
+  "tokensConsumed": [],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/BUSDropdowns/BUSDropdownList/BUSDropdownList",
+  "exportName": "BUSDropdownList",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSDropdowns/BUSDropdownList/BUSDropdownList.js"
+}

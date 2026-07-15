@@ -1,0 +1,17 @@
+{
+  "componentId": "BUSInput",
+  "name": "BUSInput",
+  "category": "input",
+  "status": "approved",
+  "description": "Extracted from BUSInput.js",
+  "props": [],
+  "tokensConsumed": [],
+  "mapsFromHtml": [
+    "input",
+    "search"
+  ],
+  "importPath": "Components/CustomUIs/BUSInputs/BUSInput/BUSInput",
+  "exportName": "BUSInput",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSInputs/BUSInput/BUSInput.js"
+}

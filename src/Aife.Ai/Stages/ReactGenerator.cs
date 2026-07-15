@@ -101,7 +101,10 @@ public sealed class ReactGenerator : IReactGenerator
                 name = detail.Name,
                 props = props?.Props ?? new List<ComponentProp>(),
                 tokensConsumed = detail.TokensConsumed ?? new List<string>(),
-                accessibility = detail.Accessibility
+                accessibility = detail.Accessibility,
+                importPath = detail.ImportPath,
+                exportName = detail.ExportName,
+                isDefaultExport = detail.IsDefaultExport
             }));
         }
 

@@ -1,0 +1,43 @@
+{
+  "componentId": "BUSSpotlightSearch",
+  "name": "BUSSpotlight Search",
+  "category": "input",
+  "status": "approved",
+  "description": "Extracted from BUSSpotlightSearch.jsx",
+  "props": [
+    {
+      "name": "shortcuts",
+      "type": "array",
+      "required": true
+    },
+    {
+      "name": "onSearch",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "searchResults",
+      "type": "array",
+      "required": true
+    },
+    {
+      "name": "searchLoading",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "onResultClick",
+      "type": "function",
+      "required": false
+    }
+  ],
+  "tokensConsumed": [],
+  "mapsFromHtml": [
+    "input",
+    "search"
+  ],
+  "importPath": "Components/CustomUIs/BUSSpotlightSearch/BUSSpotlightSearch",
+  "exportName": "BUSSpotlightSearch",
+  "isDefaultExport": true,
+  "sourceFile": "src/Components/CustomUIs/BUSSpotlightSearch/BUSSpotlightSearch.jsx"
+}

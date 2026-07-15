@@ -1,0 +1,114 @@
+{
+  "componentId": "BUSGridTable",
+  "name": "BUSGrid Table",
+  "category": "other",
+  "status": "approved",
+  "description": "Extracted from bus-grid-table.jsx",
+  "props": [
+    {
+      "name": "gridKeyField",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "data",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "columns",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "menuOptions",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "selectedState",
+      "type": "object",
+      "required": false
+    },
+    {
+      "name": "setSelectedState",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "pageable",
+      "type": "object",
+      "required": false
+    },
+    {
+      "name": "onPageChange",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "sort",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "sortable",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "onSortChange",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "bulkOperations",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "isAnyExternalBulkOperations",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "onRowClick",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onRowDoubleClick",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "customizedRowTemplate",
+      "type": "any",
+      "required": false
+    },
+    {
+      "name": "dynamicMenuOptions",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "customCellClasses",
+      "type": "array",
+      "required": false
+    }
+  ],
+  "tokensConsumed": [
+    "color.table.header.bg",
+    "color.text.primary",
+    "color.table.row.border"
+  ],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/bus-grids/bus-grid-table/bus-grid-table",
+  "exportName": "BUSGridTable",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/bus-grids/bus-grid-table/bus-grid-table.jsx"
+}

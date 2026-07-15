@@ -1,13 +1,65 @@
 {
-  "ComponentId": "BUSFilter",
-  "Name": "BUSFilter",
-  "Category": "other",
-  "Status": "approved",
-  "Description": "Extracted from BUSFilter.jsx",
-  "Props": [],
-  "Variants": null,
-  "TokensConsumed": [],
-  "Examples": null,
-  "Accessibility": null,
-  "MapsFromHtml": []
+  "componentId": "BUSFilter",
+  "name": "BUSFilter",
+  "category": "other",
+  "status": "approved",
+  "description": "Extracted from BUSFilter.jsx",
+  "props": [
+    {
+      "name": "isOpen",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "initialValues",
+      "type": "object",
+      "required": false
+    },
+    {
+      "name": "filters",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "onFilterSubmit",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onFilterClear",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onFilterClose",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "style",
+      "type": "object",
+      "required": false
+    },
+    {
+      "name": "autoFilterEnabled",
+      "type": "boolean",
+      "required": false
+    }
+  ],
+  "tokensConsumed": [],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/BUSFilter/BUSFilter",
+  "exportName": "BUSFilter",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSFilter/BUSFilter.jsx"
 }

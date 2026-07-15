@@ -1,0 +1,14 @@
+{
+  "componentId": "BUSGroupingUtils",
+  "name": "Grouping Utils",
+  "category": "other",
+  "status": "approved",
+  "description": "Extracted from BUSMultiselectAdvancedUtils.js",
+  "props": [],
+  "tokensConsumed": [],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/BUSMultiselectAdvanced/BUSMultiselectAdvancedUtils",
+  "exportName": "GroupingUtils",
+  "isDefaultExport": true,
+  "sourceFile": "src/Components/CustomUIs/BUSMultiselectAdvanced/BUSMultiselectAdvancedUtils.js"
+}

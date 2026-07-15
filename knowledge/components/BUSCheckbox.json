@@ -1,17 +1,42 @@
 {
   "componentId": "BUSCheckbox",
-  "name": "BUS Checkbox",
+  "name": "BUSCheckbox",
   "category": "form",
   "status": "approved",
-  "description": "BUSKvalitet custom checkbox with label. Not KendoReact — uses native input[type=checkbox] with custom styling.",
+  "description": "Extracted from BUSCheckbox.js",
   "props": [
-    { "name": "label", "type": "string", "required": true },
-    { "name": "name", "type": "string", "required": false },
-    { "name": "checked", "type": "boolean", "required": false },
-    { "name": "disabled", "type": "boolean", "required": false, "default": false },
-    { "name": "onChange", "type": "function", "required": false }
+    {
+      "name": "disabled",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "label",
+      "type": "ReactNode",
+      "required": false
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "value",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "onChange",
+      "type": "function",
+      "required": false
+    }
   ],
-  "tokensConsumed": ["color.text.primary"],
-  "accessibility": { "role": "checkbox", "ariaProps": ["aria-checked"] },
-  "mapsFromHtml": ["checkbox", "check", "check-box", "input[type=checkbox]"]
+  "tokensConsumed": [],
+  "mapsFromHtml": [
+    "checkbox"
+  ],
+  "importPath": "Components/CustomUIs/BUSCheckbox/BUSCheckbox",
+  "exportName": "BUSCheckbox",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSCheckbox/BUSCheckbox.js"
 }

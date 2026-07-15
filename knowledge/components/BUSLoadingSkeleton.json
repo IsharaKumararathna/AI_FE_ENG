@@ -1,0 +1,25 @@
+{
+  "componentId": "BUSLoadingSkeleton",
+  "name": "BUSLoading Skeleton",
+  "category": "other",
+  "status": "approved",
+  "description": "Extracted from BUSLoadingSkeleton.js",
+  "props": [
+    {
+      "name": "width",
+      "type": "number",
+      "required": false
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "required": false
+    }
+  ],
+  "tokensConsumed": [],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/BUSLoadingSkeletons/BUSLoadingSkeleton/BUSLoadingSkeleton",
+  "exportName": "BUSLoadingSkeleton",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSLoadingSkeletons/BUSLoadingSkeleton/BUSLoadingSkeleton.js"
+}

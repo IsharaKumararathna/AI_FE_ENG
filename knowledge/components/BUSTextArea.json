@@ -1,0 +1,70 @@
+{
+  "componentId": "BUSTextArea",
+  "name": "BUSText Area",
+  "category": "other",
+  "status": "approved",
+  "description": "Extracted from BUSTextArea.js",
+  "props": [
+    {
+      "name": "value",
+      "type": "any",
+      "required": false
+    },
+    {
+      "name": "onChange",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onBlur",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onFocus",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "disabled",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "placeholder",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "rows",
+      "type": "number",
+      "required": false
+    },
+    {
+      "name": "maxLength",
+      "type": "number",
+      "required": false
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "style",
+      "type": "object",
+      "required": false
+    }
+  ],
+  "tokensConsumed": [],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/BUSTextBoxes/BUSTextArea/BUSTextArea",
+  "exportName": "BUSTextArea",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSTextBoxes/BUSTextArea/BUSTextArea.js"
+}

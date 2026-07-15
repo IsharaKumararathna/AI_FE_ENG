@@ -1,0 +1,14 @@
+{
+  "componentId": "BUSRichTextEditor",
+  "name": "BUSRich Text Editor",
+  "category": "other",
+  "status": "approved",
+  "description": "Extracted from BUSRichTextEditor.tsx",
+  "props": [],
+  "tokensConsumed": [],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/BUSRichTextEditor/BUSRichTextEditor",
+  "exportName": "BUSRichTextEditor",
+  "isDefaultExport": true,
+  "sourceFile": "src/Components/CustomUIs/BUSRichTextEditor/BUSRichTextEditor.tsx"
+}

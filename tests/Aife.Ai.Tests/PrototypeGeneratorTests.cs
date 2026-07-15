@@ -30,11 +30,11 @@ public class PrototypeGeneratorTests
                 "layout": "AppLayout",
                 "children": [
                   { "componentId": "BUSButton" },
-                  { "componentId": "DataGrid" }
+                  { "componentId": "BUSGrid" }
                 ]
               },
               "tokensUsed": ["color.primary", "spacing.md"],
-              "componentsUsed": ["BUSButton", "DataGrid"]
+              "componentsUsed": ["BUSButton", "BUSGrid"]
             }
             """
         });
@@ -74,7 +74,7 @@ public class PrototypeGeneratorTests
                     Layout = "AppLayout",
                     Regions = new List<RegionSpec>
                     {
-                        new() { Slot = "main", Component = "DataGrid" }
+                        new() { Slot = "main", Component = "BUSGrid" }
                     },
                     Actions = new List<ActionSpec>
                     {
@@ -98,12 +98,12 @@ public class PrototypeGeneratorTests
         result.Tree.Layout.Should().Be("AppLayout");
         result.Tree.Children.Should().HaveCount(2);
         result.Tree.Children.Should().Contain(n => n.ComponentId == "BUSButton");
-        result.Tree.Children.Should().Contain(n => n.ComponentId == "DataGrid");
+        result.Tree.Children.Should().Contain(n => n.ComponentId == "BUSGrid");
 
         // Provenance
         result.TokensUsed.Should().Contain("color.primary");
         result.ComponentsUsed.Should().Contain("BUSButton");
-        result.ComponentsUsed.Should().Contain("DataGrid");
+        result.ComponentsUsed.Should().Contain("BUSGrid");
     }
 
     [Fact]

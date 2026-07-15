@@ -1,15 +1,37 @@
 {
   "componentId": "BUSSwitch",
-  "name": "BUS Switch / Toggle",
+  "name": "BUSSwitch",
   "category": "form",
   "status": "approved",
-  "description": "BUSKvalitet toggle switch built on react-bootstrap Form.Check type=switch. Supports sm/md/lg sizes.",
+  "description": "Extracted from BUSSwitch.js",
   "props": [
-    { "name": "checked", "type": "boolean", "required": false },
-    { "name": "value", "type": "boolean", "required": false },
-    { "name": "size", "type": "string", "required": false, "enum": ["small", "medium", "large"] }
+    {
+      "name": "size",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "checked",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "value",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false
+    }
   ],
-  "tokensConsumed": ["color.primary"],
-  "accessibility": { "role": "switch", "ariaProps": ["aria-checked"] },
-  "mapsFromHtml": ["switch", "toggle", "toggle-switch"]
+  "tokensConsumed": [],
+  "mapsFromHtml": [
+    "switch"
+  ],
+  "importPath": "Components/CustomUIs/BUSSwitch/BUSSwitch",
+  "exportName": "BUSSwitch",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSSwitch/BUSSwitch.js"
 }

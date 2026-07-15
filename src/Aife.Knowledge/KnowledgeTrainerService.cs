@@ -15,6 +15,10 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         @"\$([\w-]+)\s*:\s*([^;]+);",
         RegexOptions.Compiled);
 
+    private static readonly Regex CssCustomPropertyRegex = new(
+        @"--([\w-]+)\s*:\s*([^;]+);",
+        RegexOptions.Compiled);
+
     private static readonly Regex TokenValueRegex = new(
         @"^(#[0-9a-fA-F]{3,8}|[0-9]+px|[0-9]+%|rgba?\([^)]+\)|[\d.]+(?:rem|em|vh|vw)|[a-z-]+\([^)]*\)).*$",
         RegexOptions.Compiled);
@@ -27,8 +31,27 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         @"(\w+)\??\s*:\s*(\w+(?:<[^>]+>)?)(?:;|,)",
         RegexOptions.Compiled);
 
+    // Matches `X.propTypes = { ... };` blocks used by plain JS/JSX components
+    // (BUS core repo convention: PropTypes instead of TS interfaces).
+    private static readonly Regex PropTypesBlockRegex = new(
+        @"(\w+)\.propTypes\s*=\s*\{([\s\S]*?)\}\s*;",
+        RegexOptions.Compiled);
+
+    // Matches a single top-level `propName: PropTypes.xxx` declaration.
+    private static readonly Regex PropTypesNameRegex = new(
+        @"^(\w+)\s*:\s*PropTypes\.(\w+)",
+        RegexOptions.Compiled);
+
+    // Group 1 = "default " or empty; Group 2 = component name.
+    // Covers `export const X = forwardRef(...)`, `export function X(...)`,
+    // `export default function X(...)`, and `export default class X`.
     private static readonly Regex ComponentExportRegex = new(
-        @"export\s+(?:const|function|class)\s+(\w+)",
+        @"export\s+(default\s+)?(?:const|function|class)\s+(\w+)",
+        RegexOptions.Compiled);
+
+    // Covers `export default X;` (component declared earlier, exported by name at the bottom).
+    private static readonly Regex DefaultExportNameRegex = new(
+        @"export\s+default\s+(\w+)\s*;",
         RegexOptions.Compiled);
 
     private static readonly Dictionary<string, (string componentId, string name, string category)> TokenCategoryMap = new(StringComparer.OrdinalIgnoreCase)
@@ -104,23 +127,26 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
             }
 
             var componentFiles = FindComponentFiles(folderPath);
-            var components = new List<ComponentDetail>();
-            foreach (var file in componentFiles)
+            var extracted = new List<ComponentDetail>();
+            foreach (var componentFile in componentFiles)
             {
+                var file = componentFile.Path;
                 try
                 {
-                    var component = ExtractComponent(file);
+                    var component = ExtractComponent(file, componentFile.IsNested);
                     if (component is not null)
-                    {
-                        components.Add(component);
-                        WriteComponentFile(component);
-                    }
+                        extracted.Add(component);
                 }
                 catch (Exception ex)
                 {
                     warnings.Add($"Could not extract component from {Path.GetFileName(file)}: {ex.Message}");
                 }
             }
+
+            var components = DemoteInternalSubComponents(extracted);
+            foreach (var component in components)
+                WriteComponentFile(component);
+
             result = result with { ComponentsExtracted = components.Count };
 
             // 3. Update manifest
@@ -229,7 +255,7 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         try
         {
             var content = File.ReadAllText(filePath);
-            return ScssVariableRegex.IsMatch(content);
+            return ScssVariableRegex.IsMatch(content) || CssCustomPropertyRegex.IsMatch(content);
         }
         catch
         {
@@ -261,7 +287,27 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
             });
         }
 
-        return tokens;
+        // Some projects declare tokens as CSS custom properties (--name: value;)
+        // inside :root {} instead of, or alongside, SCSS $variables.
+        foreach (Match match in CssCustomPropertyRegex.Matches(content))
+        {
+            var name = match.Groups[1].Value.Trim();
+            var value = match.Groups[2].Value.Trim();
+
+            if (!TokenValueRegex.IsMatch(value))
+                continue;
+
+            var category = ClassifyToken(name);
+            tokens.Add(new DesignToken
+            {
+                Name = name,
+                Value = value,
+                Category = category,
+                Description = $"Extracted from {Path.GetFileName(variablesPath)}"
+            });
+        }
+
+        return tokens.GroupBy(t => t.Name).Select(g => g.First()).ToList();
     }
 
     private static string ClassifyToken(string name)
@@ -282,83 +328,143 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
             return "typography";
         if (lower.Contains("font-family") || lower.Contains("font-stack"))
             return "typography";
-        if (lower.Contains("width") || lower.Contains("breakpoint"))
-            return "layout";
-        if (lower.Contains("z-index"))
-            return "layout";
-        if (lower.Contains("transition") || lower.Contains("animation"))
-            return "animation";
         if (lower.Contains("border"))
             return "border";
+        // The design-token-set schema only allows: color, spacing, radius,
+        // typography, border, shadow. Sizing-ish concepts without a better
+        // home (layout widths/breakpoints, z-index, transitions/animation)
+        // are bucketed under "spacing" rather than an invalid category.
+        if (lower.Contains("width") || lower.Contains("breakpoint")
+            || lower.Contains("z-index") || lower.Contains("transition") || lower.Contains("animation"))
+            return "spacing";
 
-        return "other";
+        return "spacing";
     }
 
-    private static List<string> FindComponentFiles(string folderPath)
+    /// <summary>
+    /// Demotes components whose id is a PascalCase extension of another
+    /// extracted component's id (e.g. BUSGridTable, BUSGridColumnMenu relative
+    /// to BUSGrid) to a neutral category with no HTML mapping. Folder depth
+    /// alone can't reliably identify internal sub-pieces (some real public
+    /// components, like bus-grids/bus-grid/bus-grid.jsx, are themselves one
+    /// level deep), so this instead looks at naming: if the id equals a
+    /// shorter sibling id plus additional capitalized word(s), it's very
+    /// likely an internal implementation detail of that sibling and shouldn't
+    /// compete with it for HTML-element matching (e.g. "table" -> BUSGrid).
+    /// </summary>
+    private static List<ComponentDetail> DemoteInternalSubComponents(List<ComponentDetail> components)
     {
-        var results = new List<string>();
-        var searchPaths = new[]
+        var ids = components.Select(c => c.ComponentId).ToList();
+
+        return components
+            .Select(c =>
+            {
+                var isSubPieceOfAnother = ids.Any(otherId =>
+                    !otherId.Equals(c.ComponentId, StringComparison.Ordinal)
+                    && otherId.Length < c.ComponentId.Length
+                    && c.ComponentId.StartsWith(otherId, StringComparison.Ordinal)
+                    // Guard against unrelated ids that happen to share a
+                    // prefix (e.g. BUSButton vs BUSButtonGroup would still be
+                    // considered related here, which is the desired
+                    // behavior); require the next character to start a new
+                    // PascalCase word so "BUSGrid" doesn't also swallow an
+                    // unrelated "BUSGridley".
+                    && char.IsUpper(c.ComponentId[otherId.Length]));
+
+                return isSubPieceOfAnother
+                    ? c with { Category = "other", MapsFromHtml = new List<string>() }
+                    : c;
+            })
+            .ToList();
+    }
+
+    private static List<(string Path, bool IsNested)> FindComponentFiles(string folderPath)
+    {
+        var results = new List<(string Path, bool IsNested)>();
+
+        // Prefer the canonical CustomUIs convention. Only fall back to a plain
+        // Components/ scan when CustomUIs doesn't exist — scanning both would
+        // double-count every file under CustomUIs (it's nested inside
+        // Components). Case-insensitive file systems (Windows) also mean
+        // "Components" and "components" resolve to the same physical folder,
+        // so only the first existing candidate in each group is scanned.
+        var customUisPath = new[]
         {
             Path.Combine(folderPath, "src", "Components", "CustomUIs"),
             Path.Combine(folderPath, "src", "components", "CustomUIs"),
-            Path.Combine(folderPath, "src", "Components"),
-            Path.Combine(folderPath, "src", "components"),
-        };
+        }.FirstOrDefault(Directory.Exists);
 
-        foreach (var sp in searchPaths)
+        if (customUisPath is not null)
         {
-            if (!Directory.Exists(sp))
-                continue;
-
-            try
+            ScanComponentFolder(customUisPath, results);
+        }
+        else
+        {
+            var componentsPath = new[]
             {
-                // Scan direct child folders of CustomUIs (each = one DS component group).
-                // For each child folder: pick .tsx/.jsx files at the root level,
-                // but skip nested sub-folders (those are internal pieces, not DS components).
-                foreach (var dir in Directory.GetDirectories(sp))
-                {
-                    // Collect files directly in this component folder (not in sub-folders)
-                    var topFiles = Directory.GetFiles(dir, "*.tsx")
-                        .Concat(Directory.GetFiles(dir, "*.jsx"))
-                        .Concat(Directory.GetFiles(dir, "*.js"));
-                    results.AddRange(topFiles);
+                Path.Combine(folderPath, "src", "Components"),
+                Path.Combine(folderPath, "src", "components"),
+            }.FirstOrDefault(Directory.Exists);
 
-                    // Only recurse into BUS sub-folders if this parent folder is NOT
-                    // a BUS component folder itself (avoid double-counting).
-                    var parentName = Path.GetFileName(dir);
-                    foreach (var subDir in Directory.GetDirectories(dir))
-                    {
-                        var subName = Path.GetFileName(subDir);
-                        // Skip internal sub-components like bus-grids/bus-grid/, BUSButtons/BUSDropdownButton/
-                        if (subName.StartsWith("bus-", StringComparison.OrdinalIgnoreCase)
-                            || (parentName.StartsWith("BUS", StringComparison.OrdinalIgnoreCase)
-                                && subName.StartsWith("BUS", StringComparison.OrdinalIgnoreCase)))
-                            continue;
-
-                        var subFiles = Directory.GetFiles(subDir, "*.tsx")
-                            .Concat(Directory.GetFiles(subDir, "*.jsx"))
-                            .Concat(Directory.GetFiles(subDir, "*.js"));
-                        results.AddRange(subFiles);
-                    }
-                }
-
-                // Also include loose files at the CustomUIs root level
-                results.AddRange(Directory.GetFiles(sp, "*.tsx"));
-                results.AddRange(Directory.GetFiles(sp, "*.jsx"));
-                results.AddRange(Directory.GetFiles(sp, "*.js"));
-            }
-            catch { /* skip inaccessible directories */ }
+            if (componentsPath is not null)
+                ScanComponentFolder(componentsPath, results);
         }
 
-        // Filter to only files that export a component
-        return results.Where(HasComponentExport).ToList();
+        // Defense in depth against case-sensitive file systems or any
+        // remaining path overlap: de-dupe by physical path before filtering.
+        return results
+            .GroupBy(r => r.Path, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.First())
+            .Where(r => HasComponentExport(r.Path))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Scans direct child folders of <paramref name="rootPath"/> (each = one DS
+    /// component group) for .tsx/.jsx/.js files, recursing exactly one level
+    /// deeper. BUS core repos mix both PascalCase (BUSButtons/BUSButton.js) and
+    /// lowercase-hyphenated (bus-grids/bus-grid/bus-grid.jsx) folder
+    /// conventions for the actual public component, so nested folders are not
+    /// filtered by name — internal sub-pieces just become extra (harmless)
+    /// entries tagged <c>IsNested = true</c> so callers can avoid classifying
+    /// them as if they were the primary, HTML-mappable component.
+    /// </summary>
+    private static void ScanComponentFolder(string rootPath, List<(string Path, bool IsNested)> results)
+    {
+        try
+        {
+            foreach (var dir in Directory.GetDirectories(rootPath))
+            {
+                var topFiles = Directory.GetFiles(dir, "*.tsx")
+                    .Concat(Directory.GetFiles(dir, "*.jsx"))
+                    .Concat(Directory.GetFiles(dir, "*.js"));
+                results.AddRange(topFiles.Select(f => (f, false)));
+
+                foreach (var subDir in Directory.GetDirectories(dir))
+                {
+                    var subFiles = Directory.GetFiles(subDir, "*.tsx")
+                        .Concat(Directory.GetFiles(subDir, "*.jsx"))
+                        .Concat(Directory.GetFiles(subDir, "*.js"));
+                    results.AddRange(subFiles.Select(f => (f, true)));
+                }
+            }
+
+            // Also include loose files at the root level
+            results.AddRange(Directory.GetFiles(rootPath, "*.tsx").Select(f => (f, false)));
+            results.AddRange(Directory.GetFiles(rootPath, "*.jsx").Select(f => (f, false)));
+            results.AddRange(Directory.GetFiles(rootPath, "*.js").Select(f => (f, false)));
+        }
+        catch { /* skip inaccessible directories */ }
     }
 
     private static bool HasComponentExport(string filePath)
     {
         try
         {
-            return ComponentExportRegex.IsMatch(File.ReadAllText(filePath));
+            var content = File.ReadAllText(filePath);
+            return ComponentExportRegex.IsMatch(content)
+                || DefaultExportNameRegex.IsMatch(content)
+                || content.Contains("export default");
         }
         catch
         {
@@ -366,23 +472,29 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         }
     }
 
-    private static ComponentDetail? ExtractComponent(string filePath)
+    private static ComponentDetail? ExtractComponent(string filePath, bool isNested = false)
     {
         var content = File.ReadAllText(filePath);
         var fileName = Path.GetFileNameWithoutExtension(filePath);
         var folderName = Path.GetFileName(Path.GetDirectoryName(filePath)) ?? fileName;
 
-        // Extract component name
-        var exportMatch = ComponentExportRegex.Match(content);
-        var componentName = exportMatch.Success ? exportMatch.Groups[1].Value : fileName;
+        // Resolve the exported component name and whether it's a default export.
+        var (componentName, exportName, isDefaultExport) = ResolveExportInfo(content, fileName);
 
         // Generate a stable componentId
         var componentId = componentName.StartsWith("BUS") ? componentName : $"BUS{componentName}";
 
-        // Determine category from folder/file name
+        // Note: folder depth alone ("isNested") doesn't reliably distinguish
+        // internal sub-pieces from the real public component — some BUS
+        // components (e.g. bus-grids/bus-grid/bus-grid.jsx) legitimately live
+        // one level deep too. Internal-piece demotion instead happens as a
+        // post-processing pass (see DemoteInternalSubComponents) based on
+        // componentId prefix relationships within the whole extracted batch.
         var category = ClassifyComponent(componentId, folderName, content);
+        var mapsFromHtml = InferMapsFromHtml(componentId, content);
 
-        // Extract props from TypeScript interface
+        // Extract props: prefer a TypeScript interface (I*Props); fall back to
+        // PropTypes.* (the BUS core repo's plain JS/JSX convention).
         var props = new List<ComponentProp>();
         var interfaceMatch = TsxPropsRegex.Match(content);
         if (interfaceMatch.Success)
@@ -400,9 +512,15 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
                 });
             }
         }
+        else
+        {
+            props = ExtractPropTypesProps(content);
+        }
 
         // Infer tokens consumed from the component code
         var tokensConsumed = InferTokensConsumed(content, componentId);
+
+        var importPath = ComputeImportPath(filePath);
 
         return new ComponentDetail
         {
@@ -413,8 +531,142 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
             Description = $"Extracted from {Path.GetRelativePath(Path.GetDirectoryName(filePath)!, filePath)}",
             Props = props,
             TokensConsumed = tokensConsumed,
-            MapsFromHtml = InferMapsFromHtml(componentId, content)
+            MapsFromHtml = mapsFromHtml,
+            ImportPath = importPath,
+            ExportName = exportName,
+            IsDefaultExport = isDefaultExport,
+            SourceFile = "src/" + importPath + Path.GetExtension(filePath)
         };
+    }
+
+    /// <summary>
+    /// Resolves the exported component name, the recommended import name, and
+    /// whether it's exported as default. Handles both TS/named-export style
+    /// (<c>export const X = forwardRef(...)</c>, <c>export function X(...)</c>)
+    /// and default-export styles (<c>export default function X(...)</c>,
+    /// <c>export default X;</c>, or an anonymous default export).
+    /// </summary>
+    private static (string componentName, string exportName, bool isDefaultExport) ResolveExportInfo(string content, string fileName)
+    {
+        var namedMatch = ComponentExportRegex.Match(content);
+        if (namedMatch.Success)
+        {
+            var isDefault = namedMatch.Groups[1].Success && namedMatch.Groups[1].Value.Trim().Length > 0;
+            var name = namedMatch.Groups[2].Value;
+            return (name, name, isDefault);
+        }
+
+        var defaultNameMatch = DefaultExportNameRegex.Match(content);
+        if (defaultNameMatch.Success)
+        {
+            var name = defaultNameMatch.Groups[1].Value;
+            return (name, name, true);
+        }
+
+        // Anonymous default export or no recognizable export pattern — fall
+        // back to the file name (the common convention for the component name).
+        return (fileName, fileName, true);
+    }
+
+    /// <summary>
+    /// Extracts props from a <c>Component.propTypes = { ... };</c> block —
+    /// the convention used by plain JS/JSX components (no TS interfaces).
+    /// Splits the block on top-level (bracket-depth-aware) commas so nested
+    /// shapes like <c>PropTypes.arrayOf(PropTypes.shape({...}))</c> don't
+    /// break the split.
+    /// </summary>
+    private static List<ComponentProp> ExtractPropTypesProps(string content)
+    {
+        var props = new List<ComponentProp>();
+        var blockMatch = PropTypesBlockRegex.Match(content);
+        if (!blockMatch.Success)
+            return props;
+
+        var body = blockMatch.Groups[2].Value;
+        foreach (var statement in SplitTopLevel(body, ','))
+        {
+            var trimmed = statement.Trim();
+            if (trimmed.Length == 0)
+                continue;
+
+            var m = PropTypesNameRegex.Match(trimmed);
+            if (!m.Success)
+                continue;
+
+            var propName = m.Groups[1].Value;
+            var propType = m.Groups[2].Value;
+            var required = trimmed.Contains(".isRequired");
+
+            props.Add(new ComponentProp
+            {
+                Name = propName,
+                Type = MapPropTypesType(propType),
+                Required = required
+            });
+        }
+
+        return props;
+    }
+
+    /// <summary>
+    /// Splits <paramref name="content"/> on <paramref name="separator"/> only at
+    /// bracket depth 0, so nested parens/braces/brackets (e.g. PropTypes.shape({...}))
+    /// aren't split apart.
+    /// </summary>
+    private static List<string> SplitTopLevel(string content, char separator)
+    {
+        var results = new List<string>();
+        var depth = 0;
+        var start = 0;
+
+        for (var i = 0; i < content.Length; i++)
+        {
+            var c = content[i];
+            if (c is '(' or '[' or '{') depth++;
+            else if (c is ')' or ']' or '}') depth--;
+            else if (c == separator && depth == 0)
+            {
+                results.Add(content[start..i]);
+                start = i + 1;
+            }
+        }
+
+        if (start < content.Length)
+            results.Add(content[start..]);
+
+        return results;
+    }
+
+    private static string MapPropTypesType(string propType) => propType.ToLowerInvariant() switch
+    {
+        "string" => "string",
+        "number" => "number",
+        "bool" => "boolean",
+        "func" => "function",
+        "node" => "ReactNode",
+        "element" => "ReactNode",
+        "array" => "array",
+        "arrayof" => "array",
+        "object" => "object",
+        "shape" => "object",
+        "exact" => "object",
+        "oneoftype" => "any",
+        "oneof" => "string",
+        "instanceof" => "any",
+        _ => "any"
+    };
+
+    /// <summary>
+    /// Computes an import path relative to the project's <c>src/</c> folder
+    /// (e.g. <c>Components/CustomUIs/BUSButtons/BUSButton</c>, no extension),
+    /// so the caller can write a real <c>import ... from '...'</c> statement.
+    /// </summary>
+    private static string ComputeImportPath(string filePath)
+    {
+        var normalized = filePath.Replace('\\', '/');
+        var srcIndex = normalized.LastIndexOf("/src/", StringComparison.OrdinalIgnoreCase);
+        var relative = srcIndex >= 0 ? normalized[(srcIndex + 5)..] : Path.GetFileName(normalized);
+        return Path.ChangeExtension(relative, null) ?? relative;
     }
 
     private static string ClassifyComponent(string componentId, string folderName, string content)
@@ -423,7 +675,7 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         var folder = folderName.ToLowerInvariant();
         var contentLower = content.ToLowerInvariant();
 
-        if (lower.Contains("button") || folder.Contains("button")) return "button";
+        if ((lower.Contains("button") && !lower.Contains("radio")) || folder.Contains("button")) return "button";
         if (lower.Contains("grid") || lower.Contains("table") || folder.Contains("grid")) return "table";
         if (lower.Contains("tab") || folder.Contains("tab") || lower.Contains("nav")) return "navigation";
         if (lower.Contains("input") || lower.Contains("search") || lower.Contains("textbox")
@@ -485,7 +737,7 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         var maps = new List<string>();
         var lower = componentId.ToLowerInvariant();
 
-        if (lower.Contains("button")) maps.AddRange(new[] { "button" });
+        if (lower.Contains("button") && !lower.Contains("radio")) maps.AddRange(new[] { "button" });
         if (lower.Contains("grid") || lower.Contains("table")) maps.AddRange(new[] { "table" });
         if (lower.Contains("tab")) maps.AddRange(new[] { "tabs", "tab" });
         if (lower.Contains("input") || lower.Contains("search")) maps.AddRange(new[] { "input", "search" });
@@ -521,10 +773,15 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         Directory.CreateDirectory(dir);
         var filePath = Path.Combine(dir, $"{component.ComponentId}.json");
 
+        // Omit null variants/examples/accessibility rather than serializing
+        // explicit `null` — the component catalog schema types these fields
+        // as array/object (not nullable), so a present-but-null value fails
+        // validation while an absent property is fine (none are required).
         var json = JsonConvert.SerializeObject(component, new JsonSerializerSettings
         {
             Formatting = Formatting.Indented,
-            ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
+            ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver(),
+            NullValueHandling = NullValueHandling.Ignore
         });
         File.WriteAllText(filePath, json);
     }

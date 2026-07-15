@@ -1,0 +1,231 @@
+{
+  "componentId": "BUSGrid",
+  "name": "BUSGrid",
+  "category": "table",
+  "status": "approved",
+  "description": "Extracted from bus-grid.jsx",
+  "props": [
+    {
+      "name": "gridKeyField",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "data",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "columns",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "onColumnMenuSubmit",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "initialSearchValue",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "onSearch",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onSearchClear",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "menuOptions",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "initialFilterValues",
+      "type": "object",
+      "required": false
+    },
+    {
+      "name": "filters",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "isFilterPanelOpen",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "onFilterPanelToggle",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onFilterSubmit",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onFilterClear",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onFilterSave",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "initialTab",
+      "type": "number",
+      "required": false
+    },
+    {
+      "name": "tabs",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "sort",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "sortable",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "onSortChange",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onRowClick",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onRowDoubleClick",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "pageable",
+      "type": "object",
+      "required": false
+    },
+    {
+      "name": "onPageChange",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "additionalOptions",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "bulkOperations",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "isAnyExternalBulkOperations",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "customizedRowTemplate",
+      "type": "any",
+      "required": false
+    },
+    {
+      "name": "customCellClasses",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "autoFilterEnabled",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "dynamicMenuOptions",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "dataLoading",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "onFilterClose",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "isSaveFilterVisible",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "isAllTabGridFormFilterChanged",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "InfoPopupComponent",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "isInfoPopupAutoDisplay",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "isGridSearchOnDebounceEnabled",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "enableButtonSearch",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "onDebounceSearch",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onSearchDebounceTime",
+      "type": "number",
+      "required": false
+    }
+  ],
+  "tokensConsumed": [
+    "color.table.header.bg",
+    "color.text.primary",
+    "color.table.row.border"
+  ],
+  "mapsFromHtml": [
+    "table"
+  ],
+  "importPath": "Components/CustomUIs/bus-grids/bus-grid/bus-grid",
+  "exportName": "BUSGrid",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/bus-grids/bus-grid/bus-grid.jsx"
+}

@@ -1,0 +1,14 @@
+{
+  "componentId": "BUSContextMenu",
+  "name": "BUSContext Menu",
+  "category": "other",
+  "status": "approved",
+  "description": "Extracted from BUSContextMenu.js",
+  "props": [],
+  "tokensConsumed": [],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/BUSMenus/BUSContextMenu/BUSContextMenu",
+  "exportName": "BUSContextMenu",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSMenus/BUSContextMenu/BUSContextMenu.js"
+}

@@ -1,0 +1,14 @@
+{
+  "componentId": "BUSTextSkeleton",
+  "name": "BUSText Skeleton",
+  "category": "other",
+  "status": "approved",
+  "description": "Extracted from BUSTextSkeleton.js",
+  "props": [],
+  "tokensConsumed": [],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/BUSLoadingSkeletons/BUSTextSkeleton/BUSTextSkeleton",
+  "exportName": "BUSTextSkeleton",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSLoadingSkeletons/BUSTextSkeleton/BUSTextSkeleton.js"
+}

@@ -1,0 +1,69 @@
+{
+  "componentId": "BUSGridFilterPanel",
+  "name": "BUSGrid Filter Panel",
+  "category": "other",
+  "status": "approved",
+  "description": "Extracted from bus-grid-filter-panel.jsx",
+  "props": [
+    {
+      "name": "isOpen",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "initialFilterValues",
+      "type": "object",
+      "required": false
+    },
+    {
+      "name": "filters",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "onFilterSubmit",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onFilterClear",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onFilterClose",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onFilterSave",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "autoFilterEnabled",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "isSaveFilterVisible",
+      "type": "boolean",
+      "required": false
+    }
+  ],
+  "tokensConsumed": [
+    "color.table.header.bg",
+    "color.text.primary",
+    "color.table.row.border"
+  ],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/bus-grids/bus-grid-filter-panel/bus-grid-filter-panel",
+  "exportName": "BUSGridFilterPanel",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/bus-grids/bus-grid-filter-panel/bus-grid-filter-panel.jsx"
+}

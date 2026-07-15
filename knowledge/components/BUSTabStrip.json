@@ -1,15 +1,43 @@
 {
   "componentId": "BUSTabStrip",
-  "name": "BUS Tab Strip",
+  "name": "BUSTab Strip",
   "category": "navigation",
   "status": "approved",
-  "description": "BUSKvalitet tab strip built on react-bootstrap Tabs/Tab. Supports count badges and colored labels.",
+  "description": "Extracted from BUSTabStrip.js",
   "props": [
-    { "name": "tabs", "type": "array", "required": true },
-    { "name": "selected", "type": "string", "required": true },
-    { "name": "onSelect", "type": "function", "required": true }
+    {
+      "name": "selected",
+      "type": "number",
+      "required": false
+    },
+    {
+      "name": "onSelect",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "scrollable",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "tabStripDisabled",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "hideArrows",
+      "type": "boolean",
+      "required": false
+    }
   ],
-  "tokensConsumed": ["color.primary", "color.background.surface"],
-  "accessibility": { "role": "tablist", "keyboardSupport": true },
-  "mapsFromHtml": ["tabs", "tab", "tabstrip", "div.tab-section"]
+  "tokensConsumed": [],
+  "mapsFromHtml": [
+    "tabs",
+    "tab"
+  ],
+  "importPath": "Components/CustomUIs/BUSTabStrip/BUSTabStrip",
+  "exportName": "BUSTabStrip",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSTabStrip/BUSTabStrip.js"
 }

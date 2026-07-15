@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Aife.Application\Aife.Application.csproj" />
+    <ProjectReference Include="..\Aife.Knowledge\Aife.Knowledge.csproj" />
   </ItemGroup>
 
   <ItemGroup>

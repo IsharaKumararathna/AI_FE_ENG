@@ -1,0 +1,14 @@
+{
+  "componentId": "BUSDateTimePicker",
+  "name": "BUSDate Time Picker",
+  "category": "other",
+  "status": "approved",
+  "description": "Extracted from BUSDateTimePicker.jsx",
+  "props": [],
+  "tokensConsumed": [],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/BUSDateTimePicker/BUSDateTimePicker",
+  "exportName": "BUSDateTimePicker",
+  "isDefaultExport": true,
+  "sourceFile": "src/Components/CustomUIs/BUSDateTimePicker/BUSDateTimePicker.jsx"
+}

@@ -1,0 +1,14 @@
+{
+  "componentId": "BUSFormField",
+  "name": "BUSForm Field",
+  "category": "other",
+  "status": "approved",
+  "description": "Extracted from BUSFormField.js",
+  "props": [],
+  "tokensConsumed": [],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/BUSFormFields/BUSFormField/BUSFormField",
+  "exportName": "BUSFormField",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSFormFields/BUSFormField/BUSFormField.js"
+}

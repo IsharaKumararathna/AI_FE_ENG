@@ -5,6 +5,7 @@ using Aife.Application.Knowledge;
 using Aife.Application.Prompting;
 using Aife.Domain.Enums;
 using Aife.Domain.Generation;
+using Aife.Knowledge;
 using Newtonsoft.Json;
 
 namespace Aife.Ai.Stages;
@@ -147,7 +148,7 @@ public sealed class PrototypeConformanceReviewer : IPrototypeConformanceReviewer
                 }
 
                 // Check semantic fallback match
-                if (MatchesSemantically(element.Kind, summary.Category))
+                if (ComponentMatchingService.MatchesSemantically(element.Kind, summary.Category))
                 {
                     hasMapping = true;
                     break;
@@ -166,27 +167,6 @@ public sealed class PrototypeConformanceReviewer : IPrototypeConformanceReviewer
                 });
             }
         }
-    }
-
-    private static bool MatchesSemantically(string elementKind, string category)
-    {
-        var fallback = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["button"] = "button",
-            ["table"] = "table", ["datagrid"] = "table", ["grid"] = "table",
-            ["input"] = "input", ["search"] = "input", ["textbox"] = "input",
-            ["tabs"] = "navigation", ["tab"] = "navigation", ["sidebar"] = "navigation",
-            ["navigation"] = "navigation", ["nav"] = "navigation",
-            ["form"] = "form", ["formfield"] = "form", ["checkbox"] = "form",
-            ["switch"] = "form", ["toggle"] = "form",
-            ["chips"] = "display", ["chip"] = "display", ["badge"] = "display",
-            ["typography"] = "display", ["avatar"] = "display",
-        };
-
-        if (!fallback.TryGetValue(elementKind, out var expectedCategory))
-            return false;
-
-        return string.Equals(category, expectedCategory, StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task CheckLayoutConformanceAsync(
@@ -255,7 +235,22 @@ public sealed class PrototypeConformanceReviewer : IPrototypeConformanceReviewer
 
         var response = await _router.CompleteAsync(request, ct);
 
-        var report = JsonConvert.DeserializeObject<PrototypeConformanceReport>(response.Text);
+        // Extract JSON from LLM response
+        var text = response.Text;
+        var jsonStart = text.IndexOfAny(new[] { '[', '{' });
+        if (jsonStart > 0)
+            text = text[jsonStart..];
+
+        PrototypeConformanceReport? report = null;
+        try
+        {
+            report = JsonConvert.DeserializeObject<PrototypeConformanceReport>(text);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ConformanceReviewer] Failed to parse LLM response: {ex.Message}. Raw: {text[..Math.Min(text.Length, 200)]}");
+        }
+
         return report ?? new PrototypeConformanceReport
         {
             PrototypeId = prototype.Id,

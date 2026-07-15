@@ -48,7 +48,7 @@ public class GoldenFileTests
             [
               {
                 "path": "src/Dashboard.tsx",
-                "content": "import { BUSButton, DataGrid } from '@org/ds/react'; export const Dashboard = () => null;"
+                "content": "import { BUSButton, BUSGrid } from '@org/ds/react'; export const Dashboard = () => null;"
               }
             ]
             """;
@@ -67,7 +67,7 @@ public class GoldenFileTests
             Children = new List<UiNode>
             {
                 new() { NodeId = "n1", ComponentId = "BUSButton" },
-                new() { NodeId = "n2", ComponentId = "DataGrid" }
+                new() { NodeId = "n2", ComponentId = "BUSGrid" }
             }
         };
 
@@ -99,11 +99,11 @@ public class GoldenFileTests
                 "layout": "AppLayout",
                 "children": [
                   { "componentId": "BUSButton" },
-                  { "componentId": "DataGrid" }
+                  { "componentId": "BUSGrid" }
                 ]
               },
               "tokensUsed": ["color.primary", "spacing.md"],
-              "componentsUsed": ["BUSButton", "DataGrid"]
+              "componentsUsed": ["BUSButton", "BUSGrid"]
             }
             """;
 
@@ -125,7 +125,7 @@ public class GoldenFileTests
                     Layout = "AppLayout",
                     Regions = new List<RegionSpec>
                     {
-                        new() { Slot = "main", Component = "DataGrid" }
+                        new() { Slot = "main", Component = "BUSGrid" }
                     },
                     Actions = new List<ActionSpec>
                     {

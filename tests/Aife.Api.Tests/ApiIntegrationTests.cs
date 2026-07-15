@@ -145,7 +145,7 @@ public class ApiIntegrationTests : IClassFixture<CustomWebApplicationFactory>
                     layout = "AppLayout",
                     regions = new[]
                     {
-                        new { slot = "main", component = "DataGrid" }
+                        new { slot = "main", component = "BUSGrid" }
                     },
                     actions = new[]
                     {

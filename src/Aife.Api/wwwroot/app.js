@@ -196,171 +196,207 @@ function renderPreview(artifacts) {
     return;
   }
 
-  // Extract meaningful info from the generated TSX for a clean preview
   const content = mainFile.content;
 
-  // Extract component name
+  // Extract meaningful info from the generated TSX
   const nameMatch = content.match(/(?:const|function)\s+([A-Z]\w*)/);
   const compName = nameMatch ? nameMatch[1] : 'Generated';
 
-  // Extract JSX elements used
   const imports = (content.match(/import\s+\{([^}]+)\}\s+from/g) || [''])[0] || '';
   const comps = imports.replace(/import\s*\{|\}\s*from.*/g, '').trim();
+  const compList = comps.split(',').map(c => c.trim()).filter(Boolean);
 
-  // Extract column headers if DataGrid used
-  const colMatch = content.match(/columns=\{(?:\[([^\]]+)\]|["']([^"']+)["'])/);
-  const cols = colMatch ? (colMatch[1] || colMatch[2]).replace(/["']/g, '').split(',').map(c => c.trim()) : [];
+  // Extract column headers if DataGrid is used
+  const colMatch = content.match(/columns\s*=\s*\[([^\]]+)\]/);
+  const cols = colMatch ? colMatch[1].replace(/["']/g, '').split(',').map(c => c.trim()) : [];
 
-  // Extract row data if present
-  const rowMatch = content.match(/rows=\{(?:\[([^\]]*\{[^}]*\}[^\]]*)\])/);
-  let rows = [];
+  // Extract row data if present (from generated code)
+  const rowMatch = content.match(/rows\s*=\s*(\[[\s\S]*?\])\s*\]/);
+  let dataRows = [];
   if (rowMatch) {
-    const rowStr = rowMatch[1];
-    rows = [...rowStr.matchAll(/\{[^}]+\}/g)].map(m => {
-      try { return JSON.parse(m[0].replace(/'/g, '"')); } catch { return {}; }
-    });
+    try {
+      // Try to parse as JSON-like
+      const rowStr = rowMatch[1].replace(/'/g, '"');
+      if (rowStr.startsWith('[') && rowStr.endsWith(']')) {
+        dataRows = JSON.parse(rowStr);
+      }
+    } catch { /* use sample data fallback */ }
   }
 
-  // Build clean preview HTML matching the prototype structure
+  // Determine page structure from the generated content
+  const hasLayout = content.includes('<AppLayout');
+  const hasSidebar = hasLayout || content.includes('sidebar');
+  const hasTabs = compList.includes('BUSTabStrip');
+  const hasTable = compList.includes('DataGrid');
+  const hasButtons = compList.includes('BUSButton');
+  const hasLabels = compList.includes('BUSLabel');
+  const hasExpansion = compList.includes('BUSExpansionPanel');
+  const hasCheckbox = compList.includes('BUSCheckbox');
+  const hasSwitch = compList.includes('BUSSwitch');
+  const hasInput = compList.includes('BUSInput') || compList.includes('BUSSearch') || compList.includes('BUSFilter');
+
+  // Extract page title from the analysis or content
+  const titleMatch = content.match(/(?:<h1|>\s*['"])([^<"']+)(?:<\/h1|['"])/);
+  const pageTitle = titleMatch ? titleMatch[1].trim() : compName;
+
+  // Build the preview HTML dynamically based on what was actually generated
   let previewHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>';
   previewHtml += `
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter','Segoe UI',sans-serif; background: #f6f8fb; color: #1e293b; font-size: 14px; }
     .layout { display: flex; height: 100vh; }
-    .sidebar { width: 280px; background: #fff; border-right: 1px solid #e5e7eb; flex-shrink: 0; }
-    .logo { display: flex; align-items: center; gap: 15px; padding: 16px 18px; border-bottom: 1px solid #eee; }
-    .menu-btn { width: 38px; height: 38px; border: 1px solid #ddd; background: #fff; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-    .brand { display: flex; align-items: center; gap: 10px; font-size: 22px; color: #1155cc; font-weight: 700; }
-    nav { padding: 15px 0; }
-    nav a { display: flex; align-items: center; gap: 14px; padding: 15px 20px; color: #334155; text-decoration: none; cursor: pointer; font-size: 14px; }
+    .sidebar { width: 260px; background: #fff; border-right: 1px solid #e5e7eb; flex-shrink: 0; overflow-y: auto; }
+    .logo { display: flex; align-items: center; gap: 12px; padding: 16px; border-bottom: 1px solid #eee; }
+    .menu-btn { width: 36px; height: 36px; border: 1px solid #ddd; background: #fff; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .brand { font-size: 20px; color: #1155cc; font-weight: 700; }
+    nav a { display: flex; align-items: center; gap: 12px; padding: 14px 18px; color: #334155; text-decoration: none; font-size: 14px; }
     nav a.active { background: #e8f2ff; color: #1155cc; font-weight: 600; }
     main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-    header.topbar { background: #fff; height: 66px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; flex-shrink: 0; }
-    .search { width: 330px; background: #fff; border: 1px solid #d9dee7; border-radius: 10px; display: flex; align-items: center; padding: 0 14px; }
-    .search input { width: 100%; border: none; height: 40px; outline: none; font-size: 14px; }
-    .user { display: flex; align-items: center; gap: 12px; }
-    .avatar { width: 36px; height: 36px; background: #dbeafe; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1155cc; font-weight: 700; font-size: 14px; }
-    .content { padding: 30px; overflow: auto; flex: 1; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    h1 { font-size: 38px; color: #111928; font-weight: 700; }
-    .primary-btn { background: #0d5bd7; color: #fff; border: none; border-radius: 10px; padding: 14px 22px; font-size: 15px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
-    .primary-btn:hover { background: #1548be; }
-    .tabs { display: flex; gap: 25px; margin-bottom: 25px; border-bottom: 1px solid #e4e7ed; }
-    .tab-btn { padding: 14px 2px; border: none; background: none; font-size: 16px; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-    .tab-btn.active { color: #1155cc; border-bottom: 3px solid #1155cc; font-weight: 600; margin-bottom: -1px; }
-    .tab-btn span { background: #eef2f7; padding: 3px 9px; border-radius: 50px; font-size: 13px; font-weight: 500; }
-    .toolbar { display: flex; justify-content: space-between; margin-bottom: 18px; }
-    .toolbar-left { display: flex; gap: 12px; }
-    .outline-btn { background: #fff; border: 1px solid #d7dce5; padding: 11px 16px; border-radius: 10px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 6px; color: #374151; }
-    .outline-btn:hover { background: #f9fafb; }
-    .chips { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
-    .chip { background: #eef6ff; color: #0d5bd7; border: 1px solid #bcd8ff; padding: 8px 14px; border-radius: 100px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
-    .chips a { color: #0d5bd7; text-decoration: none; font-weight: 600; font-size: 13px; }
-    .table-wrapper { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+    header.topbar { background: #fff; height: 60px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; flex-shrink: 0; }
+    .search { width: 300px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; display: flex; align-items: center; padding: 0 12px; }
+    .search input { width: 100%; border: none; height: 38px; outline: none; background: transparent; }
+    .user { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 34px; height: 34px; background: #dbeafe; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1155cc; font-weight: 700; }
+    .content { padding: 28px; overflow: auto; flex: 1; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    h1 { font-size: 32px; color: #111928; font-weight: 700; }
+    .primary-btn { background: #0d5bd7; color: #fff; border: none; border-radius: 8px; padding: 12px 20px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .outline-btn { background: #fff; border: 1px solid #d7dce5; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; color: #374151; }
+    .tabs { display: flex; gap: 20px; margin-bottom: 20px; border-bottom: 1px solid #e4e7ed; }
+    .tab-btn { padding: 12px 2px; border: none; background: none; font-size: 15px; color: #64748b; cursor: pointer; }
+    .tab-btn.active { color: #1155cc; border-bottom: 2px solid #1155cc; font-weight: 600; margin-bottom: -1px; }
+    .tab-btn .badge-count { background: #eef2f7; padding: 2px 8px; border-radius: 50px; font-size: 12px; margin-left: 4px; }
+    .table-wrapper { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; margin-top: 16px; }
     table { width: 100%; border-collapse: collapse; }
     thead { background: #f8fafc; }
-    th { text-align: left; padding: 16px; font-size: 14px; color: #64748b; font-weight: 600; white-space: nowrap; }
-    td { padding: 18px 16px; border-top: 1px solid #edf0f4; font-size: 14px; }
-    .status-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+    th { text-align: left; padding: 14px; font-size: 13px; color: #64748b; font-weight: 600; }
+    td { padding: 16px 14px; border-top: 1px solid #f1f3f6; font-size: 14px; }
+    .status-badge { display: inline-block; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
     .status-started { background: #e7f0ff; color: #0d5bd7; }
     .status-progress { background: #fff8e1; color: #b45309; }
     .status-completed { background: #e6f7ed; color: #057a55; }
+    .comp-label { display: block; padding: 8px 0; font-size: 13px; color: #6b7280; }
+    .comp-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+    .comp-card h3 { font-size: 14px; margin-bottom: 4px; }
+    .comp-card p { font-size: 13px; color: #6b7280; }
+    .expansion-panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; cursor: pointer; }
+    .simple-page { max-width: 960px; margin: 0 auto; }
   `;
-  previewHtml += '</style></head><body><div class="layout">';
+  previewHtml += '</style></head><body>';
 
-  // Sidebar
-  previewHtml += '<aside class="sidebar">';
-  previewHtml += '<div class="logo"><div class="menu-btn">☰</div><div class="brand">📋 BUSpek</div></div>';
-  previewHtml += '<nav>';
-  previewHtml += '<a class="active">📋 Active inspections</a>';
-  previewHtml += '<a>📄 Control register</a>';
-  previewHtml += '<a>🔔 Follow-up</a>';
-  previewHtml += '<a>👤 Customer register</a>';
-  previewHtml += '<a>⚙️ Settings</a>';
-  previewHtml += '</nav></aside>';
+  // Decide layout: sidebar layout or simple single-column
+  if (hasSidebar) {
+    previewHtml += '<div class="layout">';
+    previewHtml += '<aside class="sidebar">';
+    previewHtml += '<div class="logo"><div class="menu-btn">☰</div><div class="brand">📋 BUSpek</div></div>';
+    previewHtml += '<nav>';
+    if (hasTabs) previewHtml += '<a class="active">📋 ' + pageTitle + '</a>';
+    else previewHtml += '<a class="active">📋 Overview</a>';
+    previewHtml += '<a>📄 Control register</a>';
+    previewHtml += '<a>🔔 Follow-up</a>';
+    previewHtml += '<a>👤 Customers</a>';
+    previewHtml += '<a>⚙️ Settings</a>';
+    previewHtml += '</nav></aside>';
+    previewHtml += '<main>';
+    // Header
+    previewHtml += '<header class="topbar"><div class="search">🔍 <input type="text" placeholder="Search..."></div><div class="user"><div class="avatar">U</div><span>User</span></div></header>';
+  } else {
+    // Simple page — no sidebar
+    previewHtml += '<div class="simple-page">';
+  }
 
-  // Main area
-  previewHtml += '<main>';
-
-  // Header - search on LEFT, user on RIGHT
-  previewHtml += '<header class="topbar">';
-  previewHtml += '<div class="search">🔍 <input type="text" placeholder="Search reg. no. or VIN..."></div>';
-  previewHtml += '<div class="user"><div class="avatar">TS</div><span>Tomas Setsä</span> ▼</div>';
-  previewHtml += '</header>';
-
-  // Content
   previewHtml += '<section class="content">';
 
   // Page header
-  const title = content.includes('Active inspections') ? 'Active inspections' : compName;
-  previewHtml += '<div class="page-header"><h1>' + title + '</h1>';
-  if (comps.includes('BUSButton')) previewHtml += '<button class="primary-btn">+ New control</button>';
+  previewHtml += '<div class="page-header"><h1>' + pageTitle + '</h1>';
+  if (hasButtons) previewHtml += '<button class="primary-btn">+ New</button>';
   previewHtml += '</div>';
 
-  // Tabs
-  if (comps.includes('BUSTabStrip')) {
+  // Render components in order based on what was generated
+  if (hasLabels) {
+    previewHtml += '<div class="comp-label">📝 Text content region</div>';
+    previewHtml += '<div class="comp-label" style="font-size:16px;font-weight:500;color:#1e293b;margin-bottom:12px;">' + pageTitle + '</div>';
+  }
+
+  if (hasTabs) {
     previewHtml += '<div class="tabs">';
-    previewHtml += '<button class="tab-btn active">All <span>23</span></button>';
-    previewHtml += '<button class="tab-btn">Started <span>8</span></button>';
-    previewHtml += '<button class="tab-btn">Mine <span>5</span></button>';
-    previewHtml += '<button class="tab-btn">+</button>';
+    previewHtml += '<button class="tab-btn active">Tab 1 <span class="badge-count">5</span></button>';
+    previewHtml += '<button class="tab-btn">Tab 2 <span class="badge-count">3</span></button>';
+    previewHtml += '<button class="tab-btn">Tab 3 <span class="badge-count">8</span></button>';
     previewHtml += '</div>';
   }
 
-  // Toolbar
-  if (content.includes('outline') || content.includes('Filter') || content.includes('Export') || content.includes('Columns')) {
-    previewHtml += '<div class="toolbar">';
-    previewHtml += '<div class="toolbar-left">';
-    previewHtml += '<button class="outline-btn">Filter ▼</button>';
-    previewHtml += '<button class="outline-btn">Columns ▼</button>';
-    previewHtml += '</div>';
-    previewHtml += '<button class="outline-btn">Export ▼</button>';
+  if (hasExpansion) {
+    previewHtml += '<div class="expansion-panel"><strong>▶ Expandable section</strong></div>';
+  }
+
+  if (hasInput) {
+    previewHtml += '<div style="margin-bottom:16px;">';
+    previewHtml += '<input type="text" placeholder="' + (compList.includes('BUSSearch') ? 'Search...' : 'Enter text...') + '" style="width:100%;max-width:400px;padding:10px 14px;border:1px solid #d7dce5;border-radius:8px;font-size:14px;outline:none;">';
     previewHtml += '</div>';
   }
 
-  // Chips / filters
-  if (content.includes('chip') || content.includes('chips') || content.includes('filter') || content.includes('Filter')) {
-    previewHtml += '<div class="chips">';
-    previewHtml += '<span class="chip">Type: PKK ✕</span>';
-    previewHtml += '<span class="chip">Status: Started ✕</span>';
-    previewHtml += '<a href="#">Remove all filters</a>';
+  if (hasCheckbox) {
+    previewHtml += '<div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;">';
+    previewHtml += '<input type="checkbox" id="cb1"><label for="cb1" style="font-size:14px;">Checkbox option</label>';
     previewHtml += '</div>';
   }
 
-  // Table - use the ACTUAL column count from prototype (10 columns)
-  const allColumns = ['Reg.no', 'Insp.#', 'Type', 'Make / model', 'Insp.date', 'Remaining', 'Sev', 'Inspector', 'Status', ''];
-  const headers = cols.length > 0 ? cols : allColumns;
-  previewHtml += '<div class="table-wrapper"><table><thead><tr>';
-  headers.forEach(h => { previewHtml += '<th>' + h + '</th>'; });
-  previewHtml += '</tr></thead><tbody>';
+  if (hasSwitch) {
+    previewHtml += '<div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;">';
+    previewHtml += '<div style="width:44px;height:24px;background:#0d5bd7;border-radius:12px;position:relative;cursor:pointer;"><div style="width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:2px;right:2px;"></div></div>';
+    previewHtml += '<span style="font-size:14px;">Toggle switch</span>';
+    previewHtml += '</div>';
+  }
 
-  const sampleData = [
-    ['AB12345', 'PKK-2026-001234', 'PKK', 'Volvo FH', '2026-07-10', '2 days', 'L', 'TS', 'Started', '⋯'],
-    ['CD67890', 'PKK-2026-001235', 'PKK', 'Scania R450', '2026-07-11', '5 days', 'M', 'AH', 'In progress', '⋯'],
-    ['EF11223', 'PKK-2026-001236', 'EU', 'Mercedes Actros', '2026-07-09', 'Done', '', 'TS', 'Completed', '⋯'],
-    ['GH44556', 'PKK-2026-001237', 'PKK', 'MAN TGX', '2026-07-15', '7 days', '', 'KJ', 'Started', '⋯'],
-    ['IJ77889', 'PKK-2026-001238', 'EU', 'DAF XF', '2026-07-12', '1 day', 'H', 'TS', 'In progress', '⋯'],
-  ];
+  if (hasButtons) {
+    previewHtml += '<div style="margin:16px 0;display:flex;gap:10px;flex-wrap:wrap;">';
+    if (compList.includes('BUSButton')) {
+      previewHtml += '<button class="primary-btn">' + pageTitle + ' action</button>';
+      previewHtml += '<button class="outline-btn">Cancel</button>';
+    }
+    previewHtml += '</div>';
+  }
 
-  for (let i = 0; i < 5; i++) {
-    previewHtml += '<tr>';
-    const row = sampleData[i];
-    headers.forEach((h, j) => {
-      let val = row[j] || '—';
-      // Style status column
-      if (h === 'Status') {
-        const cls = val === 'Completed' ? 'status-completed' : val === 'In progress' ? 'status-progress' : 'status-started';
-        val = '<span class="status-badge ' + cls + '">' + val + '</span>';
-      }
-      previewHtml += '<td>' + val + '</td>';
+  if (hasTable) {
+    const allColumns = ['Reg.no', 'Insp.#', 'Type', 'Make / model', 'Insp.date', 'Remaining', 'Sev', 'Inspector', 'Status', ''];
+    const headers = cols.length >= 2 ? cols : allColumns;
+    previewHtml += '<div class="table-wrapper"><table><thead><tr>';
+    headers.forEach(h => { previewHtml += '<th>' + h + '</th>'; });
+    previewHtml += '</tr></thead><tbody>';
+
+    const sampleRows = dataRows.length > 0 ? dataRows : [
+      { 'Column 1': 'Sample A', 'Column 2': 'Value 1', 'Column 3': 'Active' },
+      { 'Column 1': 'Sample B', 'Column 2': 'Value 2', 'Column 3': 'Pending' },
+      { 'Column 1': 'Sample C', 'Column 2': 'Value 3', 'Column 3': 'Done' },
+    ];
+
+    sampleRows.forEach(row => {
+      previewHtml += '<tr>';
+      headers.forEach(h => {
+        let val = row[h] || '—';
+        if (h === 'Status' || (typeof val === 'string' && (val === 'Active' || val === 'Pending' || val === 'Done' || val === 'Started' || val === 'Completed'))) {
+          const cls = val === 'Completed' || val === 'Done' ? 'status-completed' : val === 'Active' ? 'status-started' : 'status-progress';
+          val = '<span class="status-badge ' + cls + '">' + val + '</span>';
+        }
+        previewHtml += '<td>' + val + '</td>';
+      });
+      previewHtml += '</tr>';
     });
-    previewHtml += '</tr>';
+    previewHtml += '</tbody></table></div>';
   }
-  previewHtml += '</tbody></table></div>';
 
-  previewHtml += '</section>'; // content
-  previewHtml += '</main>'; // main
-  previewHtml += '</div></body></html>';
+  // If nothing specific was generated, show a summary card
+  if (!hasTable && !hasTabs && !hasButtons && !hasExpansion && !hasCheckbox && !hasSwitch && !hasInput) {
+    previewHtml += '<div class="comp-card"><h3>' + pageTitle + '</h3><p>Generated component layout for this page.</p></div>';
+    compList.forEach(c => {
+      previewHtml += '<div class="comp-label">📦 Component: <strong>' + c + '</strong></div>';
+    });
+  }
+
+  previewHtml += '</section>';
+  previewHtml += hasSidebar ? '</main></div>' : '</div>';
+  previewHtml += '</body></html>';
 
   iframe.srcdoc = previewHtml;
 }

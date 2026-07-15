@@ -1,0 +1,29 @@
+{
+  "componentId": "BUSGridColumnMenu",
+  "name": "BUSGrid Column Menu",
+  "category": "other",
+  "status": "approved",
+  "description": "Extracted from bus-grid-column-menu.jsx",
+  "props": [
+    {
+      "name": "columns",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "onColumnMenuSubmit",
+      "type": "function",
+      "required": false
+    }
+  ],
+  "tokensConsumed": [
+    "color.table.header.bg",
+    "color.text.primary",
+    "color.table.row.border"
+  ],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/bus-grids/bus-grid-column-menu/bus-grid-column-menu",
+  "exportName": "BUSGridColumnMenu",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/bus-grids/bus-grid-column-menu/bus-grid-column-menu.jsx"
+}

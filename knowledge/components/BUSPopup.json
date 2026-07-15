@@ -1,13 +1,75 @@
 {
-  "ComponentId": "BUSPopup",
-  "Name": "BUSPopup",
-  "Category": "other",
-  "Status": "approved",
-  "Description": "Extracted from BUSPopup.js",
-  "Props": [],
-  "Variants": null,
-  "TokensConsumed": [],
-  "Examples": null,
-  "Accessibility": null,
-  "MapsFromHtml": []
+  "componentId": "BUSPopup",
+  "name": "BUSPopup",
+  "category": "other",
+  "status": "approved",
+  "description": "Extracted from BUSPopup.js",
+  "props": [
+    {
+      "name": "title",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "position",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "closeOnDocumentClick",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "closeOnEscape",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "open",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "disabled",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "repositionOnResize",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "showCloseIcon",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "onOpen",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onClose",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "children",
+      "type": "ReactNode",
+      "required": true
+    }
+  ],
+  "tokensConsumed": [],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/BUSPopup/BUSPopup",
+  "exportName": "BUSPopup",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSPopup/BUSPopup.js"
 }

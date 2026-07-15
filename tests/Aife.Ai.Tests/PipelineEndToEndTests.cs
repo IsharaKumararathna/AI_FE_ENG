@@ -39,7 +39,7 @@ public class PipelineEndToEndTests
             [
               {
                 "path": "src/Dashboard.tsx",
-                "content": "import { BUSButton, DataGrid } from '@org/ds/react'; export const Dashboard = () => null;"
+                "content": "import { BUSButton, BUSGrid } from '@org/ds/react'; export const Dashboard = () => null;"
               }
             ]
             """,
@@ -119,14 +119,14 @@ public class PipelineEndToEndTests
         result.Mappings!.Should().Contain(m =>
             m.ComponentId == "BUSButton" && m.Confidence >= 0.95);
         result.Mappings.Should().Contain(m =>
-            m.ComponentId == "DataGrid" && m.Confidence >= 0.95);
+            m.ComponentId == "BUSGrid" && m.Confidence >= 0.95);
 
         // ── Assert: intermediate UI tree ──
         result.Tree.Should().NotBeNull();
         result.Tree!.Layout.Should().Be("AppLayout");
         result.Tree.Children.Should().HaveCount(2);
         result.Tree.Children.Should().Contain(n => n.ComponentId == "BUSButton");
-        result.Tree.Children.Should().Contain(n => n.ComponentId == "DataGrid");
+        result.Tree.Children.Should().Contain(n => n.ComponentId == "BUSGrid");
 
         // ── Assert: generated artifacts ──
         result.Artifacts.Should().NotBeEmpty();

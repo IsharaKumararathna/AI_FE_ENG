@@ -1,0 +1,95 @@
+{
+  "componentId": "BUSMultiSelectDropdown",
+  "name": "BUSMulti Select Dropdown",
+  "category": "other",
+  "status": "approved",
+  "description": "Extracted from BUSMultiSelectDropdown.jsx",
+  "props": [
+    {
+      "name": "id",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "placeholder",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "data",
+      "type": "array",
+      "required": false
+    },
+    {
+      "name": "textField",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "valueField",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "component",
+      "type": "any",
+      "required": true
+    },
+    {
+      "name": "formProps",
+      "type": "object",
+      "required": false
+    },
+    {
+      "name": "itemRender",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "footer",
+      "type": "any",
+      "required": false
+    },
+    {
+      "name": "tags",
+      "type": "any",
+      "required": false
+    },
+    {
+      "name": "onChange",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "autoClose",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "tagRender",
+      "type": "function",
+      "required": false
+    }
+  ],
+  "tokensConsumed": [],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/BUSMultiSelectDropdown/BUSMultiSelectDropdown",
+  "exportName": "BUSMultiSelectDropdown",
+  "isDefaultExport": true,
+  "sourceFile": "src/Components/CustomUIs/BUSMultiSelectDropdown/BUSMultiSelectDropdown.jsx"
+}

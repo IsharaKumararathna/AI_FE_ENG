@@ -1,16 +1,38 @@
 {
-  "ComponentId": "BUSForm",
-  "Name": "Form",
-  "Category": "form",
-  "Status": "approved",
-  "Description": "Extracted from BUSFormAdapter.js",
-  "Props": [],
-  "Variants": null,
-  "TokensConsumed": [],
-  "Examples": null,
-  "Accessibility": null,
-  "MapsFromHtml": [
+  "componentId": "BUSForm",
+  "name": "Form",
+  "category": "form",
+  "status": "approved",
+  "description": "Extracted from BUSFormAdapter.js",
+  "props": [
+    {
+      "name": "initialValues",
+      "type": "object",
+      "required": false
+    },
+    {
+      "name": "onSubmit",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "render",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "ignoreModified",
+      "type": "boolean",
+      "required": false
+    }
+  ],
+  "tokensConsumed": [],
+  "mapsFromHtml": [
     "form",
     "formfield"
-  ]
+  ],
+  "importPath": "Components/CustomUIs/BUSFormFields/BUSFormAdapter",
+  "exportName": "Form",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSFormFields/BUSFormAdapter.js"
 }

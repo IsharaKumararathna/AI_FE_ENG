@@ -65,7 +65,7 @@ public sealed class UiTreeAssembler : IUiTreeAssembler
         var fallbackSeen = new HashSet<string>();
         foreach (var mapping in mappings.Where(m => m.Confidence < 0.5 || m.ComponentId is null))
         {
-            var fallbackId = GetFallbackComponentId(mapping.ElementRef ?? "");
+            var fallbackId = await GetFallbackComponentIdAsync(mapping.ElementRef ?? "", ct);
             if (fallbackSeen.Contains(fallbackId))
                 continue;
             fallbackSeen.Add(fallbackId);
@@ -105,23 +105,34 @@ public sealed class UiTreeAssembler : IUiTreeAssembler
         return tree;
     }
 
-    private static string GetFallbackComponentId(string elementRef)
+    /// <summary>
+    /// Resolves a best-guess component for an element the primary mapper
+    /// couldn't confidently place, by querying the KB directly rather than
+    /// hardcoding project-specific component IDs (a KB trained from a
+    /// different Core repo won't have e.g. "BUSButton"). Prefers an exact
+    /// <c>mapsFromHtml</c> declaration, then a category match via the shared
+    /// <see cref="ElementCategoryFallback"/> table, then any approved
+    /// component at all so the tree still renders something real.
+    /// </summary>
+    private async Task<string> GetFallbackComponentIdAsync(string elementRef, CancellationToken ct)
     {
-        return (elementRef ?? string.Empty).ToLowerInvariant() switch
+        var kind = (elementRef ?? string.Empty).ToLowerInvariant();
+        var allComponents = await _knowledgeProvider.SearchComponentsAsync(new ComponentQuery(), ct);
+
+        foreach (var summary in allComponents)
         {
-            "table" or "datagrid" or "grid" => "DataGrid",
-            "button" or "btn" => "BUSButton",
-            "input" or "search" or "textbox" => "BUSSearch",
-            "tabs" or "tab" or "tabstrip" => "BUSTabStrip",
-            "sidebar" or "nav" or "navigation" => "BUSTabStrip",
-            "checkbox" => "BUSCheckbox",
-            "switch" or "toggle" => "BUSSwitch",
-            "form" or "formfield" => "BUSForm",
-            "header" => "BUSButton", // header regions use buttons/toolbar items
-            "typography" => "BUSButton", // fallback for text regions
-            "chips" or "chip" or "badge" => "BUSButton",
-            "avatar" => "BUSButton",
-            _ => "BUSButton" // last resort
-        };
+            var detail = await _knowledgeProvider.GetComponentAsync(summary.ComponentId, ct);
+            if (detail?.MapsFromHtml is not null &&
+                detail.MapsFromHtml.Any(h => h.Equals(kind, StringComparison.OrdinalIgnoreCase)))
+            {
+                return summary.ComponentId;
+            }
+        }
+
+        var categoryMatch = allComponents.FirstOrDefault(s => ElementCategoryFallback.MatchesSemantically(kind, s.Category));
+        if (categoryMatch is not null)
+            return categoryMatch.ComponentId;
+
+        return allComponents.FirstOrDefault()?.ComponentId ?? "BUSButton";
     }
 }

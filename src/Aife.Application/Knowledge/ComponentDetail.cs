@@ -16,4 +16,8 @@ public sealed record ComponentDetail
     public IList<ComponentExample>? Examples { get; init; }
     public ComponentAccessibility? Accessibility { get; init; }
     public IList<string>? MapsFromHtml { get; init; }
+    public string? ImportPath { get; init; }
+    public string? ExportName { get; init; }
+    public bool IsDefaultExport { get; init; }
+    public string? SourceFile { get; init; }
 }

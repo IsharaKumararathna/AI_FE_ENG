@@ -20,13 +20,13 @@ public class ComponentCatalogSchemaTests
     }
 
     [Fact]
-    public void DataGrid_validates_against_component_catalog_schema()
+    public void BUSGrid_validates_against_component_catalog_schema()
     {
         var (isValid, errors) = SchemaValidator.ValidateFile(
             SchemaPath,
-            Path.Combine(TestPaths.Knowledge, "components", "DataGrid.json"));
+            Path.Combine(TestPaths.Knowledge, "components", "BUSGrid.json"));
 
         isValid.Should().BeTrue(
-            "DataGrid must conform to the component catalog schema. Errors:\n{0}", errors);
+            "BUSGrid must conform to the component catalog schema. Errors:\n{0}", errors);
     }
 }

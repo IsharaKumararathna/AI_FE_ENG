@@ -1,13 +1,14 @@
 {
-  "ComponentId": "BUSMultiselectAdvancedGroupingTypeEnum",
-  "Name": "BUSMultiselect Advanced Grouping Type Enum",
-  "Category": "input",
-  "Status": "approved",
-  "Description": "Extracted from BUSMultiselectAdvancedGroupingTypeEnum.js",
-  "Props": [],
-  "Variants": null,
-  "TokensConsumed": [],
-  "Examples": null,
-  "Accessibility": null,
-  "MapsFromHtml": []
+  "componentId": "BUSMultiselectAdvancedGroupingTypeEnum",
+  "name": "BUSMultiselect Advanced Grouping Type Enum",
+  "category": "other",
+  "status": "approved",
+  "description": "Extracted from BUSMultiselectAdvancedGroupingTypeEnum.js",
+  "props": [],
+  "tokensConsumed": [],
+  "mapsFromHtml": [],
+  "importPath": "Components/CustomUIs/BUSMultiselectAdvanced/BUSMultiselectAdvancedGroupingTypeEnum",
+  "exportName": "BUSMultiselectAdvancedGroupingTypeEnum",
+  "isDefaultExport": false,
+  "sourceFile": "src/Components/CustomUIs/BUSMultiselectAdvanced/BUSMultiselectAdvancedGroupingTypeEnum.js"
 }

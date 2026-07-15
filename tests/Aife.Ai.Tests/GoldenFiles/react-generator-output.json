@@ -1,6 +1,6 @@
 [
   {
     "path": "src/Dashboard.tsx",
-    "content": "import { BUSButton, DataGrid } from '@org/ds/react'; export const Dashboard = () => null;"
+    "content": "import { BUSButton, BUSGrid } from '@org/ds/react'; export const Dashboard = () => null;"
   }
 ]

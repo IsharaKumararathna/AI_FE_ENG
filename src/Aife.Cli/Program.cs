@@ -181,7 +181,46 @@ if (result.Review is not null)
 Console.WriteLine();
 Console.WriteLine("Done.");
 
+// ── Write generated artifacts to disk ──
+if (result.Artifacts is not null && result.Artifacts.Count > 0)
+{
+    var outputDir = DetermineOutputDir(htmlPath, args);
+    Directory.CreateDirectory(outputDir);
+
+    foreach (var artifact in result.Artifacts)
+    {
+        var outPath = Path.Combine(outputDir, artifact.Path.Replace('/', Path.DirectorySeparatorChar));
+        var outDir = Path.GetDirectoryName(outPath);
+        if (outDir is not null)
+            Directory.CreateDirectory(outDir);
+        await File.WriteAllTextAsync(outPath, artifact.Content);
+        Console.WriteLine($"Wrote: {outPath}");
+    }
+
+    Console.WriteLine();
+    Console.WriteLine($"Output directory: {outputDir}");
+}
+
 return 0;
+
+// ── Helpers ──
+
+static string DetermineOutputDir(string? htmlPath, string[] args)
+{
+    // Check for --output-dir flag
+    for (var i = 0; i < args.Length - 1; i++)
+    {
+        if (args[i] is "--output-dir" or "-o")
+            return Path.GetFullPath(args[i + 1]);
+    }
+
+    // Default: output/ next to the input HTML file
+    if (htmlPath is not null && File.Exists(htmlPath))
+        return Path.Combine(Path.GetDirectoryName(htmlPath)!, "output");
+
+    // Fallback: output/ in repo data directory
+    return Path.Combine(AppContext.BaseDirectory, "output");
+}
 
 // ── Helpers ──
 
