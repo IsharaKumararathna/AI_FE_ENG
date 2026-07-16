@@ -49,6 +49,16 @@ else
         "components change. Configure a source (or run `aife-mcp train` manually) to keep it current.");
 }
 
+// Resolves where save_ai_preview writes generated pages so non-technical
+// reviewers can see them live (via require.context auto-discovery in the
+// consumer project) with zero manual file placement or route wiring.
+var previewRoot = ResolvePreviewRootPath(args, componentsSource);
+if (previewRoot is not null)
+    Log(stderr, $"AI preview writes enabled (root: {previewRoot}).");
+else
+    Log(stderr, "WARNING: no --preview-root/AIFE_PREVIEW_ROOT (or --components-source fallback) configured. " +
+        "The save_ai_preview tool will be unavailable until one is set.");
+
 var provider = new JsonKnowledgeProvider(knowledgePath);
 var matchingService = new ComponentMatchingService(provider);
 var tokenChecker = new TokenConformanceChecker(provider);
@@ -64,7 +74,7 @@ while (true)
         var isNotification = request["id"] is null;
         Log(stderr, $"<- {request["method"]}{(isNotification ? " (notification)" : "")}");
 
-        var response = await HandleRequestAsync(request, provider, matchingService, tokenChecker, scorer);
+        var response = await HandleRequestAsync(request, provider, matchingService, tokenChecker, scorer, previewRoot);
 
         // JSON-RPC notifications (no "id") must never receive a response —
         // sending one anyway breaks strict clients (e.g. VS Code's MCP host
@@ -176,6 +186,31 @@ static string? ResolveComponentsSourcePath(string[] args)
     var envPath = Environment.GetEnvironmentVariable("AIFE_COMPONENTS_SOURCE");
     if (!string.IsNullOrWhiteSpace(envPath))
         return IsGitUrl(envPath) ? envPath : Path.GetFullPath(envPath);
+
+    return null;
+}
+
+/// <summary>
+/// Resolves where the save_ai_preview tool writes generated pages so they
+/// show up automatically (via require.context auto-discovery) with zero
+/// manual file placement or routing. Priority: explicit CLI arg, then env
+/// var, then (if a local, non-git components-source is configured) a
+/// `_AiPreview` sibling folder next to it. Returns null (tool unavailable)
+/// if nothing can be resolved — never guesses a location that wasn't
+/// explicitly configured or clearly derivable.
+/// </summary>
+static string? ResolvePreviewRootPath(string[] args, string? componentsSource)
+{
+    var cliPath = GetArgValue(args, "--preview-root");
+    if (!string.IsNullOrWhiteSpace(cliPath))
+        return Path.GetFullPath(cliPath);
+
+    var envPath = Environment.GetEnvironmentVariable("AIFE_PREVIEW_ROOT");
+    if (!string.IsNullOrWhiteSpace(envPath))
+        return Path.GetFullPath(envPath);
+
+    if (componentsSource is not null && !IsGitUrl(componentsSource))
+        return Path.Combine(componentsSource, "_AiPreview");
 
     return null;
 }
@@ -319,7 +354,8 @@ static async Task<object> HandleRequestAsync(
     IKnowledgeProvider provider,
     ComponentMatchingService matchingService,
     TokenConformanceChecker tokenChecker,
-    PrototypeScorer scorer)
+    PrototypeScorer scorer,
+    string? previewRoot)
 {
     var method = request["method"]?.ToString() ?? "";
     var id = request["id"];
@@ -331,7 +367,7 @@ static async Task<object> HandleRequestAsync(
         {
             "initialize" => new { jsonrpc = "2.0", id, result = new { protocolVersion = ResolveProtocolVersion(request), serverInfo = new { name = "aife-mcp", version = "1.0.0" }, capabilities = new { tools = new { listChanged = false } } } },
             "tools/list" => new { jsonrpc = "2.0", id, result = new { tools = Aife.Mcp.McpToolDefinitions.Tools } },
-            "tools/call" => new { jsonrpc = "2.0", id, result = await CallToolAsync(request["params"]?["name"]?.ToString() ?? "", request["params"]?["arguments"] as JObject, provider, matchingService, tokenChecker, scorer, ct) },
+            "tools/call" => new { jsonrpc = "2.0", id, result = await CallToolAsync(request["params"]?["name"]?.ToString() ?? "", request["params"]?["arguments"] as JObject, provider, matchingService, tokenChecker, scorer, previewRoot, ct) },
             "notifications/initialized" => new { jsonrpc = "2.0", id, result = new { } },
             "ping" => new { jsonrpc = "2.0", id, result = new { } },
             // We only declared the "tools" capability, but some clients still
@@ -369,6 +405,7 @@ static async Task<object> CallToolAsync(
     ComponentMatchingService matchingService,
     TokenConformanceChecker tokenChecker,
     PrototypeScorer scorer,
+    string? previewRoot,
     CancellationToken ct)
 {
     return toolName switch
@@ -390,7 +427,121 @@ static async Task<object> CallToolAsync(
             args?["elements"]?.ToObject<List<ScoredElementInput>>() ?? new List<ScoredElementInput>(),
             args?["tokenViolations"]?.ToObject<List<TokenViolation>>() ?? new List<TokenViolation>(),
             ct),
+        "save_ai_preview" => await SaveAiPreviewAsync(previewRoot, args, ct),
         _ => new { error = $"Unknown tool: {toolName}" }
+    };
+}
+
+/// <summary>
+/// Writes AI-generated page files into the consumer project's AI-preview
+/// folder (e.g. src/Components/AppLogic/_AiPreview/&lt;slug&gt;/), where the
+/// project's own AiPreviewPage.tsx auto-discovers them via require.context.
+/// This is the piece that makes the whole preview flow zero-manual-work:
+/// generate -> call this tool -> reviewers see it live, no file copying or
+/// route/App.js edits ever needed.
+///
+/// Security: slug and every file path are strictly validated (no "..",
+/// no absolute paths/drive letters, resulting full path re-checked to stay
+/// under the slug folder) before any write, since this executes filesystem
+/// writes driven by LLM/client-supplied input (OWASP path traversal).
+/// </summary>
+static async Task<object> SaveAiPreviewAsync(string? previewRoot, JObject? args, CancellationToken ct)
+{
+    if (previewRoot is null)
+        return new { error = "No preview root configured. Set --preview-root or AIFE_PREVIEW_ROOT (or --components-source as a fallback base) when starting the MCP server." };
+
+    var slug = args?["slug"]?.ToString();
+    if (string.IsNullOrWhiteSpace(slug) || !System.Text.RegularExpressions.Regex.IsMatch(slug, "^[a-z0-9][a-z0-9-]*$"))
+        return new { error = "'slug' is required and must be lowercase kebab-case (e.g. 'customer-register')." };
+
+    var files = args?["files"]?.ToObject<List<PreviewFileInput>>();
+    if (files is null || files.Count == 0)
+        return new { error = "'files' must be a non-empty array of { path, content }." };
+
+    var slugRoot = Path.GetFullPath(Path.Combine(previewRoot, slug));
+    var previewRootFull = Path.GetFullPath(previewRoot);
+    if (!slugRoot.StartsWith(previewRootFull, StringComparison.OrdinalIgnoreCase))
+        return new { error = "Invalid slug." };
+
+    var hasIndex = files.Any(f => f.Path.Equals("index.tsx", StringComparison.OrdinalIgnoreCase));
+    var written = new List<string>();
+
+    foreach (var file in files)
+    {
+        if (string.IsNullOrWhiteSpace(file.Path) ||
+            file.Path.Contains("..") ||
+            Path.IsPathRooted(file.Path) ||
+            file.Path.Contains(':'))
+            return new { error = $"Invalid file path: '{file.Path}'." };
+
+        var fullPath = Path.GetFullPath(Path.Combine(slugRoot, file.Path));
+        if (!fullPath.StartsWith(slugRoot, StringComparison.OrdinalIgnoreCase))
+            return new { error = $"Invalid file path (escapes slug folder): '{file.Path}'." };
+
+        var dir = Path.GetDirectoryName(fullPath);
+        if (dir is not null)
+            Directory.CreateDirectory(dir);
+
+        await File.WriteAllTextAsync(fullPath, file.Content, ct);
+        written.Add(file.Path);
+    }
+
+    // Convenience: if the caller forgot an index.tsx (the file
+    // AiPreviewPage.tsx's require.context glob looks for) but supplied
+    // exactly one component file, auto-generate a re-export so the preview
+    // still shows up without the caller needing to know that convention.
+    if (!hasIndex)
+    {
+        var componentFiles = files.Where(f => f.Path.EndsWith(".tsx", StringComparison.OrdinalIgnoreCase) && !f.Path.Equals("index.tsx", StringComparison.OrdinalIgnoreCase)).ToList();
+        if (componentFiles.Count == 1)
+        {
+            var componentModule = Path.GetFileNameWithoutExtension(componentFiles[0].Path);
+            var indexPath = Path.Combine(slugRoot, "index.tsx");
+            await File.WriteAllTextAsync(indexPath, $"export {{ default }} from './{componentModule}';{Environment.NewLine}", ct);
+            written.Add("index.tsx (auto-generated)");
+        }
+        else
+        {
+            return new
+            {
+                warning = "No index.tsx supplied and more than one .tsx file present — couldn't auto-generate one. " +
+                    "Add an index.tsx that default-exports the main component so the preview page can discover it.",
+                slug,
+                filesWritten = written
+            };
+        }
+    }
+
+    // Persist the raw source + analysis/review (if supplied) as meta.json
+    // alongside the code, so AiPreviewPage.tsx can show "React Code" /
+    // "Review Report" / "Analysis" tabs matching the Aife.Api dashboard's
+    // presentation — reading sources straight from meta.json (not a webpack
+    // raw-loader, which isn't guaranteed to be installed in every consumer
+    // project) keeps this reliable with zero extra webpack config.
+    var analysis = args?["analysis"];
+    var review = args?["review"];
+    var sources = new JObject();
+    foreach (var file in files.Where(f => !f.Path.Equals("index.tsx", StringComparison.OrdinalIgnoreCase)))
+        sources[file.Path] = file.Content;
+
+    var meta = new JObject
+    {
+        ["files"] = new JArray(files.Select(f => f.Path)),
+        ["sources"] = sources,
+        ["analysis"] = analysis,
+        ["review"] = review,
+        ["generatedAt"] = DateTimeOffset.UtcNow.ToString("O")
+    };
+    await File.WriteAllTextAsync(Path.Combine(slugRoot, "meta.json"), meta.ToString(Formatting.Indented), ct);
+    written.Add("meta.json");
+
+    return new
+    {
+        success = true,
+        slug,
+        filesWritten = written,
+        previewUrl = $"/ai-preview/{slug}",
+        message = $"Saved. Once the dev server is running, open http://localhost:3000/#/ai-preview/{slug} (after logging in) to review it."
     };
 }
 
@@ -429,4 +580,10 @@ static string FindRepoRoot()
     var dir = new DirectoryInfo(AppContext.BaseDirectory);
     while (dir is not null) { if (Directory.Exists(Path.Combine(dir.FullName, "knowledge"))) return dir.FullName; dir = dir.Parent; }
     return AppContext.BaseDirectory;
+}
+
+sealed class PreviewFileInput
+{
+    public string Path { get; set; } = "";
+    public string Content { get; set; } = "";
 }

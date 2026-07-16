@@ -224,6 +224,102 @@ public static class McpToolDefinitions
                 },
                 required = new[] { "elements" }
             }
+        },
+        new
+        {
+            name = "save_ai_preview",
+            description = "Saves generated page file(s) into the consumer project's live AI-preview folder " +
+                "so a non-technical reviewer can see them rendered through the project's REAL build pipeline " +
+                "(real webpack/sass, real design tokens) with zero manual file copying or route wiring — the " +
+                "project's AiPreviewPage.tsx auto-discovers anything saved here via require.context. Call " +
+                "this as the LAST step after generating a page's component (and its .module.scss if any). " +
+                "'slug' must be lowercase kebab-case (e.g. 'customer-register') and becomes the URL " +
+                "/ai-preview/{slug}. 'files' must include an 'index.tsx' that default-exports the page " +
+                "component (e.g. `export { default } from './MyPage';`) — if omitted and exactly one .tsx " +
+                "file is given, an index.tsx is auto-generated for you. Also pass 'analysis' (the detected " +
+                "layout/elements from prototype analysis) and 'review' (score/outcome/violations/suggestions " +
+                "from the AI reviewer) when available — the preview page shows these as 'Analysis' and " +
+                "'Review Report' tabs alongside the live render and raw React code, mirroring the Aife.Api " +
+                "dashboard's presentation. Both are optional; omit either if that stage wasn't run. Requires " +
+                "the server to have been started with --preview-root or AIFE_PREVIEW_ROOT (or a " +
+                "--components-source fallback) configured; if not, this tool returns an error explaining how " +
+                "to configure it — never silently guesses a location.",
+            inputSchema = new
+            {
+                type = "object",
+                properties = new
+                {
+                    slug = new { type = "string", description = "Lowercase kebab-case identifier for the page, e.g. 'customer-register'. Becomes the URL /ai-preview/{slug}." },
+                    files = new
+                    {
+                        type = "array",
+                        description = "Files to write under the slug's preview folder. Include an index.tsx re-exporting the component's default export.",
+                        items = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                path = new { type = "string", description = "Relative file name within the slug folder, e.g. 'index.tsx', 'CustomerRegister.tsx', 'CustomerRegister.module.scss'. No '..' or absolute paths." },
+                                content = new { type = "string", description = "Full file content." }
+                            },
+                            required = new[] { "path", "content" }
+                        }
+                    },
+                    analysis = new
+                    {
+                        type = "object",
+                        description = "Optional: the PrototypeAnalysis result (layout + detected elements) to show in the preview's 'Analysis' tab.",
+                        properties = new
+                        {
+                            layout = new { type = "string" },
+                            elements = new
+                            {
+                                type = "array",
+                                items = new
+                                {
+                                    type = "object",
+                                    properties = new
+                                    {
+                                        kind = new { type = "string" },
+                                        text = new { type = "string" },
+                                        bounds = new { type = "string" }
+                                    },
+                                    required = new[] { "kind" }
+                                }
+                            }
+                        }
+                    },
+                    review = new
+                    {
+                        type = "object",
+                        description = "Optional: the ReviewReport result (score/outcome/violations/suggestions) to show in the preview's 'Review Report' tab.",
+                        properties = new
+                        {
+                            score = new { type = "number" },
+                            outcome = new { type = "string", description = "e.g. 'Passed', 'PassedWithWarnings', 'Failed'." },
+                            violations = new
+                            {
+                                type = "array",
+                                items = new
+                                {
+                                    type = "object",
+                                    properties = new
+                                    {
+                                        ruleId = new { type = "string" },
+                                        category = new { type = "string" },
+                                        severity = new { type = "string" },
+                                        message = new { type = "string" },
+                                        location = new { type = "string" }
+                                    },
+                                    required = new[] { "ruleId", "message" }
+                                }
+                            },
+                            suggestions = new { type = "array", items = new { type = "string" } }
+                        }
+                    }
+                },
+                required = new[] { "slug", "files" }
+            }
         }
     };
 }
