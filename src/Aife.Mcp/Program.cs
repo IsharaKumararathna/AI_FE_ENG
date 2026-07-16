@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Text;
 using Aife.Application.Knowledge;
 using Aife.Knowledge;
@@ -15,10 +17,6 @@ if (args.Length > 0 && args[0].Equals("train", StringComparison.OrdinalIgnoreCas
 }
 
 var knowledgePath = ResolveKnowledgePath(args);
-var provider = new JsonKnowledgeProvider(knowledgePath);
-var matchingService = new ComponentMatchingService(provider);
-var tokenChecker = new TokenConformanceChecker(provider);
-var scorer = new PrototypeScorer(provider);
 
 var stdin = Console.OpenStandardInput();
 var stdout = Console.OpenStandardOutput();
@@ -26,6 +24,35 @@ var stderr = Console.OpenStandardError();
 
 // Write startup log to stderr (stdio is for JSON-RPC)
 Log(stderr, $"Aife MCP Server v1.0.0 starting (kb: {knowledgePath})");
+
+// Keep the Knowledge Base fresh automatically: if a live component-library
+// source is configured, compare its fingerprint (git HEAD SHA, or a hash of
+// file mtimes/sizes) against the one recorded at the last train and
+// auto-retrain before serving any tool calls if it changed. If no source is
+// configured at all, fall back to serving the static knowledge/ snapshot
+// as-is (documented zero-config path) but warn that it may go stale.
+var componentsSource = ResolveComponentsSourcePath(args);
+if (componentsSource is not null)
+{
+    if (!IsGitUrl(componentsSource) && !Directory.Exists(componentsSource))
+    {
+        Log(stderr, $"FATAL: --components-source/AIFE_COMPONENTS_SOURCE points to a path that does not exist: {componentsSource}");
+        return 1;
+    }
+
+    await RefreshKnowledgeIfStaleAsync(knowledgePath, componentsSource, stderr);
+}
+else
+{
+    Log(stderr, "WARNING: no --components-source/AIFE_COMPONENTS_SOURCE configured. " +
+        "Serving the static knowledge/ snapshot as-is — it will not auto-refresh when " +
+        "components change. Configure a source (or run `aife-mcp train` manually) to keep it current.");
+}
+
+var provider = new JsonKnowledgeProvider(knowledgePath);
+var matchingService = new ComponentMatchingService(provider);
+var tokenChecker = new TokenConformanceChecker(provider);
+var scorer = new PrototypeScorer(provider);
 
 while (true)
 {
@@ -63,10 +90,11 @@ static async Task<int> RunTrainCommandAsync(string[] args)
     var source = GetArgValue(args, "--source");
     var outPath = GetArgValue(args, "--out");
     var modeArg = GetArgValue(args, "--mode") ?? "update";
+    var branch = GetArgValue(args, "--branch");
 
     if (string.IsNullOrWhiteSpace(source))
     {
-        Console.Error.WriteLine("Usage: aife-mcp train --source <repoPath> [--out <kbPath>] [--mode update|replace]");
+        Console.Error.WriteLine("Usage: aife-mcp train --source <repoPath|gitUrl> [--branch <name>] [--out <kbPath>] [--mode update|replace]");
         return 1;
     }
 
@@ -80,11 +108,24 @@ static async Task<int> RunTrainCommandAsync(string[] args)
         : TrainMode.Update;
 
     var trainer = new KnowledgeTrainerService(outPath);
-    var result = await trainer.TrainFromFolderAsync(Path.GetFullPath(source), mode, CancellationToken.None);
+    var result = IsGitUrl(source)
+        ? await trainer.TrainFromGitAsync(source, branch, mode, CancellationToken.None)
+        : await trainer.TrainFromFolderAsync(Path.GetFullPath(source), mode, CancellationToken.None);
 
     Console.WriteLine(JsonConvert.SerializeObject(result, Formatting.Indented));
     return result.Success ? 0 : 1;
 }
+
+/// <summary>
+/// True if the source string is a git remote (https/ssh URL or *.git) rather
+/// than a local folder path — used to route to TrainFromGitAsync (clone then
+/// scan) instead of TrainFromFolderAsync, and to skip local-path validation.
+/// </summary>
+static bool IsGitUrl(string source) =>
+    source.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+    source.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+    source.StartsWith("git@", StringComparison.OrdinalIgnoreCase) ||
+    source.EndsWith(".git", StringComparison.OrdinalIgnoreCase);
 
 static string? GetArgValue(string[] args, string flag)
 {
@@ -118,6 +159,159 @@ static string ResolveKnowledgePath(string[] args)
         return projectLocalPath;
 
     return Path.Combine(FindRepoRoot(), "knowledge");
+}
+
+/// <summary>
+/// Resolves the live component-library source path (the "Core repo" containing
+/// e.g. `src/Components/CustomUIs`) so the server can detect drift and
+/// auto-refresh its Knowledge Base. Priority: explicit CLI arg, then env var.
+/// Returns null if neither is configured (no auto-refresh; static snapshot only).
+/// </summary>
+static string? ResolveComponentsSourcePath(string[] args)
+{
+    var cliPath = GetArgValue(args, "--components-source");
+    if (!string.IsNullOrWhiteSpace(cliPath))
+        return IsGitUrl(cliPath) ? cliPath : Path.GetFullPath(cliPath);
+
+    var envPath = Environment.GetEnvironmentVariable("AIFE_COMPONENTS_SOURCE");
+    if (!string.IsNullOrWhiteSpace(envPath))
+        return IsGitUrl(envPath) ? envPath : Path.GetFullPath(envPath);
+
+    return null;
+}
+
+/// <summary>
+/// Compares the current fingerprint of the component source folder against
+/// the one recorded from the last successful train and, if different (or
+/// none was recorded yet), re-runs the trainer in Update mode before the
+/// server starts serving tool calls. Keeps steady-state startups fast when
+/// nothing changed (fingerprint match -> no re-scan).
+/// </summary>
+static async Task RefreshKnowledgeIfStaleAsync(string knowledgePath, string componentsSource, Stream stderr)
+{
+    var fingerprintPath = Path.Combine(knowledgePath, ".source-fingerprint");
+    var currentFingerprint = IsGitUrl(componentsSource)
+        ? TryGetRemoteGitHeadSha(componentsSource) is { } sha ? $"git-remote:{sha}" : $"unknown:{Guid.NewGuid():N}"
+        : ComputeSourceFingerprint(componentsSource);
+    var previousFingerprint = File.Exists(fingerprintPath) ? await File.ReadAllTextAsync(fingerprintPath) : null;
+
+    if (string.Equals(currentFingerprint, previousFingerprint, StringComparison.Ordinal))
+    {
+        Log(stderr, $"Components source unchanged since last train (source: {componentsSource}). Serving cached knowledge base.");
+        return;
+    }
+
+    Log(stderr, $"Components source changed (or never trained) \u2014 refreshing knowledge base from {componentsSource}...");
+    Directory.CreateDirectory(knowledgePath);
+    var trainer = new KnowledgeTrainerService(knowledgePath);
+    var result = IsGitUrl(componentsSource)
+        ? await trainer.TrainFromGitAsync(componentsSource, null, TrainMode.Update, CancellationToken.None)
+        : await trainer.TrainFromFolderAsync(componentsSource, TrainMode.Update, CancellationToken.None);
+
+    if (!result.Success)
+    {
+        Log(stderr, $"WARNING: auto-refresh training reported errors: {string.Join("; ", result.Errors)}. Serving existing knowledge base as-is.");
+        return;
+    }
+
+    await File.WriteAllTextAsync(fingerprintPath, currentFingerprint);
+    Log(stderr, $"Knowledge base refreshed (componentsExtracted={result.ComponentsExtracted}, tokensExtracted={result.TokensExtracted}).");
+}
+
+/// <summary>
+/// Fingerprints a component-library source folder so drift can be detected
+/// cheaply on every startup. Prefers the git HEAD commit SHA (fast, exact)
+/// when the source is a git working tree; falls back to a SHA-256 hash of
+/// each relevant source file's relative path + size + last-write-time, which
+/// still catches uncommitted local edits.
+/// </summary>
+static string ComputeSourceFingerprint(string sourcePath)
+{
+    var gitSha = TryGetGitHeadSha(sourcePath);
+    if (gitSha is not null)
+        return $"git:{gitSha}";
+
+    var extensions = new HashSet<string> { ".tsx", ".jsx", ".ts", ".js", ".scss", ".css" };
+    var excludedDirs = new HashSet<string> { "node_modules", "dist", "build", ".git", "bin", "obj" };
+
+    var files = Directory.EnumerateFiles(sourcePath, "*", SearchOption.AllDirectories)
+        .Where(f => extensions.Contains(Path.GetExtension(f)))
+        .Where(f => !f.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Any(excludedDirs.Contains))
+        .OrderBy(f => f, StringComparer.Ordinal);
+
+    var sb = new StringBuilder();
+    foreach (var file in files)
+    {
+        var info = new FileInfo(file);
+        var relative = Path.GetRelativePath(sourcePath, file);
+        sb.Append(relative).Append('|').Append(info.Length).Append('|').Append(info.LastWriteTimeUtc.Ticks).Append('\n');
+    }
+
+    var hash = SHA256.HashData(Encoding.UTF8.GetBytes(sb.ToString()));
+    return $"hash:{Convert.ToHexString(hash)}";
+}
+
+static string? TryGetGitHeadSha(string sourcePath)
+{
+    if (!Directory.Exists(Path.Combine(sourcePath, ".git")))
+        return null;
+
+    try
+    {
+        var psi = new ProcessStartInfo("git", "rev-parse HEAD")
+        {
+            WorkingDirectory = sourcePath,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+        using var process = Process.Start(psi);
+        if (process is null) return null;
+
+        var output = process.StandardOutput.ReadToEnd().Trim();
+        process.WaitForExit(5000);
+        return process.ExitCode == 0 && !string.IsNullOrWhiteSpace(output) ? output : null;
+    }
+    catch
+    {
+        // git not installed, not a repo, or any other failure -> fall back to hash-based fingerprint.
+        return null;
+    }
+}
+
+/// <summary>
+/// Fingerprints a remote git source without a full clone, via `git ls-remote
+/// &lt;url&gt; HEAD` (lightweight network call). Returns null if ls-remote
+/// fails (offline, auth required, etc.) so the caller falls back to a random
+/// fingerprint that always forces a retrain rather than silently skipping one.
+/// </summary>
+static string? TryGetRemoteGitHeadSha(string gitUrl)
+{
+    try
+    {
+        var psi = new ProcessStartInfo("git", $"ls-remote {gitUrl} HEAD")
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+        using var process = Process.Start(psi);
+        if (process is null) return null;
+
+        var output = process.StandardOutput.ReadToEnd().Trim();
+        process.WaitForExit(10000);
+        if (process.ExitCode != 0 || string.IsNullOrWhiteSpace(output))
+            return null;
+
+        // Output format: "<sha>\tHEAD"
+        return output.Split('\t', ' ')[0];
+    }
+    catch
+    {
+        return null;
+    }
 }
 
 static async Task<object> HandleRequestAsync(
