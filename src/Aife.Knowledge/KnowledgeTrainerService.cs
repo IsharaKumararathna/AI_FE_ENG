@@ -815,21 +815,48 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         }
 
         var filePath = Path.Combine(_knowledgePath, "manifest.json");
+
+        // The trainer only ever writes tokens/*.json and components/*.json
+        // into _knowledgePath (see TrainFromFolderAsync above) — it never
+        // generates layouts/, referenceUiPatterns/, icons/, best-practices/
+        // or accessibility/ files for a consumer project. Pointing the
+        // manifest at those static, dev-repo-only asset paths regardless
+        // makes JsonKnowledgeProvider fail to load the Knowledge Base the
+        // moment a project is trained without them (e.g. a fresh
+        // `.aife/knowledge` for a consumer repo). Only reference an asset
+        // path if the file actually exists under _knowledgePath already
+        // (pre-seeded or from a prior train); otherwise omit it so the
+        // provider treats it as simply not configured.
         var manifest = new
         {
             version = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss"),
             components = merged,
-            tokens = "tokens/tokens.json",
-            layouts = new[] { "layouts/AppLayout.json" },
-            referenceUiPatterns = new[] { "referenceUiPatterns/ActiveInspectionsPage.json" },
-            icons = "icons/icons.json",
-            bestPractices = new[] { "best-practices/naming.md" },
-            accessibilityRules = "accessibility/rules.json"
+            tokens = ExistingKnowledgeFileOrDefault("tokens/tokens.json"),
+            layouts = ExistingKnowledgeFilesOrEmpty("layouts/AppLayout.json"),
+            referenceUiPatterns = ExistingKnowledgeFilesOrEmpty("referenceUiPatterns/ActiveInspectionsPage.json"),
+            icons = ExistingKnowledgeFileOrDefault("icons/icons.json"),
+            bestPractices = ExistingKnowledgeFilesOrEmpty("best-practices/naming.md"),
+            accessibilityRules = ExistingKnowledgeFileOrDefault("accessibility/rules.json")
         };
 
         var json = JsonConvert.SerializeObject(manifest, Formatting.Indented);
         File.WriteAllText(filePath, json);
     }
+
+    /// <summary>
+    /// Returns the relative path if the file exists under _knowledgePath,
+    /// otherwise null (manifest key is omitted / provider falls back to a
+    /// default empty value instead of a broken reference).
+    /// </summary>
+    private string? ExistingKnowledgeFileOrDefault(string relativePath) =>
+        File.Exists(Path.Combine(_knowledgePath, relativePath)) ? relativePath : null;
+
+    /// <summary>
+    /// Same as <see cref="ExistingKnowledgeFileOrDefault"/> but for manifest
+    /// keys that hold an array of paths.
+    /// </summary>
+    private string[] ExistingKnowledgeFilesOrEmpty(string relativePath) =>
+        File.Exists(Path.Combine(_knowledgePath, relativePath)) ? new[] { relativePath } : Array.Empty<string>();
 
     private List<string> LoadExistingManifestComponents()
     {

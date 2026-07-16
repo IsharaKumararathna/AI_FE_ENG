@@ -365,9 +365,9 @@ static async Task<object> HandleRequestAsync(
     {
         return method switch
         {
-            "initialize" => new { jsonrpc = "2.0", id, result = new { protocolVersion = ResolveProtocolVersion(request), serverInfo = new { name = "aife-mcp", version = "1.0.0" }, capabilities = new { tools = new { listChanged = false } } } },
+            "initialize" => new { jsonrpc = "2.0", id, result = new { protocolVersion = ResolveProtocolVersion(request), serverInfo = new { name = "aife-mcp", version = "1.0.0" }, capabilities = new { tools = new { listChanged = false }, prompts = new { listChanged = false } } } },
             "tools/list" => new { jsonrpc = "2.0", id, result = new { tools = Aife.Mcp.McpToolDefinitions.Tools } },
-            "tools/call" => new { jsonrpc = "2.0", id, result = await CallToolAsync(request["params"]?["name"]?.ToString() ?? "", request["params"]?["arguments"] as JObject, provider, matchingService, tokenChecker, scorer, previewRoot, ct) },
+            "tools/call" => new { jsonrpc = "2.0", id, result = BuildToolCallResult(await CallToolAsync(request["params"]?["name"]?.ToString() ?? "", request["params"]?["arguments"] as JObject, provider, matchingService, tokenChecker, scorer, previewRoot, ct)) },
             "notifications/initialized" => new { jsonrpc = "2.0", id, result = new { } },
             "ping" => new { jsonrpc = "2.0", id, result = new { } },
             // We only declared the "tools" capability, but some clients still
@@ -375,7 +375,8 @@ static async Task<object> HandleRequestAsync(
             // with empty lists rather than an error so discovery can't get
             // stuck on an unadvertised-but-queried capability.
             "resources/list" => new { jsonrpc = "2.0", id, result = new { resources = Array.Empty<object>() } },
-            "prompts/list" => new { jsonrpc = "2.0", id, result = new { prompts = Array.Empty<object>() } },
+            "prompts/list" => new { jsonrpc = "2.0", id, result = new { prompts = Aife.Mcp.McpPromptDefinitions.Prompts } },
+            "prompts/get" => new { jsonrpc = "2.0", id, result = GetPrompt(request["params"]?["name"]?.ToString() ?? "", request["params"]?["arguments"] as JObject) },
             _ => new { jsonrpc = "2.0", id, error = new { code = -32601, message = $"Unknown method: {method}" } }
         };
     }
@@ -396,6 +397,69 @@ static async Task<object> HandleRequestAsync(
 /// </summary>
 static string ResolveProtocolVersion(JObject request) =>
     request["params"]?["protocolVersion"]?.ToString() ?? "2025-03-26";
+
+/// <summary>
+/// Wraps a tool's raw return value in the MCP-spec-compliant "tools/call"
+/// result envelope: <c>{ content: [{ type: "text", text: "..." }], isError }</c>.
+/// Every branch of <see cref="CallToolAsync" /> previously returned its raw
+/// domain object (a list, a DTO, or an anonymous <c>{ error = "..." }</c>)
+/// directly as the JSON-RPC "result", which isn't a valid CallToolResult per
+/// the MCP spec. Spec-compliant clients destructure <c>result.content</c> as
+/// an array — when it's missing (i.e. undefined), that surfaces client-side
+/// as "TypeError: r.content is not iterable" even though the server-side
+/// call itself succeeded. Serializing the raw result to JSON text and
+/// wrapping it here keeps all the existing tool handlers unchanged while
+/// making every "tools/call" response protocol-correct.
+/// </summary>
+static object BuildToolCallResult(object toolResult)
+{
+    var json = JsonConvert.SerializeObject(toolResult);
+
+    var isError = false;
+    try
+    {
+        isError = JToken.Parse(json) is JObject obj && obj["error"] is not null;
+    }
+    catch (JsonException)
+    {
+        // Not a JSON object (e.g. a bare array) - can't contain an "error" key.
+    }
+
+    return new
+    {
+        content = new object[] { new { type = "text", text = json } },
+        isError
+    };
+}
+
+/// <summary>
+/// Builds the MCP "prompts/get" response for a named prompt, substituting
+/// the caller's arguments into the template text (see
+/// McpPromptDefinitions.RenderConvertPrototypeToPage). Returns an error
+/// object (not an exception) for an unknown prompt name so a bad slash-
+/// command invocation surfaces a clear message instead of a protocol error.
+/// </summary>
+static object GetPrompt(string name, JObject? args)
+{
+    if (name != "convert-prototype-to-page")
+        return new { error = $"Unknown prompt: {name}" };
+
+    var prototypePath = args?["prototypePath"]?.ToString();
+    if (string.IsNullOrWhiteSpace(prototypePath))
+        return new { error = "'prototypePath' argument is required." };
+
+    var slug = args?["slug"]?.ToString();
+    var text = Aife.Mcp.McpPromptDefinitions.RenderConvertPrototypeToPage(prototypePath, slug);
+
+    return new
+    {
+        description = "Convert an HTML/CSS prototype into a real, reviewable React page.",
+        messages = new object[]
+        {
+            new { role = "user", content = new { type = "text", text } }
+        }
+    };
+}
 
 
 static async Task<object> CallToolAsync(

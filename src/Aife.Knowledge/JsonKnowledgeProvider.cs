@@ -212,8 +212,17 @@ public sealed class JsonKnowledgeProvider : IKnowledgeProvider
         {
             var relativePath = pathToken.ToString();
             var fullPath = Path.Combine(_knowledgePath, relativePath);
+
+            // Manifest entries can reference optional/static knowledge assets
+            // (e.g. layouts, referenceUiPatterns) that a per-project trainer
+            // run (KnowledgeTrainerService.UpdateManifest) may not have
+            // generated yet in a freshly-trained consumer project's Knowledge
+            // Base. Skip rather than fail the whole load so one missing
+            // optional file doesn't break every tool call — consistent with
+            // the already-lenient icons/best-practices/accessibility loaders
+            // below.
             if (!File.Exists(fullPath))
-                throw new FileNotFoundException($"Knowledge file not found: {relativePath}", fullPath);
+                continue;
 
             var item = JsonConvert.DeserializeObject<T>(File.ReadAllText(fullPath));
             if (item is not null)
@@ -230,7 +239,7 @@ public sealed class JsonKnowledgeProvider : IKnowledgeProvider
 
         var fullPath = Path.Combine(_knowledgePath, pathToken.ToString());
         if (!File.Exists(fullPath))
-            throw new FileNotFoundException($"Knowledge {label} file not found: {pathToken}", fullPath);
+            return Activator.CreateInstance<T>();
 
         return JsonConvert.DeserializeObject<T>(File.ReadAllText(fullPath))
             ?? Activator.CreateInstance<T>();
