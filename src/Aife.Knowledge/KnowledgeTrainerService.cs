@@ -388,10 +388,19 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         // Components). Case-insensitive file systems (Windows) also mean
         // "Components" and "components" resolve to the same physical folder,
         // so only the first existing candidate in each group is scanned.
+        //
+        // `folderPath` itself is accepted as either a repo root (containing
+        // src/Components/CustomUIs) OR a path that already points directly at
+        // the Components folder — the convention used by
+        // --components-source/AIFE_COMPONENTS_SOURCE in .mcp.json configs
+        // (e.g. "...\Repo\src\Components"). Without the direct-folder
+        // candidates below, that convention silently double-nests the path
+        // (".../src/Components/src/Components/CustomUIs") and finds nothing.
         var customUisPath = new[]
         {
             Path.Combine(folderPath, "src", "Components", "CustomUIs"),
             Path.Combine(folderPath, "src", "components", "CustomUIs"),
+            Path.Combine(folderPath, "CustomUIs"),
         }.FirstOrDefault(Directory.Exists);
 
         if (customUisPath is not null)
@@ -404,6 +413,7 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
             {
                 Path.Combine(folderPath, "src", "Components"),
                 Path.Combine(folderPath, "src", "components"),
+                folderPath,
             }.FirstOrDefault(Directory.Exists);
 
             if (componentsPath is not null)
