@@ -142,7 +142,39 @@ dotnet publish src/Aife.Mcp -c Release -r win-x64 --self-contained true `
 This produces `C:\tools\aife-mcp\Aife.Mcp.exe` — copy it (or the whole output
 folder) anywhere; it has no dependency on this repo or a .NET runtime install.
 
-### 2. Train a local Knowledge Base from the consumer project's Core repo
+### 2. Set up the consumer project (one command)
+
+The `setup` subcommand automates training, preview-root detection, and
+`.vscode/mcp.json` generation in a single step:
+
+```powershell
+C:\tools\aife-mcp\Aife.Mcp.exe setup `
+    --source  "C:\path\to\CoreRepo" `
+    --project "C:\path\to\ConsumerProject"
+```
+
+- `--source`   — path to the repo containing the real component library.
+- `--project`  — path to the consumer project that will consume the MCP server.
+- `--exe-path` — (optional) override the aife-mcp executable path written into
+  `mcp.json`. Auto-detected from the running process if omitted.
+
+This will:
+
+1. Train a Knowledge Base into `<project>/.aife/knowledge/`.
+2. Auto-detect the preview root by scanning for common React project structures
+   (`src/Components/AppLogic`, `src/Components/CustomUIs`, etc.).
+3. Generate `.vscode/mcp.json` with the correct `--knowledge`,
+   `--components-source`, and `--preview-root` arguments.
+
+After running `setup`, just open the consumer project in VS Code and start
+using Copilot Chat in Agent mode — no manual env vars or path wrangling.
+
+### 2b. Manual alternative (train + mcp.json separately)
+
+If you prefer manual control, you can train the KB and write `mcp.json`
+yourself:
+
+#### Train a local Knowledge Base
 
 Run the `train` subcommand once (and again any time components change) to
 scan the real component library and build a `.aife/knowledge` folder:
@@ -161,6 +193,9 @@ C:\tools\aife-mcp\Aife.Mcp.exe train --source "C:\path\to\CoreRepo" --out "C:\pa
 This has no ASP.NET/Aife.Api dependency — it's a plain console invocation.
 
 ### 3. Register the server in the consumer project's `.vscode/mcp.json`
+
+> **Note:** If you used `setup` above, this file was generated automatically.
+> The manual config below is only needed for the "2b" path.
 
 ```json
 {
@@ -188,10 +223,56 @@ the same published executable works across projects without rebuilding:
    `knowledge/` directory (this is what makes Steps 1-3 above work unchanged
    for this repo without any extra configuration)
 
-> **Out of scope for now:** a fully automated `.vsix` VS Code extension that
-> auto-prompts for the Core repo path, auto-runs `train`, and auto-writes
-> `mcp.json` on install. The manual publish + `train` + `mcp.json` steps above
-> are the supported path today; a one-click installer is future work.
+> **Tip:** The `setup` subcommand (step 2 above) automates steps 2b–3
+> into a single command. Use it unless you need non-default KB paths or
+> custom env vars.
+
+## LLM Proxy — Resilient Connection to LLM APIs
+
+When Copilot Chat / GLM extensions make LLM calls, transient network errors
+(`ECONNRESET`, `ETIMEDOUT`, `ECONNREFUSED`) can interrupt the flow. The
+`proxy` subcommand ships a resilient HTTP reverse proxy in the same
+self-contained executable — no Node.js or extra dependencies required.
+
+### Usage
+
+```powershell
+# Start the proxy (Ctrl+C to stop)
+C:\tools\aife-mcp\Aife.Mcp.exe proxy `
+    --upstream "https://your-llm-api.example.com" `
+    --port 3456
+```
+
+Then point your LLM client (VS Code extension setting, env var, etc.) at
+`http://localhost:3456` instead of the upstream URL directly.
+
+### Options
+
+| Flag | Default | Description |
+|---|---|---|
+| `--upstream <url>` | *(required)* | The real LLM API base URL |
+| `--port <n>` | `3456` | Local port to listen on |
+| `--retries <n>` | `3` | Max retry attempts per request |
+| `--initial-delay <seconds>` | `2` | Initial retry delay (exponential backoff) |
+
+### What it does
+
+- **Retries** transient failures (`HttpRequestException`, `SocketException`,
+  `IOException`, `TaskCanceledException`) and server errors (5xx, 429) with
+  exponential backoff using Polly 8.
+- **Streams** response bodies through, preserving SSE (`text/event-stream`)
+  for token-by-token output.
+- **Buffers** request bodies before forwarding so retries replay the exact
+  same payload.
+- Returns a `502 Bad Gateway` JSON body with a human-readable error message
+  when all retries are exhausted.
+
+### Example `.vscode/mcp.json` with proxy
+
+If your GLM extension reads the LLM endpoint from an env var, configure the
+proxy port there. The MCP server itself does **not** call the LLM — it is the
+coding agent (Copilot Chat) that makes LLM calls — so the proxy is configured
+on the client side, not in the MCP server's `mcp.json` entry.
 
 ## How Copilot Uses It
 

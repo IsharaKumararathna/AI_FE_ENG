@@ -1,10 +1,14 @@
 using System.Diagnostics;
+using System.Net;
+using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using Aife.Application.Knowledge;
 using Aife.Knowledge;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Polly;
+using Polly.Retry;
 
 #nullable disable warnings
 
@@ -14,6 +18,24 @@ using Newtonsoft.Json.Linq;
 if (args.Length > 0 && args[0].Equals("train", StringComparison.OrdinalIgnoreCase))
 {
     return await RunTrainCommandAsync(args);
+}
+
+// `setup` subcommand: one-command bootstrap for a consumer project — trains
+// the KB, auto-detects the preview root, and writes .vscode/mcp.json so POs
+// only need to open VS Code (no manual env vars / path wrangling).
+//   aife-mcp setup --source C:\Core\Repo --project C:\Consumer\App
+if (args.Length > 0 && args[0].Equals("setup", StringComparison.OrdinalIgnoreCase))
+{
+    return await RunSetupCommandAsync(args);
+}
+
+// `proxy` subcommand: lightweight HTTP reverse proxy with Polly retry that
+// sits between the VS Code LLM extension and the upstream API, shielding
+// the MCP flow from transient ECONNRESET / ETIMEDOUT / ECONNREFUSED errors.
+//   aife-mcp proxy --upstream https://api.openai.com --port 3456
+if (args.Length > 0 && args[0].Equals("proxy", StringComparison.OrdinalIgnoreCase))
+{
+    return await RunProxyCommandAsync(args);
 }
 
 var knowledgePath = ResolveKnowledgePath(args);
@@ -125,6 +147,376 @@ static async Task<int> RunTrainCommandAsync(string[] args)
     Console.WriteLine(JsonConvert.SerializeObject(result, Formatting.Indented));
     return result.Success ? 0 : 1;
 }
+
+// ──────────────────────────────────────────────────────────────────
+//  setup subcommand
+// ──────────────────────────────────────────────────────────────────
+
+static async Task<int> RunSetupCommandAsync(string[] args)
+{
+    var source = GetArgValue(args, "--source");
+    var project = GetArgValue(args, "--project");
+    var exePath = GetArgValue(args, "--exe-path");
+
+    if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(project))
+    {
+        Console.Error.WriteLine("Usage: aife-mcp setup --source <CoreRepoPath> --project <ConsumerProjectPath> [--exe-path <aifeExePath>]");
+        Console.Error.WriteLine();
+        Console.Error.WriteLine("  --source   Path to the core component library repo (required)");
+        Console.Error.WriteLine("  --project  Path to the consumer project (required)");
+        Console.Error.WriteLine("  --exe-path Path to the published aife-mcp executable (auto-detected if omitted)");
+        return 1;
+    }
+
+    source = Path.GetFullPath(source);
+    project = Path.GetFullPath(project);
+
+    if (!Directory.Exists(source))
+    {
+        Console.Error.WriteLine($"ERROR: Source path does not exist: {source}");
+        return 1;
+    }
+
+    if (!Directory.Exists(project))
+    {
+        Console.Error.WriteLine($"ERROR: Project path does not exist: {project}");
+        return 1;
+    }
+
+    // ── Step 1: Train KB ──
+    var kbPath = Path.Combine(project, ".aife", "knowledge");
+    Console.WriteLine($"[1/3] Training knowledge base from {source}");
+    Console.WriteLine($"      -> {kbPath}");
+    Directory.CreateDirectory(kbPath);
+
+    var trainer = new KnowledgeTrainerService(kbPath);
+    var result = IsGitUrl(source)
+        ? await trainer.TrainFromGitAsync(source, null, TrainMode.Replace, CancellationToken.None)
+        : await trainer.TrainFromFolderAsync(source, TrainMode.Replace, CancellationToken.None);
+
+    if (!result.Success)
+    {
+        Console.Error.WriteLine($"ERROR: Training failed: {string.Join("; ", result.Errors)}");
+        return 1;
+    }
+
+    Console.WriteLine($"      {result.ComponentsExtracted} components, {result.TokensExtracted} tokens extracted.");
+
+    // ── Step 2: Detect preview root ──
+    var previewRoot = DetectPreviewRoot(project, source);
+    Console.WriteLine(previewRoot is not null
+        ? $"[2/3] Preview root detected: {previewRoot}"
+        : "[2/3] Preview root: not detected (save_ai_preview will be unavailable until --preview-root or AIFE_PREVIEW_ROOT is set)");
+
+    // ── Step 3: Generate .vscode/mcp.json ──
+    Console.WriteLine("[3/3] Generating .vscode/mcp.json ...");
+    var mcpJsonPath = Path.Combine(project, ".vscode", "mcp.json");
+    Directory.CreateDirectory(Path.GetDirectoryName(mcpJsonPath)!);
+
+    var resolvedExe = exePath is not null
+        ? Path.GetFullPath(exePath)
+        : Process.GetCurrentProcess().MainModule?.FileName ?? "aife-mcp";
+
+    var mcpArgs = new List<string>
+    {
+        "--knowledge", kbPath,
+        "--components-source", source
+    };
+    if (previewRoot is not null)
+    {
+        mcpArgs.Add("--preview-root");
+        mcpArgs.Add(previewRoot);
+    }
+
+    var mcpConfig = new JObject
+    {
+        ["servers"] = new JObject
+        {
+            ["aife"] = new JObject
+            {
+                ["type"] = "stdio",
+                ["command"] = resolvedExe,
+                ["args"] = new JArray(mcpArgs.Select(a => (JToken)a))
+            }
+        }
+    };
+
+    if (File.Exists(mcpJsonPath))
+        Console.WriteLine($"      {mcpJsonPath} already exists — overwriting.");
+
+    await File.WriteAllTextAsync(mcpJsonPath, mcpConfig.ToString(Formatting.Indented));
+
+    Console.WriteLine();
+    Console.WriteLine("Setup complete.");
+    Console.WriteLine($"  Knowledge base: {kbPath}");
+    Console.WriteLine($"  MCP config:     {mcpJsonPath}");
+    if (previewRoot is not null)
+        Console.WriteLine($"  Preview root:   {previewRoot}");
+    Console.WriteLine();
+    Console.WriteLine("Next: open the consumer project in VS Code (v1.99+) and use Copilot Chat in Agent mode.");
+
+    return 0;
+}
+
+/// <summary>
+/// Scans the consumer project and source repo for common React project
+/// patterns where the AI-preview folder should live. Returns the first
+/// match, or null if no recognizable structure is found.
+/// </summary>
+static string? DetectPreviewRoot(string projectPath, string sourcePath)
+{
+    var roots = new[] { projectPath, sourcePath };
+    var subPaths = new[]
+    {
+        Path.Combine("src", "Components", "AppLogic", "_AiPreview"),
+        Path.Combine("src", "Components", "CustomUIs", "_AiPreview"),
+        Path.Combine("src", "Components", "_AiPreview"),
+        Path.Combine("src", "components", "_AiPreview"),
+    };
+
+    // 1. Check if _AiPreview already exists somewhere
+    foreach (var root in roots)
+        foreach (var sub in subPaths)
+        {
+            var candidate = Path.Combine(root, sub);
+            if (Directory.Exists(candidate))
+                return candidate;
+        }
+
+    // 2. Pick the first parent folder that exists and append _AiPreview
+    var basePaths = new[]
+    {
+        Path.Combine("src", "Components", "AppLogic"),
+        Path.Combine("src", "Components", "CustomUIs"),
+        Path.Combine("src", "Components"),
+        Path.Combine("src", "components"),
+    };
+
+    foreach (var root in roots)
+        foreach (var sub in basePaths)
+        {
+            var baseDir = Path.Combine(root, sub);
+            if (Directory.Exists(baseDir))
+                return Path.Combine(baseDir, "_AiPreview");
+        }
+
+    return null;
+}
+
+// ──────────────────────────────────────────────────────────────────
+//  proxy subcommand
+// ──────────────────────────────────────────────────────────────────
+
+static async Task<int> RunProxyCommandAsync(string[] args)
+{
+    var upstream = GetArgValue(args, "--upstream");
+    var portStr = GetArgValue(args, "--port") ?? "3456";
+    var retriesStr = GetArgValue(args, "--retries") ?? "3";
+    var delayStr = GetArgValue(args, "--initial-delay") ?? "2";
+
+    if (string.IsNullOrWhiteSpace(upstream))
+    {
+        Console.Error.WriteLine("Usage: aife-mcp proxy --upstream <url> [--port 3456] [--retries 3] [--initial-delay 2]");
+        Console.Error.WriteLine();
+        Console.Error.WriteLine("  --upstream       The LLM API base URL to proxy (e.g. https://api.openai.com)");
+        Console.Error.WriteLine("  --port           Local port to listen on (default: 3456)");
+        Console.Error.WriteLine("  --retries        Max retry attempts on transient failures (default: 3)");
+        Console.Error.WriteLine("  --initial-delay  Initial backoff delay in seconds (default: 2)");
+        return 1;
+    }
+
+    if (!int.TryParse(portStr, out var port) || port < 1 || port > 65535)
+    {
+        Console.Error.WriteLine($"ERROR: Invalid port: {portStr}");
+        return 1;
+    }
+
+    if (!int.TryParse(retriesStr, out var retries) || retries < 0)
+    {
+        Console.Error.WriteLine($"ERROR: Invalid retries: {retriesStr}");
+        return 1;
+    }
+
+    if (!double.TryParse(delayStr, System.Globalization.CultureInfo.InvariantCulture, out var initialDelay) || initialDelay <= 0)
+    {
+        Console.Error.WriteLine($"ERROR: Invalid initial-delay: {delayStr}");
+        return 1;
+    }
+
+    var upstreamUri = new Uri(upstream.TrimEnd('/'));
+    var listener = new HttpListener();
+    var prefix = $"http://localhost:{port}/";
+    listener.Prefixes.Add(prefix);
+
+    var retryPipeline = new ResiliencePipelineBuilder<HttpResponseMessage>()
+        .AddRetry(new RetryStrategyOptions<HttpResponseMessage>
+        {
+            MaxRetryAttempts = retries,
+            BackoffType = DelayBackoffType.Exponential,
+            Delay = TimeSpan.FromSeconds(initialDelay),
+            ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                .Handle<HttpRequestException>()
+                .Handle<SocketException>()
+                .Handle<IOException>()
+                .Handle<TaskCanceledException>(ex => !ex.CancellationToken.IsCancellationRequested)
+                .HandleResult(r => (int)r.StatusCode >= 500 || r.StatusCode == HttpStatusCode.TooManyRequests),
+            OnRetry = retryArgs =>
+            {
+                var reason = retryArgs.Outcome.Exception?.GetType().Name
+                    ?? $"HTTP {(int)(retryArgs.Outcome.Result?.StatusCode ?? 0)}";
+                Console.Error.WriteLine($"[proxy] Retry {retryArgs.AttemptNumber + 1}/{retries} after {retryArgs.RetryDelay.TotalSeconds:F1}s — {reason}");
+                return ValueTask.CompletedTask;
+            }
+        })
+        .Build();
+
+    using var httpClient = new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
+
+    try
+    {
+        listener.Start();
+    }
+    catch (HttpListenerException ex)
+    {
+        Console.Error.WriteLine($"ERROR: Cannot listen on {prefix} — {ex.Message}");
+        Console.Error.WriteLine("Try a different --port or run as administrator.");
+        return 1;
+    }
+
+    Console.WriteLine($"Aife LLM proxy listening on {prefix}");
+    Console.WriteLine($"  Upstream:      {upstreamUri}");
+    Console.WriteLine($"  Retries:       {retries} (exponential backoff, {initialDelay}s initial delay)");
+    Console.WriteLine($"  Point your LLM extension at: http://localhost:{port}");
+    Console.WriteLine();
+    Console.WriteLine("Press Ctrl+C to stop.");
+
+    var cts = new CancellationTokenSource();
+    Console.CancelKeyPress += (_, e) => { e.Cancel = true; cts.Cancel(); };
+
+    try
+    {
+        while (!cts.Token.IsCancellationRequested)
+        {
+            var ctx = await listener.GetContextAsync().WaitAsync(cts.Token);
+            // Fire-and-forget per request (concurrent)
+            _ = HandleProxyRequestAsync(ctx, upstreamUri, httpClient, retryPipeline, cts.Token);
+        }
+    }
+    catch (OperationCanceledException) { /* graceful shutdown */ }
+    finally
+    {
+        listener.Stop();
+        Console.WriteLine("[proxy] Stopped.");
+    }
+
+    return 0;
+}
+
+static async Task HandleProxyRequestAsync(
+    HttpListenerContext context,
+    Uri upstreamUri,
+    HttpClient httpClient,
+    ResiliencePipeline<HttpResponseMessage> retryPipeline,
+    CancellationToken ct)
+{
+    var request = context.Request;
+    var response = context.Response;
+
+    try
+    {
+        var targetUrl = new Uri(upstreamUri, request.Url!.PathAndQuery);
+
+        // Buffer the request body so Polly can replay it on retry
+        byte[]? requestBody = null;
+        if (request.HasEntityBody)
+        {
+            using var ms = new MemoryStream();
+            await request.InputStream.CopyToAsync(ms, ct);
+            requestBody = ms.ToArray();
+        }
+
+        Console.Error.WriteLine($"[proxy] {request.HttpMethod} {request.Url!.PathAndQuery}");
+
+        var upstreamResponse = await retryPipeline.ExecuteAsync(async token =>
+        {
+            var msg = new HttpRequestMessage(new HttpMethod(request.HttpMethod), targetUrl);
+
+            // Forward headers (skip hop-by-hop)
+            foreach (string? key in request.Headers.AllKeys)
+            {
+                if (key is null || IsHopByHopHeader(key)) continue;
+                if (key.Equals("Host", StringComparison.OrdinalIgnoreCase)) continue;
+                if (key.Equals("Content-Length", StringComparison.OrdinalIgnoreCase)) continue;
+                if (key.Equals("Content-Type", StringComparison.OrdinalIgnoreCase)) continue;
+                msg.Headers.TryAddWithoutValidation(key, request.Headers.GetValues(key));
+            }
+
+            if (requestBody is not null)
+            {
+                msg.Content = new ByteArrayContent(requestBody);
+                if (request.ContentType is not null)
+                    msg.Content.Headers.TryAddWithoutValidation("Content-Type", request.ContentType);
+            }
+
+            return await httpClient.SendAsync(msg, HttpCompletionOption.ResponseHeadersRead, token);
+        }, ct);
+
+        // Copy response status + headers
+        response.StatusCode = (int)upstreamResponse.StatusCode;
+
+        foreach (var header in upstreamResponse.Headers)
+        {
+            if (IsHopByHopHeader(header.Key)) continue;
+            foreach (var val in header.Value)
+                response.Headers.Add(header.Key, val);
+        }
+
+        foreach (var header in upstreamResponse.Content.Headers)
+        {
+            if (header.Key.Equals("Content-Length", StringComparison.OrdinalIgnoreCase)) continue;
+            if (header.Key.Equals("Content-Type", StringComparison.OrdinalIgnoreCase))
+            {
+                response.ContentType = string.Join(", ", header.Value);
+                continue;
+            }
+            foreach (var val in header.Value)
+                response.Headers.Add(header.Key, val);
+        }
+
+        // Stream body through (handles both SSE and regular JSON responses)
+        using var upstreamStream = await upstreamResponse.Content.ReadAsStreamAsync(ct);
+        await upstreamStream.CopyToAsync(response.OutputStream, ct);
+
+        Console.Error.WriteLine($"[proxy] {request.HttpMethod} {request.Url!.PathAndQuery} -> {(int)upstreamResponse.StatusCode}");
+    }
+    catch (Exception ex) when (ex is not OperationCanceledException)
+    {
+        Console.Error.WriteLine($"[proxy] ERROR {request.HttpMethod} {request.Url?.PathAndQuery}: {ex.Message}");
+        try
+        {
+            response.StatusCode = 502;
+            response.ContentType = "application/json";
+            var errorBytes = Encoding.UTF8.GetBytes(
+                JsonConvert.SerializeObject(new { error = $"Proxy error: {ex.Message}" }));
+            await response.OutputStream.WriteAsync(errorBytes, ct);
+        }
+        catch { /* response may already be sent */ }
+    }
+    finally
+    {
+        try { response.Close(); } catch { }
+    }
+}
+
+static bool IsHopByHopHeader(string name) =>
+    name.Equals("Transfer-Encoding", StringComparison.OrdinalIgnoreCase) ||
+    name.Equals("Connection", StringComparison.OrdinalIgnoreCase) ||
+    name.Equals("Keep-Alive", StringComparison.OrdinalIgnoreCase) ||
+    name.Equals("Proxy-Authenticate", StringComparison.OrdinalIgnoreCase) ||
+    name.Equals("Proxy-Authorization", StringComparison.OrdinalIgnoreCase) ||
+    name.Equals("TE", StringComparison.OrdinalIgnoreCase) ||
+    name.Equals("Trailer", StringComparison.OrdinalIgnoreCase) ||
+    name.Equals("Upgrade", StringComparison.OrdinalIgnoreCase);
 
 /// <summary>
 /// True if the source string is a git remote (https/ssh URL or *.git) rather
