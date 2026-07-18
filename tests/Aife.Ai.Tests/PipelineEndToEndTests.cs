@@ -38,7 +38,7 @@ public class PipelineEndToEndTests
             ["Generate"] = """
             [
               {
-                "path": "src/Dashboard.tsx",
+                "path": ".aife/react/Dashboard.tsx",
                 "content": "import { BUSButton, BUSGrid } from '@org/ds/react'; export const Dashboard = () => null;"
               }
             ]
@@ -130,7 +130,7 @@ public class PipelineEndToEndTests
 
         // ── Assert: generated artifacts ──
         result.Artifacts.Should().NotBeEmpty();
-        result.Artifacts!.Should().Contain(a => a.Path == "src/Dashboard.tsx");
+        result.Artifacts!.Should().Contain(a => a.Path == ".aife/react/Dashboard.tsx");
         result.Artifacts.Should().Contain(a => a.Content.Contains("BUSButton"));
 
         // ── Assert: review report ──

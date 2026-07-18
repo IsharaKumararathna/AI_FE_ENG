@@ -50,7 +50,7 @@ public class FileRepositoryTests
         var sessionId = "s-002";
         var artifacts = new[]
         {
-            new GeneratedArtifact { Path = "src/Dashboard.tsx", Content = "export const Dashboard = () => null;" },
+            new GeneratedArtifact { Path = ".aife/react/Dashboard.tsx", Content = "export const Dashboard = () => null;" },
             new GeneratedArtifact { Path = "src/Button.tsx", Content = "export const Button = () => null;" }
         };
 
@@ -58,7 +58,7 @@ public class FileRepositoryTests
         var loaded = await repo.ListAsync(sessionId, CancellationToken.None);
 
         loaded.Should().HaveCount(2);
-        loaded.Should().Contain(a => a.Path == "src/Dashboard.tsx");
+        loaded.Should().Contain(a => a.Path == ".aife/react/Dashboard.tsx");
 
         Cleanup(basePath);
     }

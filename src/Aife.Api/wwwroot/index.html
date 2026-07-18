@@ -93,35 +93,44 @@
 
     <!-- Results -->
     <section class="step hidden" id="step-results">
-      <div class="tabs">
-        <button class="tab active" data-tab="preview">👁️ Live Preview</button>
-        <button class="tab" data-tab="code">📄 React Code</button>
-        <button class="tab" data-tab="review">✅ Review Report</button>
-        <button class="tab" data-tab="analysis">🔍 Analysis</button>
-      </div>
-
-      <!-- Preview Tab -->
-      <div class="tab-content active" id="tab-preview">
-        <div class="preview-header">
-          <h3>Live React Preview</h3>
-          <span class="badge badge-info">Generated using BUS Design System</span>
+      <div class="results-split">
+        <!-- Left: Live Preview -->
+        <div class="results-preview">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>👁️ Live Preview</h3>
+              <span class="badge badge-info">Generated using BUS Design System</span>
+            </div>
+            <iframe id="preview-frame" class="preview-frame" title="React Preview"></iframe>
+          </div>
         </div>
-        <iframe id="preview-frame" class="preview-frame" title="React Preview"></iframe>
-      </div>
 
-      <!-- Code Tab -->
-      <div class="tab-content" id="tab-code">
-        <div id="code-files"></div>
-      </div>
+        <!-- Right: Details panels -->
+        <div class="results-details">
+          <!-- React Code -->
+          <div class="panel">
+            <button class="panel-toggle active" data-panel="panel-code">📄 React Code <span class="toggle-icon">▼</span></button>
+            <div class="panel-body active" id="panel-code">
+              <div id="code-files"></div>
+            </div>
+          </div>
 
-      <!-- Review Tab -->
-      <div class="tab-content" id="tab-review">
-        <div id="review-content"></div>
-      </div>
+          <!-- Review Report -->
+          <div class="panel">
+            <button class="panel-toggle active" data-panel="panel-review">✅ Review Report <span class="toggle-icon">▼</span></button>
+            <div class="panel-body active" id="panel-review">
+              <div id="review-content"></div>
+            </div>
+          </div>
 
-      <!-- Analysis Tab -->
-      <div class="tab-content" id="tab-analysis">
-        <div id="analysis-content"></div>
+          <!-- Analysis -->
+          <div class="panel">
+            <button class="panel-toggle active" data-panel="panel-analysis">🔍 Analysis <span class="toggle-icon">▼</span></button>
+            <div class="panel-body active" id="panel-analysis">
+              <div id="analysis-content"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </div>

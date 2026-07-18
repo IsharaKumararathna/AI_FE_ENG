@@ -62,7 +62,7 @@ public class ApiIntegrationTests : IClassFixture<CustomWebApplicationFactory>
         artifactsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var artifactsJson = JArray.Parse(await artifactsResponse.Content.ReadAsStringAsync());
         artifactsJson.Should().NotBeEmpty();
-        artifactsJson[0]!["path"]!.ToString().Should().Be("src/Generated.tsx");
+        artifactsJson[0]!["path"]!.ToString().Should().Be(".aife/react/Generated.tsx");
 
         // ── Get review ──
         var reviewResponse = await client.GetAsync($"/api/v1/sessions/{sessionId}/review");

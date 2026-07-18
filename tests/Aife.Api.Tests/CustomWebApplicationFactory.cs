@@ -51,7 +51,7 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 ["Generate"] = """
                 [
                   {
-                    "path": "src/Dashboard.tsx",
+                    "path": ".aife/react/Dashboard.tsx",
                     "content": "import { BUSButton, BUSGrid } from '@org/ds/react'; export const Dashboard = () => null;"
                   }
                 ]

@@ -47,7 +47,7 @@ public class GoldenFileTests
         var cannedResponse = """
             [
               {
-                "path": "src/Dashboard.tsx",
+                "path": ".aife/react/Dashboard.tsx",
                 "content": "import { BUSButton, BUSGrid } from '@org/ds/react'; export const Dashboard = () => null;"
               }
             ]

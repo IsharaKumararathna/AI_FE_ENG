@@ -23,7 +23,7 @@ public sealed class StubLlmProvider : ILlmProvider
         ["Generate"] = """
         [
           {
-            "path": "src/Dashboard.tsx",
+            "path": ".aife/react/Dashboard.tsx",
             "content": "import { BUSButton, DataGrid } from '@org/ds/react'; export const Dashboard = () => null;"
           }
         ]

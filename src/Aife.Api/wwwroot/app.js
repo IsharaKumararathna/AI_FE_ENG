@@ -4,13 +4,11 @@ const API = window.location.origin + '/api/v1';
 let currentSessionId = null;
 let currentPrototypeId = null;
 
-// ── Tab switching ──
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+// ── Panel toggles (collapsible detail sections) ──
+document.querySelectorAll('.panel-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('active');
+    document.getElementById(btn.dataset.panel).classList.toggle('active');
   });
 });
 
