@@ -11,14 +11,14 @@ public class PromptEvalTests
         var dataset = new List<ScoredDatasetEntry>
         {
             new() { Input = "button", ExpectedOutput = "BUSButton", Category = "mapper" },
-            new() { Input = "table", ExpectedOutput = "DataGrid", Category = "mapper" },
+            new() { Input = "table", ExpectedOutput = "BUSGrid", Category = "mapper" },
             new() { Input = "unknown", ExpectedOutput = "null", Category = "mapper" }
         };
 
         var harness = new PromptEvaluationHarness(input => input switch
         {
             "button" => ("BUSButton", 100, 50),
-            "table" => ("DataGrid", 120, 60),
+            "table" => ("BUSGrid", 120, 60),
             _ => ("null", 80, 40)
         });
 
@@ -43,7 +43,7 @@ public class PromptEvalTests
         var harness = new PromptEvaluationHarness(input => input switch
         {
             "button" => ("BUSButton", 100, 50),
-            _ => ("DataGrid", 120, 60)
+            _ => ("BUSGrid", 120, 60)
         });
 
         var result = harness.Evaluate("component.mapper", "1.0.0", dataset, threshold: 0.8);

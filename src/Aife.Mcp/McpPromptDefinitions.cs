@@ -73,16 +73,24 @@ public static class McpPromptDefinitions
         - Never use "../CustomUIs/..." — that only goes up one level and will break.
 
         ⚠️ CRITICAL — Component usage rules (BUS design system):
-        - BUSLabel, BUSButton, BUSTextArea and most BUS components REQUIRE a
-          `className` prop. ALWAYS pass at least className="".
-        - BUSSwitch does NOT have an `onChange` prop. Use only these props:
-          { checked, value, size, className }. To handle toggle behavior, wrap
-          it in a clickable container or use the `checked`/`value` props for
-          controlled behavior with a state variable.
-        - Every .tsx file that uses CSS module classes (className={styles.xxx})
-          MUST include: `import styles from './ComponentName.module.scss';`
+        - BUSLabel: className is OPTIONAL (has defaultProp className=''). You can omit it safely.
+        - BUSButton: className is OPTIONAL (has defaultProp className='bus-btn'). Pass className for styling.
+        - BUSTextArea: className is OPTIONAL. Pass className for styling.
+        - BUSSwitch: className is OPTIONAL. Supports onChange, onFocus, onBlur, disabled, id, name, label
+          via {...rest} passthrough to react-bootstrap Form.Check.
+        - BUSTabStrip: DOES NOT ACCEPT className. Do NOT pass className to BUSTabStrip.
+          Its only props are: selected, onSelect, tabs, scrollable, keepTabsMounted,
+          renderAllContent, tabStripDisabled, hideArrows.
+        - BUSGrid: importPath is "Components/CustomUIs/bus-grids/bus-grid/bus-grid" (lowercase
+          hyphenated folder convention — DIFFERENT from the standard PascalCase path pattern).
+          DO NOT fabricate "Components/CustomUIs/BUSGrid/BUSGrid".
+        - Every .tsx file that uses CSS module classes (className={styles.xxx}) MUST include:
+          `import styles from './ComponentName.module.scss';`
           as its LAST import (after all component imports).
-        - If a .tsx file has NO CSS module usage, do NOT import styles.
+        - Always type callback parameters. For onChange on text inputs/areas, use:
+          `onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleChange(e.target.value)}`
+          For onClick on buttons, use: `onClick={(e: React.MouseEvent) => handleClick()}`
+          NEVER leave a callback parameter untyped as `(e) =>` — TypeScript strict mode rejects implicit 'any'.
 
         4. Call `check_token_conformance` on the CSS to get real design-token
            violations, then call `score_prototype` with your matched elements +

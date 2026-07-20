@@ -21,7 +21,7 @@ public class IntermediateUiSchemaTests
         },
         {
           "nodeId": "n2",
-          "componentId": "DataGrid",
+          "componentId": "BUSGrid",
           "variant": "default",
           "props": {
             "columns": ["Name", "Status", "Updated"],

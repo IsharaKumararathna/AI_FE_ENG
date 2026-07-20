@@ -32,12 +32,15 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
         builder.ConfigureServices(services =>
         {
-            // Replace the StubLlmProvider with a stage-aware fake
-            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(ILlmProvider));
-            if (descriptor is not null)
-                services.Remove(descriptor);
+            // Replace all real LLM providers with a single test fake
+            var toRemove = services.Where(d =>
+                d.ServiceType == typeof(ILlmProvider) ||
+                d.ServiceType == typeof(IEnumerable<ILlmProvider>) ||
+                d.ServiceType == typeof(LlmRouter)).ToList();
+            foreach (var d in toRemove)
+                services.Remove(d);
 
-            services.AddSingleton<ILlmProvider>(new StageAwareFakeProvider(new Dictionary<string, string>
+            var fake = new StageAwareFakeProvider(new Dictionary<string, string>
             {
                 ["Analyze"] = """
                 {
@@ -75,7 +78,7 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 ["GeneratePrototype"] = """
                 {
                   "html": "<html><body><button>Submit</button><table></table></body></html>",
-                  "css": ":root { --color-action-primary: #0066cc; }",
+                  "css": ":root { --color-primary: #1548be; }",
                   "intermediateUiTree": {
                     "page": "Dashboard",
                     "layout": "AppLayout",
@@ -84,11 +87,15 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
                       { "componentId": "BUSGrid" }
                     ]
                   },
-                  "tokensUsed": ["color.action.primary"],
+                  "tokensUsed": ["color.primary"],
                   "componentsUsed": ["BUSButton", "BUSGrid"]
                 }
                 """
-            }));
+            });
+
+            services.AddSingleton<ILlmProvider>(fake);
+            services.AddSingleton<IEnumerable<ILlmProvider>>(new[] { fake }.AsEnumerable());
+            services.AddSingleton<LlmRouter>();
         });
     }
 }

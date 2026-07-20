@@ -1100,20 +1100,20 @@ static string AutoFixTsx(string content, string slugRoot, string fullPath)
     // ── Fix 1: Wrong relative import paths ──
     // The LLM often writes `../CustomUIs/BUSComponent/BUSComponent` which
     // resolves from _AiPreview/<slug>/ up only one level (to _AiPreview/).
-    // The actual importPath from the KB starts at "Components/..." from the
-    // src/ root. Since _AiPreview/<slug>/ is typically 3 levels deep
-    // (slug/ -> _AiPreview/ -> AppLogic/ -> src root -> Components/), the
-    // correct prefix is "../../../".
+    // Following the existing project convention (SettingsPage.tsx uses
+    // `../CustomUIs/...` from `src/Components/SettingsPage/`), the
+    // correct depth from `src/Components/AppLogic/_AiPreview/<slug>/` is
+    // 3 levels up to `Components/`, then into `CustomUIs/...`.
     content = System.Text.RegularExpressions.Regex.Replace(
         content,
         @"from\s+['""]\.\./CustomUIs/([^'""]+)['""]",
-        "from '../../../Components/CustomUIs/$1'");
+        "from '../../../CustomUIs/$1'");
 
-    // Also fix `from '../Components/` which is wrong from 2 levels deep
+    // Fix: `from '../Components/CustomUIs/` -> `from '../../../CustomUIs/`
     content = System.Text.RegularExpressions.Regex.Replace(
         content,
-        @"from\s+['""]\.\./Components/([^'""]+)['""]",
-        "from '../../../Components/$1'");
+        @"from\s+['""]\.\./Components/CustomUIs/([^'""]+)['""]",
+        "from '../../../CustomUIs/$1'");
 
     // ── Fix 2: Missing `import styles` ──
     // If the file uses `styles.xxx` but has no `import styles` statement,
@@ -1138,23 +1138,27 @@ static string AutoFixTsx(string content, string slugRoot, string fullPath)
         }
     }
 
-    // ── Fix 3: Missing `className` on BUS components that require it ──
-    // Several BUS components (BUSLabel, BUSButton, BUSTextArea, BUSSwitch)
-    // have PropTypes that require `className`. The LLM often omits it
-    // because most design systems make it optional. This fix adds
-    // className="" to any opening tag that doesn't already have it,
-    // using a match evaluator for robustness (handles multi-line,
-    // self-closing, and prop-heavy tags correctly).
+    // ── Fix 3: Missing `className` on BUS components ──
+    // BUSLabel, BUSButton, BUSTextArea, BUSSwitch all accept className.
+    // The LLM often omits it. Inject className="" into BOTH self-closing
+    // and non-self-closing opening tags, but ONLY when the tag doesn't
+    // already contain arrow functions (=>) which would break the regex.
     var componentsNeedingClassName = new[] { "BUSLabel", "BUSButton", "BUSTextArea", "BUSSwitch" };
-    var busTagRegex = new System.Text.RegularExpressions.Regex(
-        $@"<({string.Join("|", componentsNeedingClassName)})\b([^>]*)>",
+    var busOpeningTagRegex = new System.Text.RegularExpressions.Regex(
+        $@"<({string.Join("|", componentsNeedingClassName)})(\s[^>]*?)?(?<!/)>",
         System.Text.RegularExpressions.RegexOptions.Singleline);
-    content = busTagRegex.Replace(content, match =>
+    content = busOpeningTagRegex.Replace(content, match =>
     {
         var full = match.Value;
+        // Skip if tag contains arrow functions — regex can't parse them safely
+        if (full.Contains("=>"))
+            return full;
         if (full.Contains("className="))
-            return full; // Already has className — nothing to fix
-        // Insert className="" right before the closing >
+            return full;
+        // Self-closing: insert before />
+        if (full.EndsWith("/>"))
+            return full[..^2] + " className=\"\"" + " />";
+        // Opening tag: insert before >
         return full[..^1] + " className=\"\"" + ">";
     });
 
@@ -1163,6 +1167,42 @@ static string AutoFixTsx(string content, string slugRoot, string fullPath)
     // all remaining props to react-bootstrap Form.Check — onChange,
     // onFocus, onBlur, disabled, id, name, label are all valid.
     // No fix needed here — the KB now correctly documents passthroughProps.
+
+    // ── Fix 5: Strip className from BUSTabStrip ──
+    // BUSTabStrip does NOT accept className (not in PropTypes, no
+    // {...rest} spread). The LLM often adds it anyway because most
+    // components accept it. Strip it out to prevent TS2322 errors.
+    // SAFETY: Only operate on self-closing tags (no children) to avoid
+    // corrupting complex tags with arrow function props.
+    content = System.Text.RegularExpressions.Regex.Replace(
+        content,
+        @"(<BUSTabStrip\b[^>]*?)\s+className=\{[^}]+\}\s*",
+        "$1 ");
+    content = System.Text.RegularExpressions.Regex.Replace(
+        content,
+        @"(<BUSTabStrip\b[^>]*?)\s+className=\{?[^}"">]+\}?("")?",
+        "$1");
+
+    // ── Fix 6: Type untyped callback parameters ──
+    // The LLM often writes `onChange={(e) => ...}` or `onChange={e => ...}`
+    // without a type annotation. TypeScript strict mode rejects implicit
+    // 'any'. Add explicit React types based on the element context.
+    content = System.Text.RegularExpressions.Regex.Replace(
+        content,
+        @"onChange=\{\s*(?:\(e\)\s*|e\s*)=>",
+        "onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>");
+
+    // Also fix onClick callbacks that are untyped
+    content = System.Text.RegularExpressions.Regex.Replace(
+        content,
+        @"onClick=\{\s*(?:\(e\)\s*|e\s*)=>",
+        "onClick={(e: React.MouseEvent) =>");
+
+    // Fix setState callbacks that are untyped (for BUSSwitch)
+    content = System.Text.RegularExpressions.Regex.Replace(
+        content,
+        @"onChange=\{\s*\(\s*checked\s*\)\s*=>\s*set\w+\s*\(\s*checked\s*\)\s*\}",
+        "onChange={(checked: boolean) => set$1(checked)}");
 
     return content;
 }

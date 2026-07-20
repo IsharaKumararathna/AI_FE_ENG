@@ -19,10 +19,10 @@ public class PrototypeRequestSchemaTests
           "regions": [
             { "slot": "header", "component": "AppBar" },
             { "slot": "sidebar", "component": "NavList" },
-            { "slot": "main", "component": "DataGrid", "props": { "title": "Customers" } }
+            { "slot": "main", "component": "BUSGrid", "props": { "title": "Customers" } }
           ],
           "actions": [
-            { "slot": "main", "component": "PrimaryButton", "label": "Add Customer" }
+            { "slot": "main", "component": "BUSButton", "label": "Add Customer" }
           ]
         }
       ]
