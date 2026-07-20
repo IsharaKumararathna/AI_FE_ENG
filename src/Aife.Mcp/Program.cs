@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
@@ -942,7 +943,7 @@ static async Task<object> CallToolAsync(
             args?["elements"]?.ToObject<List<ScoredElementInput>>() ?? new List<ScoredElementInput>(),
             args?["tokenViolations"]?.ToObject<List<TokenViolation>>() ?? new List<TokenViolation>(),
             ct),
-        "save_ai_preview" => await SaveAiPreviewAsync(previewRoot, args, ct),
+        "save_ai_preview" => await SaveAiPreviewAsync(previewRoot, args, ct, provider),
         _ => new { error = $"Unknown tool: {toolName}" }
     };
 }
@@ -960,7 +961,7 @@ static async Task<object> CallToolAsync(
 /// under the slug folder) before any write, since this executes filesystem
 /// writes driven by LLM/client-supplied input (OWASP path traversal).
 /// </summary>
-static async Task<object> SaveAiPreviewAsync(string? previewRoot, JObject? args, CancellationToken ct)
+static async Task<object> SaveAiPreviewAsync(string? previewRoot, JObject? args, CancellationToken ct, IKnowledgeProvider provider)
 {
     if (previewRoot is null)
         return new { error = "No preview root configured. Set --preview-root or AIFE_PREVIEW_ROOT (or --components-source as a fallback base) when starting the MCP server." };
@@ -1019,7 +1020,7 @@ static async Task<object> SaveAiPreviewAsync(string? previewRoot, JObject? args,
         // so non-technical reviewers see a working preview with zero
         // manual editing — the whole point of save_ai_preview.
         if (file.Path.EndsWith(".tsx", StringComparison.OrdinalIgnoreCase))
-            content = AutoFixTsx(content, slugRoot, fullPath);
+            content = AutoFixTsx(content, slugRoot, fullPath, provider);
 
         await File.WriteAllTextAsync(fullPath, content, ct);
         written.Add(file.Path);
@@ -1086,115 +1087,92 @@ static async Task<object> SaveAiPreviewAsync(string? previewRoot, JObject? args,
 
 /// <summary>
 /// Deterministic post-generation fixes for common LLM mistakes in .tsx files.
-/// The LLM doesn't know the consumer project's directory structure or which
-/// components require `className`, so these patterns catch the 3 most common
-/// failure modes that would otherwise block a non-technical reviewer:
-///   1. Wrong relative import depth (../CustomUIs/... instead of ../../../)
-///   2. Missing `import styles from './X.module.scss'` when styles.xxx is used
-///   3. **Add `// @ts-nocheck`** — the consumer project is plain JS with
-///      PropTypes; TypeScript strict mode rejects `{...rest}` passthrough
-///      props and `forwardRef` children, generating dozens of TS2322 errors
-///      that non-technical reviewers can't fix. Silencing TS for generated
-///      preview pages is standard practice — the code works fine at runtime.
-/// Each fix is deterministic (regex-based, no LLM call) so it's fast, safe,
-/// and the output is predictable.
+/// These are KB-agnostic — no hardcoded BUS or CustomUIs strings.
+/// If you train with a different component library, these fixes still work
+/// because they derive import path structure from the KB at runtime.
 /// </summary>
-static string AutoFixTsx(string content, string slugRoot, string fullPath)
+static string AutoFixTsx(string content, string slugRoot, string fullPath, IKnowledgeProvider provider)
 {
     // ── Fix 0: Add @ts-nocheck ──
-    // The consumer project is plain JS (PropTypes), not TypeScript.
-    // TypeScript can't infer prop types from PropTypes alone — especially
-    // for forwardRef components (BUSButton, BUSTextArea) and {…rest} spread
-    // components (BUSSwitch).  This produces dozens of TS2322 errors that
-    // are completely harmless at runtime.  Adding `// @ts-nocheck` as the
-    // very first line suppresses ALL TS checking for this one generated
-    // preview file — the code compiles and renders fine via webpack/babel.
+    // Consumer projects are typically plain JS (PropTypes), not TypeScript.
+    // TypeScript can't infer prop types from PropTypes — especially for
+    // forwardRef and {…rest} spread components. Adding `// @ts-nocheck`
+    // suppresses ALL TS errors for this file. The code works fine at
+    // runtime via webpack/babel.
     if (!content.StartsWith("// @ts-nocheck"))
         content = "// @ts-nocheck\n" + content;
 
-    // ── Fix 1: Wrong relative import paths ──
-    // The LLM often writes `../CustomUIs/BUSComponent/BUSComponent` which
-    // resolves from _AiPreview/<slug>/ up only one level (to _AiPreview/).
-    // Following the existing project convention (SettingsPage.tsx uses
-    // `../CustomUIs/...` from `src/Components/SettingsPage/`), the
-    // correct depth from `src/Components/AppLogic/_AiPreview/<slug>/` is
-    // 3 levels up to `Components/`, then into `CustomUIs/...`.
-    content = System.Text.RegularExpressions.Regex.Replace(
-        content,
-        @"from\s+['""]\.\./CustomUIs/([^'""]+)['""]",
-        "from '../../../CustomUIs/$1'");
+    // ── Fix 1: Wrong relative import paths (KB-driven) ──
+    // The LLM often writes `../CustomUIs/X` or `../Components/X` (one level
+    // up), but the generated file lives 3+ levels deep in _AiPreview/<slug>/.
+    // We discover the correct import prefix by examining the first component
+    // in the KB: its `importPath` tells us the parent folder name to search
+    // for.  If the KB uses "CustomUIs", we fix "../CustomUIs/"; if it uses
+    // "components", we fix "../components/".  The replacement depth (how
+    // many "../" to prepend) is derived from the actual slugRoot depth.
+    var depth = ComputeDepthFromPreviewRoot(slugRoot);
+    var upPrefix = string.Concat(Enumerable.Repeat("../", depth));
 
-    // Fix: `from '../Components/CustomUIs/` -> `from '../../../CustomUIs/`
+    // Discover the component-root folder name from the first KB entry.
+    // e.g. "Components/CustomUIs/BUSButton/BUSButton" -> "CustomUIs"
+    var allComponents = provider.SearchComponentsAsync(new ComponentQuery(), CancellationToken.None)
+        .GetAwaiter().GetResult();
+    var firstId = allComponents?.FirstOrDefault()?.ComponentId;
+    string componentRoot = "CustomUIs"; // sensible default
+    if (firstId is not null)
+    {
+        var detail = provider.GetComponentAsync(firstId, CancellationToken.None)
+            .GetAwaiter().GetResult();
+        if (detail?.ImportPath is { } ip)
+        {
+            var parts = ip.Split('/');
+            var compIdx = Array.FindIndex(parts, p => p.Equals("Components", StringComparison.OrdinalIgnoreCase));
+            if (compIdx >= 0 && compIdx + 1 < parts.Length)
+                componentRoot = parts[compIdx + 1]; // e.g. "CustomUIs"
+        }
+    }
+
+    // Fix `from '../$componentRoot/...'` patterns (LLM assumed one level up)
     content = System.Text.RegularExpressions.Regex.Replace(
         content,
-        @"from\s+['""]\.\./Components/CustomUIs/([^'""]+)['""]",
-        "from '../../../CustomUIs/$1'");
+        $@"from\s+['""]\.\./{componentRoot}/([^'""]+)['""]",
+        $"from '{upPrefix}{componentRoot}/$1'");
+
+    // Fix `from '../Components/$componentRoot/...'` patterns
+    content = System.Text.RegularExpressions.Regex.Replace(
+        content,
+        $@"from\s+['""]\.\./Components/{componentRoot}/([^'""]+)['""]",
+        $"from '{upPrefix}{componentRoot}/$1'");
 
     // ── Fix 2: Missing `import styles` ──
     // If the file uses `styles.xxx` but has no `import styles` statement,
-    // inject one. The CSS module file name is derived from the .tsx file name.
+    // inject one from the sibling CSS module.
     if (content.Contains("styles.") && !content.Contains("import styles from"))
     {
         var tsxFileName = System.IO.Path.GetFileName(fullPath);
         var moduleName = System.IO.Path.GetFileNameWithoutExtension(tsxFileName) + ".module.scss";
-        // Insert after the last import statement (before the first non-import line)
         var lastImportIndex = FindLastImportPosition(content);
         if (lastImportIndex >= 0)
-        {
-            content = content.Insert(lastImportIndex,
-                $"import styles from './{moduleName}';\n");
-        }
+            content = content.Insert(lastImportIndex, $"import styles from './{moduleName}';\n");
         else
         {
-            // No existing imports — insert at the top after any leading comments
             var insertPos = FindTopInsertPosition(content);
-            content = content.Insert(insertPos,
-                $"import styles from './{moduleName}';\n");
+            content = content.Insert(insertPos, $"import styles from './{moduleName}';\n");
         }
     }
 
-    // ── Fix 3: className injection REMOVED ──
-    // Injecting className="" into JSX tags via regex is fundamentally
-    // unreliable — the `>` inside TypeScript generics like
-    // `<HTMLTextAreaElement>` collides with JSX tag closing brackets,
-    // causing the regex to inject className INSIDE type annotations:
-    //   `React.ChangeEvent<HTMLTextAreaElement className="">`  (broken!)
-    // The prompt template now teaches the LLM to always include className
-    // on BUS components. The auto-fix was doing more harm than good.
-    // See: McpPromptDefinitions.RenderConvertPrototypeToPage "CRITICAL" rules.
-
-    // ── Fix 4: BUSSwitch onChange is supported via {...rest} passthrough ──
-    // The BUSKvalitet BUSSwitch uses {...rest} spread to pass through
-    // all remaining props to react-bootstrap Form.Check — onChange,
-    // onFocus, onBlur, disabled, id, name, label are all valid.
-    // No fix needed here — the KB now correctly documents passthroughProps.
-
-    // ── Fix 5: BUSTabStrip className stripping REMOVED ──
-    // Same fundamental problem as Fix 3 — the `>` inside TypeScript
-    // generics collides with JSX tag closing brackets. Regex-based
-    // JSX manipulation is too brittle. The prompt teaches the LLM
-    // that BUSTabStrip doesn't accept className.
-
-    // ── Fix 6: Type untyped callback parameters ──
-    // The LLM often writes `onChange={(e) => ...}` or `onChange={e => ...}`
-    // without a type annotation. TypeScript strict mode rejects implicit
-    // 'any'. Add explicit React types based on the element context.
+    // ── Fix 3: Type untyped callback parameters ──
+    // The LLM often writes `(e) => ...` without a type annotation.
+    // TypeScript strict mode rejects implicit 'any'. Add explicit React types.
     content = System.Text.RegularExpressions.Regex.Replace(
         content,
         @"onChange=\{\s*(?:\(e\)\s*|e\s*)=>",
         "onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>");
 
-    // Also fix onClick callbacks that are untyped
     content = System.Text.RegularExpressions.Regex.Replace(
         content,
         @"onClick=\{\s*(?:\(e\)\s*|e\s*)=>",
         "onClick={(e: React.MouseEvent) =>");
-
-    // Fix setState callbacks that are untyped (for BUSSwitch)
-    content = System.Text.RegularExpressions.Regex.Replace(
-        content,
-        @"onChange=\{\s*\(\s*checked\s*\)\s*=>\s*set\w+\s*\(\s*checked\s*\)\s*\}",
-        "onChange={(checked: boolean) => set$1(checked)}");
 
     return content;
 }
@@ -1246,6 +1224,27 @@ static int FindTopInsertPosition(string content)
     for (int j = 0; j < i; j++)
         pos += lines[j].Length + 1;
     return pos;
+}
+
+/// <summary>
+/// Computes how many "../" levels are needed to get from the _AiPreview
+/// slug folder up to the project's src/ root (where `Components/` lives).
+/// Example: slugRoot = ".../src/Components/AppLogic/_AiPreview/settings"
+///   -> segments after "src" = ["Components","AppLogic","_AiPreview","settings"] = depth 4
+///   -> we need 4 levels of "../" to get back to src/
+/// </summary>
+static int ComputeDepthFromPreviewRoot(string slugRoot)
+{
+    // Normalize separators and find the "src" boundary
+    var normalized = slugRoot.Replace('\\', '/');
+    var srcIndex = normalized.IndexOf("/src/", StringComparison.OrdinalIgnoreCase);
+    if (srcIndex < 0)
+        return 4; // fallback: typical React project depth
+
+    // Count segments after "src/..."
+    var afterSrc = normalized[(srcIndex + "/src/".Length)..];
+    var segments = afterSrc.Split('/', StringSplitOptions.RemoveEmptyEntries);
+    return segments.Length;
 }
 
 static JObject? ReadJsonRpcMessage(Stream stdin)

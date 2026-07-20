@@ -10,6 +10,12 @@ namespace Aife.Mcp;
 /// element, use get_component's exact importPath, never invent a component,
 /// call save_ai_preview last, etc.) — baking that sequence into a prompt
 /// template here means they just fill in two simple fields instead.
+///
+/// IMPORTANT: The prompt template is KB-agnostic. It does NOT mention any
+/// specific component names (BUSButton, BUSTabStrip, etc.). All component-
+/// specific rules are derived at runtime from get_component/get_component_props
+/// calls. If you train a new KB with a different component set, the prompt
+/// still works without modification.
 /// </summary>
 public static class McpPromptDefinitions
 {
@@ -30,11 +36,9 @@ public static class McpPromptDefinitions
     };
 
     /// <summary>
-    /// Renders the "convert-prototype-to-page" prompt's full instruction text
-    /// with the caller's arguments substituted in. Kept in one place so the
-    /// exact recommended tool-call sequence (match_element -> get_component ->
-    /// get_component_props -> check_token_conformance -> score_prototype ->
-    /// save_ai_preview) only needs to be written and maintained once.
+    /// Renders the "convert-prototype-to-page" prompt with KB-agnostic
+    /// instructions. All component-specific rules come from calling
+    /// get_component/get_component_props — never hardcoded.
     /// </summary>
     public static string RenderConvertPrototypeToPage(string prototypePath, string? slug)
     {
@@ -58,39 +62,41 @@ public static class McpPromptDefinitions
            its real prop API. Use these exact values in the generated code —
            never fabricate an import path or prop name.
 
-        ⚠️ CRITICAL — Import path resolution rules:
-        - The generated .tsx file will be saved at _AiPreview/<slug>/ComponentName.tsx
-          (two levels deep from _AiPreview). Your import paths MUST be relative
-          from that location.
-        - get_component returns importPath like "Components/CustomUIs/BUSButton/BUSButton".
-          Count the folder depth: _AiPreview/<slug>/ is inside _AiPreview, which is
-          inside a deeper path like src/Components/AppLogic/_AiPreview/ or similar.
-        - The correct relative import is: go UP to the project src/ root, then INTO
-          the importPath. In practice, this means "../../../Components/CustomUIs/BUSButton/BUSButton"
-          (go up 3 levels: <slug>/ -> _AiPreview/ -> AppLogic/ -> Components/).
-        - If the importPath starts with "Components/", prepend "../../../" to it.
-        - If the importPath starts with "src/Components/", prepend "../../../../" to it.
-        - Never use "../CustomUIs/..." — that only goes up one level and will break.
+        ⚠️ CRITICAL — General rules that apply regardless of which component
+           library is in use:
 
-        ⚠️ CRITICAL — Component usage rules (BUS design system):
-        - BUSLabel: className is OPTIONAL (has defaultProp className=''). You can omit it safely.
-        - BUSButton: className is OPTIONAL (has defaultProp className='bus-btn'). Pass className for styling.
-        - BUSTextArea: className is OPTIONAL. Pass className for styling.
-        - BUSSwitch: className is OPTIONAL. Supports onChange, onFocus, onBlur, disabled, id, name, label
-          via {...rest} passthrough to react-bootstrap Form.Check.
-        - BUSTabStrip: DOES NOT ACCEPT className. Do NOT pass className to BUSTabStrip.
-          Its only props are: selected, onSelect, tabs, scrollable, keepTabsMounted,
-          renderAllContent, tabStripDisabled, hideArrows.
-        - BUSGrid: importPath is "Components/CustomUIs/bus-grids/bus-grid/bus-grid" (lowercase
-          hyphenated folder convention — DIFFERENT from the standard PascalCase path pattern).
-          DO NOT fabricate "Components/CustomUIs/BUSGrid/BUSGrid".
-        - Every .tsx file that uses CSS module classes (className={styles.xxx}) MUST include:
-          `import styles from './ComponentName.module.scss';`
-          as its LAST import (after all component imports).
-        - Always type callback parameters. For onChange on text inputs/areas, use:
-          `onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleChange(e.target.value)}`
-          For onClick on buttons, use: `onClick={(e: React.MouseEvent) => handleClick()}`
-          NEVER leave a callback parameter untyped as `(e) =>` — TypeScript strict mode rejects implicit 'any'.
+        a) Import path resolution:
+           - The generated .tsx file lives at _AiPreview/<slug>/ComponentName.tsx,
+             which is typically 3-4 levels deep from the project's src/ root.
+           - get_component returns an importPath (e.g. "Components/CustomUIs/X/X").
+             The correct relative import from _AiPreview/<slug>/ is to go UP to
+             the src/ root, then INTO the importPath. For a typical React project
+             this means "../../../" + importPath.
+           - NEVER use "../" alone — that only goes up one level and WILL break.
+
+        b) Component props:
+           - Use ONLY the props listed by get_component_props. Do NOT invent props
+             (no "variant", "size", "type" unless the KB says so).
+           - If a component's KB entry has "passthroughProps": true, it supports
+             additional standard HTML/React props via {...rest} spread.
+           - Check whether "className" is in the props list before passing it.
+             If not listed, do NOT pass className — it will cause a TS error.
+
+        c) CSS modules:
+           - Every .tsx that uses className={styles.xxx} MUST include:
+             `import styles from './ComponentName.module.scss';`
+             as the last import statement.
+
+        d) TypeScript callbacks:
+           - NEVER write untyped callbacks like `(e) =>`. Always annotate:
+             `(e: React.ChangeEvent<HTMLInputElement>) =>` for inputs/switches
+             `(e: React.MouseEvent) =>` for buttons
+             `(e: React.ChangeEvent<HTMLTextAreaElement>) =>` for textareas
+
+        e) Import style:
+           - If isDefaultExport is true:  `import ComponentName from './path'`
+           - If isDefaultExport is false: `import { ComponentName } from './path'`
+           - Use the exact exportName from get_component. Never rename on import.
 
         4. Call `check_token_conformance` on the CSS to get real design-token
            violations, then call `score_prototype` with your matched elements +

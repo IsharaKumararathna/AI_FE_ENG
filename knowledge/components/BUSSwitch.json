@@ -3,13 +3,12 @@
   "name": "BUSSwitch",
   "category": "form",
   "status": "approved",
-  "description": "Extracted from BUSSwitch.js. Wraps react-bootstrap Form.Check with {...rest} passthrough — onChange, onFocus, onBlur, disabled, name, id, label, etc. are all supported via spread.",
+  "description": "Extracted from BUSSwitch.js",
   "props": [
     {
       "name": "size",
       "type": "string",
-      "required": false,
-      "description": "One of: small, medium, large"
+      "required": false
     },
     {
       "name": "checked",
@@ -29,51 +28,42 @@
     {
       "name": "onChange",
       "type": "function",
-      "required": false,
-      "description": "Passthrough to react-bootstrap Form.Check onChange via {...rest} spread."
+      "required": false
     },
     {
       "name": "onFocus",
       "type": "function",
-      "required": false,
-      "description": "Passthrough via {...rest} spread."
+      "required": false
     },
     {
       "name": "onBlur",
       "type": "function",
-      "required": false,
-      "description": "Passthrough via {...rest} spread."
+      "required": false
     },
     {
       "name": "disabled",
       "type": "boolean",
-      "required": false,
-      "description": "Passthrough via {...rest} spread."
+      "required": false
     },
     {
       "name": "name",
       "type": "string",
-      "required": false,
-      "description": "Passthrough via {...rest} spread."
+      "required": false
     },
     {
       "name": "id",
       "type": "string",
-      "required": false,
-      "description": "Passthrough via {...rest} spread."
+      "required": false
     },
     {
       "name": "label",
       "type": "string",
-      "required": false,
-      "description": "Passthrough via {...rest} spread."
+      "required": false
     }
   ],
-  "passthroughProps": true,
   "tokensConsumed": [],
   "mapsFromHtml": [
-    "switch",
-    "toggle"
+    "switch"
   ],
   "importPath": "Components/CustomUIs/BUSSwitch/BUSSwitch",
   "exportName": "BUSSwitch",
