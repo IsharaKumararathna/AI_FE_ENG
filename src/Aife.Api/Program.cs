@@ -129,6 +129,21 @@ app.MapControllers();
 // Root redirects to dashboard (fallback if default files miss)
 app.MapGet("/", () => Results.Redirect("/index.html"));
 
+// Quick diagnostic: log all bound URLs so the developer knows exactly where to go
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    var addresses = app.Urls;
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("═══════════════════════════════════════════");
+    Console.WriteLine("  Aife API is running:");
+    foreach (var url in addresses)
+        Console.WriteLine($"    {url}");
+    Console.WriteLine("  Health check: {0}/api/v1/health",
+        addresses.FirstOrDefault() ?? "http://localhost:5000");
+    Console.WriteLine("═══════════════════════════════════════════");
+    Console.ResetColor();
+});
+
 app.Run();
 
 // Required for WebApplicationFactory<Program> in integration tests.

@@ -3,32 +3,55 @@
   "name": "BUSTab Strip",
   "category": "navigation",
   "status": "approved",
-  "description": "Extracted from BUSTabStrip.js",
+  "description": "Extracted from BUSTabStrip.js. Uses react-bootstrap Tabs/Tab (NOT KendoReact).",
   "props": [
     {
       "name": "selected",
       "type": "number",
-      "required": false
+      "required": false,
+      "description": "Index of the currently selected tab."
     },
     {
       "name": "onSelect",
       "type": "function",
-      "required": false
+      "required": false,
+      "description": "Callback when a tab is selected: (index: number) => void."
+    },
+    {
+      "name": "tabs",
+      "type": "array",
+      "required": false,
+      "description": "Array of tab objects: { title: string|element, count: string, countPosition: 'front'|'back', titleLabelText: string, titleLabelType: LabelTypeEnum, titleClassName: string, showDot: bool, renderComponent: element, tabCallback: function }."
     },
     {
       "name": "scrollable",
       "type": "boolean",
-      "required": false
+      "required": false,
+      "description": "Whether tabs are horizontally scrollable."
     },
     {
       "name": "tabStripDisabled",
       "type": "boolean",
-      "required": false
+      "required": false,
+      "description": "Disable all tabs."
     },
     {
       "name": "hideArrows",
       "type": "boolean",
-      "required": false
+      "required": false,
+      "description": "Hide scroll arrows."
+    },
+    {
+      "name": "keepTabsMounted",
+      "type": "boolean",
+      "required": false,
+      "description": "Keep inactive tab content mounted in DOM."
+    },
+    {
+      "name": "renderAllContent",
+      "type": "boolean",
+      "required": false,
+      "description": "Pre-render all tab content."
     }
   ],
   "tokensConsumed": [],

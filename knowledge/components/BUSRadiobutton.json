@@ -1,9 +1,9 @@
 {
   "componentId": "BUSRadiobutton",
   "name": "BUSRadiobutton",
-  "category": "input",
+  "category": "button",
   "status": "approved",
-  "description": "Radio button component for single-select choices. Extracted from BUSRadiobutton.jsx.",
+  "description": "Extracted from BUSRadiobutton.jsx",
   "props": [
     {
       "name": "id",
@@ -57,25 +57,9 @@
     }
   ],
   "tokensConsumed": [],
-  "mapsFromHtml": [
-    "radio",
-    "radiobutton",
-    "radio-group"
-  ],
-  "tags": ["radio", "radiobutton", "single-select", "option"],
-  "htmlPatterns": [
-    "<input type=\"radio\" ...",
-    "radio button group",
-    "single-select option"
-  ],
+  "mapsFromHtml": [],
   "importPath": "Components/CustomUIs/BUSRadioButton/BUSRadiobutton",
   "exportName": "BUSRadiobutton",
   "isDefaultExport": false,
-  "sourceFile": "src/Components/CustomUIs/BUSRadioButton/BUSRadiobutton.jsx",
-  "accessibility": {
-    "role": "radio",
-    "keyboardSupport": true,
-    "ariaProps": ["aria-checked", "aria-label", "aria-labelledby"],
-    "wcagLevel": "AA"
-  }
+  "sourceFile": "src/Components/CustomUIs/BUSRadioButton/BUSRadiobutton.jsx"
 }

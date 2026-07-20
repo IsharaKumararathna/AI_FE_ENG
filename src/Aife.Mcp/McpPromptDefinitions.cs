@@ -57,6 +57,33 @@ public static class McpPromptDefinitions
            importPath/exportName/isDefaultExport, and `get_component_props` for
            its real prop API. Use these exact values in the generated code —
            never fabricate an import path or prop name.
+
+        ⚠️ CRITICAL — Import path resolution rules:
+        - The generated .tsx file will be saved at _AiPreview/<slug>/ComponentName.tsx
+          (two levels deep from _AiPreview). Your import paths MUST be relative
+          from that location.
+        - get_component returns importPath like "Components/CustomUIs/BUSButton/BUSButton".
+          Count the folder depth: _AiPreview/<slug>/ is inside _AiPreview, which is
+          inside a deeper path like src/Components/AppLogic/_AiPreview/ or similar.
+        - The correct relative import is: go UP to the project src/ root, then INTO
+          the importPath. In practice, this means "../../../Components/CustomUIs/BUSButton/BUSButton"
+          (go up 3 levels: <slug>/ -> _AiPreview/ -> AppLogic/ -> Components/).
+        - If the importPath starts with "Components/", prepend "../../../" to it.
+        - If the importPath starts with "src/Components/", prepend "../../../../" to it.
+        - Never use "../CustomUIs/..." — that only goes up one level and will break.
+
+        ⚠️ CRITICAL — Component usage rules (BUS design system):
+        - BUSLabel, BUSButton, BUSTextArea and most BUS components REQUIRE a
+          `className` prop. ALWAYS pass at least className="".
+        - BUSSwitch does NOT have an `onChange` prop. Use only these props:
+          { checked, value, size, className }. To handle toggle behavior, wrap
+          it in a clickable container or use the `checked`/`value` props for
+          controlled behavior with a state variable.
+        - Every .tsx file that uses CSS module classes (className={styles.xxx})
+          MUST include: `import styles from './ComponentName.module.scss';`
+          as its LAST import (after all component imports).
+        - If a .tsx file has NO CSS module usage, do NOT import styles.
+
         4. Call `check_token_conformance` on the CSS to get real design-token
            violations, then call `score_prototype` with your matched elements +
            those violations to get an overall conformance score.

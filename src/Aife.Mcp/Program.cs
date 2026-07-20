@@ -1009,7 +1009,19 @@ static async Task<object> SaveAiPreviewAsync(string? previewRoot, JObject? args,
         if (dir is not null)
             Directory.CreateDirectory(dir);
 
-        await File.WriteAllTextAsync(fullPath, file.Content, ct);
+        var content = file.Content;
+
+        // ── Post-generation auto-fix for .tsx files ──
+        // LLMs often get import paths wrong (relative depth, missing
+        // className, missing styles import) because they don't fully
+        // model the consumer project's directory structure. These
+        // deterministic fixes catch the most common failure patterns
+        // so non-technical reviewers see a working preview with zero
+        // manual editing — the whole point of save_ai_preview.
+        if (file.Path.EndsWith(".tsx", StringComparison.OrdinalIgnoreCase))
+            content = AutoFixTsx(content, slugRoot, fullPath);
+
+        await File.WriteAllTextAsync(fullPath, content, ct);
         written.Add(file.Path);
     }
 
@@ -1070,6 +1082,138 @@ static async Task<object> SaveAiPreviewAsync(string? previewRoot, JObject? args,
         previewUrl = $"/ai-preview/{slug}",
         message = $"Saved. Once the dev server is running, open http://localhost:3000/#/ai-preview/{slug} (after logging in) to review it."
     };
+}
+
+/// <summary>
+/// Deterministic post-generation fixes for common LLM mistakes in .tsx files.
+/// The LLM doesn't know the consumer project's directory structure or which
+/// components require `className`, so these patterns catch the 3 most common
+/// failure modes that would otherwise block a non-technical reviewer:
+///   1. Wrong relative import depth (../CustomUIs/... instead of ../../../)
+///   2. Missing `import styles from './X.module.scss'` when styles.xxx is used
+///   3. Missing `className` prop on BUS components that require it
+/// Each fix is deterministic (regex-based, no LLM call) so it's fast, safe,
+/// and the output is predictable.
+/// </summary>
+static string AutoFixTsx(string content, string slugRoot, string fullPath)
+{
+    // ── Fix 1: Wrong relative import paths ──
+    // The LLM often writes `../CustomUIs/BUSComponent/BUSComponent` which
+    // resolves from _AiPreview/<slug>/ up only one level (to _AiPreview/).
+    // The actual importPath from the KB starts at "Components/..." from the
+    // src/ root. Since _AiPreview/<slug>/ is typically 3 levels deep
+    // (slug/ -> _AiPreview/ -> AppLogic/ -> src root -> Components/), the
+    // correct prefix is "../../../".
+    content = System.Text.RegularExpressions.Regex.Replace(
+        content,
+        @"from\s+['""]\.\./CustomUIs/([^'""]+)['""]",
+        "from '../../../Components/CustomUIs/$1'");
+
+    // Also fix `from '../Components/` which is wrong from 2 levels deep
+    content = System.Text.RegularExpressions.Regex.Replace(
+        content,
+        @"from\s+['""]\.\./Components/([^'""]+)['""]",
+        "from '../../../Components/$1'");
+
+    // ── Fix 2: Missing `import styles` ──
+    // If the file uses `styles.xxx` but has no `import styles` statement,
+    // inject one. The CSS module file name is derived from the .tsx file name.
+    if (content.Contains("styles.") && !content.Contains("import styles from"))
+    {
+        var tsxFileName = System.IO.Path.GetFileName(fullPath);
+        var moduleName = System.IO.Path.GetFileNameWithoutExtension(tsxFileName) + ".module.scss";
+        // Insert after the last import statement (before the first non-import line)
+        var lastImportIndex = FindLastImportPosition(content);
+        if (lastImportIndex >= 0)
+        {
+            content = content.Insert(lastImportIndex,
+                $"import styles from './{moduleName}';\n");
+        }
+        else
+        {
+            // No existing imports — insert at the top after any leading comments
+            var insertPos = FindTopInsertPosition(content);
+            content = content.Insert(insertPos,
+                $"import styles from './{moduleName}';\n");
+        }
+    }
+
+    // ── Fix 3: Missing `className` on BUS components that require it ──
+    // Several BUS components (BUSLabel, BUSButton, BUSTextArea, BUSSwitch)
+    // have PropTypes that require `className`. The LLM often omits it
+    // because most design systems make it optional. This fix adds
+    // className="" to any opening tag that doesn't already have it,
+    // using a match evaluator for robustness (handles multi-line,
+    // self-closing, and prop-heavy tags correctly).
+    var componentsNeedingClassName = new[] { "BUSLabel", "BUSButton", "BUSTextArea", "BUSSwitch" };
+    var busTagRegex = new System.Text.RegularExpressions.Regex(
+        $@"<({string.Join("|", componentsNeedingClassName)})\b([^>]*)>",
+        System.Text.RegularExpressions.RegexOptions.Singleline);
+    content = busTagRegex.Replace(content, match =>
+    {
+        var full = match.Value;
+        if (full.Contains("className="))
+            return full; // Already has className — nothing to fix
+        // Insert className="" right before the closing >
+        return full[..^1] + " className=\"\"" + ">";
+    });
+
+    // ── Fix 4: BUSSwitch onChange is supported via {...rest} passthrough ──
+    // The BUSKvalitet BUSSwitch uses {...rest} spread to pass through
+    // all remaining props to react-bootstrap Form.Check — onChange,
+    // onFocus, onBlur, disabled, id, name, label are all valid.
+    // No fix needed here — the KB now correctly documents passthroughProps.
+
+    return content;
+}
+
+/// <summary>
+/// Finds the position right after the last import/require statement so
+/// we can insert `import styles` right after existing imports.
+/// </summary>
+static int FindLastImportPosition(string content)
+{
+    var lines = content.Split('\n');
+    var lastImportLine = -1;
+    for (int i = 0; i < lines.Length; i++)
+    {
+        var trimmed = lines[i].TrimStart();
+        if (trimmed.StartsWith("import ") || trimmed.StartsWith("require(") ||
+            trimmed.StartsWith("export {") || trimmed.StartsWith("export *") ||
+            trimmed.StartsWith("export default"))
+            lastImportLine = i;
+    }
+    if (lastImportLine >= 0)
+    {
+        // Return the byte position right after this line's newline
+        var pos = 0;
+        for (int i = 0; i <= lastImportLine; i++)
+            pos += lines[i].Length + 1; // +1 for \n
+        return pos;
+    }
+    return -1;
+}
+
+/// <summary>
+/// Finds a safe position to insert code at the top of a file, after any
+/// leading comments or blank lines.
+/// </summary>
+static int FindTopInsertPosition(string content)
+{
+    var lines = content.Split('\n');
+    var i = 0;
+    while (i < lines.Length)
+    {
+        var trimmed = lines[i].Trim();
+        if (trimmed.Length > 0 && !trimmed.StartsWith("//") && !trimmed.StartsWith("/*") && !trimmed.StartsWith("*"))
+            break;
+        i++;
+    }
+    // Return byte position at the start of line i
+    var pos = 0;
+    for (int j = 0; j < i; j++)
+        pos += lines[j].Length + 1;
+    return pos;
 }
 
 static JObject? ReadJsonRpcMessage(Stream stdin)

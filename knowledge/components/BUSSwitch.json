@@ -3,12 +3,13 @@
   "name": "BUSSwitch",
   "category": "form",
   "status": "approved",
-  "description": "Extracted from BUSSwitch.js",
+  "description": "Extracted from BUSSwitch.js. Wraps react-bootstrap Form.Check with {...rest} passthrough — onChange, onFocus, onBlur, disabled, name, id, label, etc. are all supported via spread.",
   "props": [
     {
       "name": "size",
       "type": "string",
-      "required": false
+      "required": false,
+      "description": "One of: small, medium, large"
     },
     {
       "name": "checked",
@@ -24,20 +25,58 @@
       "name": "className",
       "type": "string",
       "required": false
+    },
+    {
+      "name": "onChange",
+      "type": "function",
+      "required": false,
+      "description": "Passthrough to react-bootstrap Form.Check onChange via {...rest} spread."
+    },
+    {
+      "name": "onFocus",
+      "type": "function",
+      "required": false,
+      "description": "Passthrough via {...rest} spread."
+    },
+    {
+      "name": "onBlur",
+      "type": "function",
+      "required": false,
+      "description": "Passthrough via {...rest} spread."
+    },
+    {
+      "name": "disabled",
+      "type": "boolean",
+      "required": false,
+      "description": "Passthrough via {...rest} spread."
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "required": false,
+      "description": "Passthrough via {...rest} spread."
+    },
+    {
+      "name": "id",
+      "type": "string",
+      "required": false,
+      "description": "Passthrough via {...rest} spread."
+    },
+    {
+      "name": "label",
+      "type": "string",
+      "required": false,
+      "description": "Passthrough via {...rest} spread."
     }
   ],
+  "passthroughProps": true,
   "tokensConsumed": [],
   "mapsFromHtml": [
-    "switch"
+    "switch",
+    "toggle"
   ],
   "importPath": "Components/CustomUIs/BUSSwitch/BUSSwitch",
   "exportName": "BUSSwitch",
   "isDefaultExport": false,
-  "sourceFile": "src/Components/CustomUIs/BUSSwitch/BUSSwitch.js",
-  "accessibility": {
-    "role": "switch",
-    "keyboardSupport": true,
-    "ariaProps": ["aria-checked", "aria-label"],
-    "wcagLevel": "AA"
-  }
+  "sourceFile": "src/Components/CustomUIs/BUSSwitch/BUSSwitch.js"
 }

@@ -3,12 +3,13 @@
   "name": "BUSLabel",
   "category": "display",
   "status": "approved",
-  "description": "Extracted from BUSLabel.js",
+  "description": "Extracted from BUSLabel.js. A <span> with bus-label CSS class. Has className defaultProp='' so it works without explicit className. Also supports any standard HTML span attributes via {...rest} spread.",
   "props": [
     {
       "name": "className",
       "type": "string",
-      "required": false
+      "required": false,
+      "description": "Merged with 'bus-label'. Defaults to '' so omitting className is safe."
     },
     {
       "name": "children",
@@ -16,8 +17,13 @@
       "required": false
     }
   ],
+  "passthroughProps": true,
   "tokensConsumed": [],
-  "mapsFromHtml": [],
+  "mapsFromHtml": [
+    "label",
+    "span",
+    "text"
+  ],
   "importPath": "Components/CustomUIs/BUSLabel/BUSLabel",
   "exportName": "BUSLabel",
   "isDefaultExport": false,
