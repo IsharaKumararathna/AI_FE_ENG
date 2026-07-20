@@ -38,5 +38,11 @@
   "importPath": "Components/CustomUIs/BUSCheckbox/BUSCheckbox",
   "exportName": "BUSCheckbox",
   "isDefaultExport": false,
-  "sourceFile": "src/Components/CustomUIs/BUSCheckbox/BUSCheckbox.js"
+  "sourceFile": "src/Components/CustomUIs/BUSCheckbox/BUSCheckbox.js",
+  "accessibility": {
+    "role": "checkbox",
+    "keyboardSupport": true,
+    "ariaProps": ["aria-checked", "aria-label", "aria-labelledby"],
+    "wcagLevel": "AA"
+  }
 }

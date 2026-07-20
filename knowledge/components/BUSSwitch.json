@@ -33,5 +33,11 @@
   "importPath": "Components/CustomUIs/BUSSwitch/BUSSwitch",
   "exportName": "BUSSwitch",
   "isDefaultExport": false,
-  "sourceFile": "src/Components/CustomUIs/BUSSwitch/BUSSwitch.js"
+  "sourceFile": "src/Components/CustomUIs/BUSSwitch/BUSSwitch.js",
+  "accessibility": {
+    "role": "switch",
+    "keyboardSupport": true,
+    "ariaProps": ["aria-checked", "aria-label"],
+    "wcagLevel": "AA"
+  }
 }

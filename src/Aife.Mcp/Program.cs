@@ -209,7 +209,7 @@ static async Task<int> RunSetupCommandAsync(string[] args)
         : "[2/3] Preview root: not detected (save_ai_preview will be unavailable until --preview-root or AIFE_PREVIEW_ROOT is set)");
 
     // ── Step 3: Generate .vscode/mcp.json ──
-    Console.WriteLine("[3/3] Generating .vscode/mcp.json ...");
+    Console.WriteLine("[3/4] Generating .vscode/mcp.json ...");
     var mcpJsonPath = Path.Combine(project, ".vscode", "mcp.json");
     Directory.CreateDirectory(Path.GetDirectoryName(mcpJsonPath)!);
 
@@ -245,6 +245,11 @@ static async Task<int> RunSetupCommandAsync(string[] args)
         Console.WriteLine($"      {mcpJsonPath} already exists — overwriting.");
 
     await File.WriteAllTextAsync(mcpJsonPath, mcpConfig.ToString(Formatting.Indented));
+
+    // ── Step 4: Deploy AiPreviewPage.tsx ──
+    Console.WriteLine("[4/4] Deploying AiPreviewPage.tsx ...");
+    await DeployAiPreviewPageAsync(previewRoot, Console.OpenStandardError());
+    Console.WriteLine($"      -> {Path.Combine(previewRoot, "AiPreviewPage.tsx")}");
 
     Console.WriteLine();
     Console.WriteLine("Setup complete.");
@@ -301,6 +306,60 @@ static string? DetectPreviewRoot(string projectPath, string sourcePath)
         }
 
     return null;
+}
+
+/// <summary>
+/// Deploys (or refreshes) the AiPreviewPage.tsx component into the consumer
+/// project's _AiPreview folder so the single static route
+/// /#/ai-preview/:slug? auto-discovers every generated component via
+/// require.context — zero manual route wiring, ever.
+/// Skips if the consumer project already has a newer (locally-modified)
+/// AiPreviewPage.tsx; writes when missing or when our embedded version is
+/// newer (tracked via a .aife-version comment in the file).
+/// </summary>
+static async Task DeployAiPreviewPageAsync(string previewRoot, Stream stderr)
+{
+    var targetPath = Path.Combine(previewRoot, "AiPreviewPage.tsx");
+    var template = ReadAiPreviewPageTemplate();
+    var embeddedVersion = EmbedFileVersion(template);
+
+    if (File.Exists(targetPath))
+    {
+        var existing = await File.ReadAllTextAsync(targetPath);
+        var existingVersion = EmbedFileVersion(existing);
+        if (existingVersion >= embeddedVersion)
+        {
+            Log(stderr, $"AiPreviewPage.tsx already at version {existingVersion} (embedded is {embeddedVersion}) — skipping deploy.");
+            return;
+        }
+        Log(stderr, $"AiPreviewPage.tsx is at version {existingVersion}, updating to {embeddedVersion}.");
+    }
+    else
+    {
+        Log(stderr, $"AiPreviewPage.tsx not found — deploying version {embeddedVersion}.");
+    }
+
+    Directory.CreateDirectory(previewRoot);
+    await File.WriteAllTextAsync(targetPath, template);
+    Log(stderr, $"AiPreviewPage.tsx deployed to {targetPath}.");
+}
+
+/// <summary>
+/// Extracts the embedded version number from the first line of the file,
+/// which must start with "// @aife-version: N". Returns 0 if no version
+/// comment is found.
+/// </summary>
+static int EmbedFileVersion(string content)
+{
+    var firstLine = content.Split('\n')[0].Trim();
+    const string prefix = "// @aife-version:";
+    if (firstLine.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+    {
+        var versionStr = firstLine[prefix.Length..].Trim();
+        if (int.TryParse(versionStr, out var version))
+            return version;
+    }
+    return 0;
 }
 
 // ──────────────────────────────────────────────────────────────────
@@ -906,6 +965,18 @@ static async Task<object> SaveAiPreviewAsync(string? previewRoot, JObject? args,
     if (previewRoot is null)
         return new { error = "No preview root configured. Set --preview-root or AIFE_PREVIEW_ROOT (or --components-source as a fallback base) when starting the MCP server." };
 
+    // Defensive: if AiPreviewPage.tsx is missing from the preview root
+    // (e.g. the project was set up before the auto-deploy feature was added,
+    // or someone deleted it), deploy it now so the preview URL actually works
+    // with zero manual steps.
+    var aiPreviewPagePath = Path.Combine(previewRoot, "AiPreviewPage.tsx");
+    if (!File.Exists(aiPreviewPagePath))
+    {
+        Directory.CreateDirectory(previewRoot);
+        var fallbackTemplate = ReadAiPreviewPageTemplate();
+        await File.WriteAllTextAsync(aiPreviewPagePath, fallbackTemplate);
+    }
+
     var slug = args?["slug"]?.ToString();
     if (string.IsNullOrWhiteSpace(slug) || !System.Text.RegularExpressions.Regex.IsMatch(slug, "^[a-z0-9][a-z0-9-]*$"))
         return new { error = "'slug' is required and must be lowercase kebab-case (e.g. 'customer-register')." };
@@ -1036,6 +1107,27 @@ static string FindRepoRoot()
     var dir = new DirectoryInfo(AppContext.BaseDirectory);
     while (dir is not null) { if (Directory.Exists(Path.Combine(dir.FullName, "knowledge"))) return dir.FullName; dir = dir.Parent; }
     return AppContext.BaseDirectory;
+}
+
+/// <summary>
+/// Reads the AiPreviewPage.tsx template from the knowledge/ folder.
+/// This is the single source of truth — the same file that gets
+/// deployed to consumer projects. Reading from disk at runtime is
+/// cleaner and avoids C# string escaping issues with JSX/TSX content.
+/// </summary>
+static string ReadAiPreviewPageTemplate()
+{
+    var templatePath = Path.Combine(FindRepoRoot(), "knowledge", "referenceUiPatterns", "AiPreviewPage.template.tsx");
+    if (File.Exists(templatePath))
+        return File.ReadAllText(templatePath);
+
+    // Fallback: look relative to the executable
+    var altPath = Path.Combine(AppContext.BaseDirectory, "knowledge", "referenceUiPatterns", "AiPreviewPage.template.tsx");
+    if (File.Exists(altPath))
+        return File.ReadAllText(altPath);
+
+    throw new FileNotFoundException(
+        "AiPreviewPage.template.tsx not found. Ensure the knowledge/ folder is deployed alongside the executable.");
 }
 
 sealed class PreviewFileInput
