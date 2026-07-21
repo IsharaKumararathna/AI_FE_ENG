@@ -1139,20 +1139,30 @@ static string AutoFixTsx(string content, string slugRoot, string fullPath, IKnow
         }
     }
 
-    // Escape for regex: componentRoot may now contain '/' (e.g. "DesignSystem/components")
-    var escapedRoot = System.Text.RegularExpressions.Regex.Escape(componentRoot);
+    // Extract the top-level component directory name for import-path matching.
+    // The LLM writes imports like '../DesignSystem' or './../../DesignSystem/components/Button'
+    // regardless of how deep the component actually lives in the KB. We match the top-level
+    // directory name and fix ONLY the depth (number of '../' segments). The old BUS
+    // convention inserting an extra 'Components/' prefix is also handled — the regex
+    // jumps past it. Zero hardcoded folder names — this works for any project structure.
+    // The LLM writes imports relative to the Components/ directory (or src/ root),
+    // so it consistently drops "Components/" from import paths. Strip this prefix
+    // from the componentRoot so the regex match key aligns with what the LLM writes.
+    // Handles both "Components/CustomUIs/..." and "components/..." (case-insensitive).
+    var strippedRoot = componentRoot;
+    if (strippedRoot.StartsWith("Components/", StringComparison.OrdinalIgnoreCase))
+        strippedRoot = strippedRoot["Components/".Length..];
 
-    // Fix `from '../$componentRoot/...'` patterns (LLM assumed one level up)
+    var topLevelDir = strippedRoot.Split('/')[0];
+    var escapedTopLevel = System.Text.RegularExpressions.Regex.Escape(topLevelDir);
+
+    // Match: from ' or " then optional ./ then one or more ../ then (optionally
+    // 'Components/' for old BUS convention) then topLevelDir then optional /sub/path.
+    // Replace only the up-prefix with the correct depth, preserving the rest.
     content = System.Text.RegularExpressions.Regex.Replace(
         content,
-        $@"from\s+['""]\.\./{escapedRoot}/([^'""]+)['""]",
-        $"from '{upPrefix}{componentRoot}/$1'");
-
-    // Fix `from '../Components/$componentRoot/...'` patterns (old BUS convention)
-    content = System.Text.RegularExpressions.Regex.Replace(
-        content,
-        $@"from\s+['""]\.\./Components/{escapedRoot}/([^'""]+)['""]",
-        $"from '{upPrefix}{componentRoot}/$1'");
+        $@"from\s+['""](?:\./)?((?:\.\./)+)(?:Components/)?({escapedTopLevel}(?:/[^'""]+)?)['""]",
+        $"from '{upPrefix}$2'");
 
     // ── Fix 2: Missing `import styles` ──
     // If the file uses `styles.xxx` but has no `import styles` statement,
