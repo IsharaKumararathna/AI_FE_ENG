@@ -1,8 +1,6 @@
+// @aife-version: 2
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import BUSLabel from '../CustomUIs/BUSLabels/BUSLabel/BUSLabel';
-import BUSButton from '../CustomUIs/BUSButtons/BUSButton/BUSButton';
-import BUSTabStrip from '../CustomUIs/BUSTabStrips/BUSTabStrip/BUSTabStrip';
 
 // ── Auto-discover all AI preview pages ──
 // Each sub-folder under _AiPreview/ is a preview page. This require.context
@@ -448,7 +446,7 @@ const AiPreviewPage: React.FC = () => {
       {/* Slug selector — only show if multiple previews exist */}
       {entries.length > 1 && (
         <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <BUSLabel text="Preview:" />
+          <span style={{ fontSize: '14px', fontWeight: 600, color: '#1f2a37' }}>Preview:</span>
           <select
             value={currentSlug}
             onChange={(e) => {
@@ -473,15 +471,30 @@ const AiPreviewPage: React.FC = () => {
         </div>
       )}
 
-      {/* 4-tab layout */}
-      <BUSTabStrip
-        tabs={TABS.map((t) => ({
-          id: t.id,
-          label: `${t.icon} ${t.label}`,
-        }))}
-        activeTabId={activeTab}
-        onTabChange={(id: string) => setActiveTab(id as TabId)}
-      />
+      {/* 4-tab layout — plain HTML/CSS, no Design System dependency */}
+      <div style={{ display: 'flex', gap: '1px', marginBottom: '0', borderBottom: '2px solid #d7dce5' }}>
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setActiveTab(t.id)}
+            style={{
+              padding: '10px 20px',
+              background: activeTab === t.id ? '#fff' : '#f3f4f6',
+              color: activeTab === t.id ? '#1a56db' : '#6b7280',
+              border: activeTab === t.id ? '2px solid #1a56db' : '2px solid transparent',
+              borderBottom: activeTab === t.id ? '2px solid #fff' : '2px solid transparent',
+              borderRadius: '8px 8px 0 0',
+              fontWeight: activeTab === t.id ? 600 : 400,
+              fontSize: '14px',
+              cursor: 'pointer',
+              marginBottom: '-2px',
+              position: 'relative' as const,
+            }}
+          >
+            {t.icon} {t.label}
+          </button>
+        ))}
+      </div>
 
       {/* Tab content */}
       <div style={{ marginTop: '16px' }}>

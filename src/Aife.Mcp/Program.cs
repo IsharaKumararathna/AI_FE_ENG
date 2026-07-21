@@ -328,12 +328,21 @@ static async Task DeployAiPreviewPageAsync(string previewRoot, Stream stderr)
     {
         var existing = await File.ReadAllTextAsync(targetPath);
         var existingVersion = EmbedFileVersion(existing);
-        if (existingVersion >= embeddedVersion)
+
+        // embeddedVersion == 0 means the template itself hasn't been versioned
+        // yet — still deploy (don't skip), because the existing file might
+        // be a stale single-view version from before the @aife-version
+        // convention was introduced.
+        if (embeddedVersion > 0 && existingVersion >= embeddedVersion)
         {
             Log(stderr, $"AiPreviewPage.tsx already at version {existingVersion} (embedded is {embeddedVersion}) — skipping deploy.");
             return;
         }
-        Log(stderr, $"AiPreviewPage.tsx is at version {existingVersion}, updating to {embeddedVersion}.");
+
+        if (existingVersion > 0)
+            Log(stderr, $"AiPreviewPage.tsx is at version {existingVersion}, updating to {embeddedVersion}.");
+        else
+            Log(stderr, $"AiPreviewPage.tsx has no version header (pre-v1), updating to {embeddedVersion}.");
     }
     else
     {
