@@ -219,12 +219,30 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
 
     private static string? FindVariablesFile(string folderPath)
     {
-        // Look for Variables.scss in Styles/Basic/
+        // Known conventions in priority order — hit the most specific first.
         var patterns = new[]
         {
+            // BUS legacy: repo-root -> src/Styles/Basic/Variables.scss
             Path.Combine(folderPath, "src", "Styles", "Basic", "Variables.scss"),
             Path.Combine(folderPath, "src", "styles", "basic", "Variables.scss"),
             Path.Combine(folderPath, "src", "Styles", "Variables.scss"),
+            // DesignSystem (repo-root): src/DesignSystem/tokens/Variables.scss
+            Path.Combine(folderPath, "src", "DesignSystem", "tokens", "Variables.scss"),
+            Path.Combine(folderPath, "src", "DesignSystem", "Tokens", "Variables.scss"),
+            Path.Combine(folderPath, "src", "DesignSystem", "styles", "Variables.scss"),
+            Path.Combine(folderPath, "src", "DesignSystem", "Styles", "Variables.scss"),
+            // DesignSystem (repo-root): src/DesignSystem/tokens/tokens.scss
+            Path.Combine(folderPath, "src", "DesignSystem", "tokens", "tokens.scss"),
+            Path.Combine(folderPath, "src", "DesignSystem", "Tokens", "tokens.scss"),
+            // Direct DesignSystem path (--components-source points AT DesignSystem/)
+            Path.Combine(folderPath, "tokens", "Variables.scss"),
+            Path.Combine(folderPath, "Tokens", "Variables.scss"),
+            Path.Combine(folderPath, "styles", "Variables.scss"),
+            Path.Combine(folderPath, "Styles", "Variables.scss"),
+            Path.Combine(folderPath, "tokens", "tokens.scss"),
+            Path.Combine(folderPath, "Tokens", "tokens.scss"),
+            // Direct DesignSystem path: Variables.scss at the root
+            Path.Combine(folderPath, "Variables.scss"),
         };
 
         foreach (var p in patterns)
@@ -233,9 +251,11 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
                 return p;
         }
 
-        // Fallback: deep search
+        // Fallback: deep search (catches any naming convention, just slower)
         return Directory.EnumerateFiles(folderPath, "Variables.scss", SearchOption.AllDirectories)
-            .FirstOrDefault();
+            .FirstOrDefault()
+            ?? Directory.EnumerateFiles(folderPath, "tokens.scss", SearchOption.AllDirectories)
+               .FirstOrDefault(f => HasVariables(f));
     }
 
     private static IEnumerable<string> FindAllScssFiles(string folderPath)
@@ -382,42 +402,85 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
     {
         var results = new List<(string Path, bool IsNested)>();
 
-        // Prefer the canonical CustomUIs convention. Only fall back to a plain
-        // Components/ scan when CustomUIs doesn't exist — scanning both would
-        // double-count every file under CustomUIs (it's nested inside
-        // Components). Case-insensitive file systems (Windows) also mean
-        // "Components" and "components" resolve to the same physical folder,
-        // so only the first existing candidate in each group is scanned.
+        // ── Canonical conventions, probed in priority order ──
+        // The first existing folder wins. This prevents double-scanning
+        // (CustomUIs lives inside Components, DesignSystem/components may
+        // overlap with a Components folder, etc.).
         //
-        // `folderPath` itself is accepted as either a repo root (containing
-        // src/Components/CustomUIs) OR a path that already points directly at
-        // the Components folder — the convention used by
-        // --components-source/AIFE_COMPONENTS_SOURCE in .mcp.json configs
-        // (e.g. "...\Repo\src\Components"). Without the direct-folder
-        // candidates below, that convention silently double-nests the path
-        // (".../src/Components/src/Components/CustomUIs") and finds nothing.
-        var customUisPath = new[]
+        // `folderPath` is accepted as either a repo root (containing
+        // src/Components/CustomUIs or src/DesignSystem) OR a path that
+        // already points directly at the components folder — the convention
+        // used by --components-source/AIFE_COMPONENTS_SOURCE in .mcp.json
+        // configs (e.g. "...\Repo\src\Components").
+        var probePaths = new[]
         {
-            Path.Combine(folderPath, "src", "Components", "CustomUIs"),
-            Path.Combine(folderPath, "src", "components", "CustomUIs"),
-            Path.Combine(folderPath, "CustomUIs"),
-        }.FirstOrDefault(Directory.Exists);
+            // (1) BUS legacy: repo-root -> src/Components/CustomUIs/
+            (ScanType.CustomUIs, Path.Combine(folderPath, "src", "Components", "CustomUIs")),
+            (ScanType.CustomUIs, Path.Combine(folderPath, "src", "components", "CustomUIs")),
+            // (2) New DesignSystem convention (repo-root -> src/DesignSystem/components/)
+            (ScanType.DesignSystem, Path.Combine(folderPath, "src", "DesignSystem", "components")),
+            (ScanType.DesignSystem, Path.Combine(folderPath, "src", "DesignSystem", "Components")),
+            (ScanType.DesignSystem, Path.Combine(folderPath, "src", "designSystem", "components")),
+            // (3) Direct DesignSystem path (--components-source points AT DesignSystem/)
+            (ScanType.DesignSystem, Path.Combine(folderPath, "components")),
+            (ScanType.DesignSystem, Path.Combine(folderPath, "Components")),
+            // (4) Direct CustomUIs path (--components-source points AT CustomUIs/)
+            (ScanType.CustomUIs, Path.Combine(folderPath, "CustomUIs")),
+            // (5) DesignSystem folder itself contains component subfolders
+            //     (e.g. --components-source points at src/DesignSystem which
+            //      has Button/, Input/, etc. directly — no nested "components/" subdir)
+            (ScanType.DesignSystem, folderPath),
+            // (6) Plain Components/ fallback (repo-root -> src/Components/)
+            (ScanType.Plain, Path.Combine(folderPath, "src", "Components")),
+            (ScanType.Plain, Path.Combine(folderPath, "src", "components")),
+            // (7) Last resort: folderPath itself is the components root
+            (ScanType.Plain, folderPath),
+        };
 
-        if (customUisPath is not null)
+        // DesignSystem probes (3) and (5) could match the same folder
+        // (e.g. src/DesignSystem/components/ exists AND folderPath itself
+        // has component subdirs).  We want the more-specific nested path
+        // first, so we deduplicate: if we've already scanned this exact
+        // physical path, skip subsequent duplicates.
+        var scannedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var (scanType, path) in probePaths)
         {
-            ScanComponentFolder(customUisPath, results);
-        }
-        else
-        {
-            var componentsPath = new[]
+            if (!Directory.Exists(path))
+                continue;
+
+            if (!scannedPaths.Add(path))
+                continue; // already scanned this exact path
+
+            if (scanType == ScanType.DesignSystem)
             {
-                Path.Combine(folderPath, "src", "Components"),
-                Path.Combine(folderPath, "src", "components"),
-                folderPath,
-            }.FirstOrDefault(Directory.Exists);
+                ScanComponentFolderFlat(path, results);
+            }
+            else
+            {
+                ScanComponentFolder(path, results);
+            }
 
-            if (componentsPath is not null)
-                ScanComponentFolder(componentsPath, results);
+            break; // first hit wins
+        }
+
+        foreach (var (scanType, path) in probePaths)
+        {
+            if (!Directory.Exists(path))
+                continue;
+
+            if (scanType == ScanType.DesignSystem)
+            {
+                // DesignSystem/components/ is flat: each subfolder is a
+                // component.  Scan one level (no nested sub-components).
+                ScanComponentFolderFlat(path, results);
+            }
+            else
+            {
+                ScanComponentFolder(path, results);
+            }
+
+            break; // first hit wins
         }
 
         // Defense in depth against case-sensitive file systems or any
@@ -427,6 +490,32 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
             .Select(g => g.First())
             .Where(r => HasComponentExport(r.Path))
             .ToList();
+    }
+
+    private enum ScanType { CustomUIs, DesignSystem, Plain }
+
+    /// <summary>
+    /// Scans a flat component folder (one folder per component, no nested
+    /// sub-components). This is the DesignSystem convention.
+    /// </summary>
+    private static void ScanComponentFolderFlat(string rootPath, List<(string Path, bool IsNested)> results)
+    {
+        try
+        {
+            foreach (var dir in Directory.GetDirectories(rootPath))
+            {
+                var files = Directory.GetFiles(dir, "*.tsx")
+                    .Concat(Directory.GetFiles(dir, "*.jsx"))
+                    .Concat(Directory.GetFiles(dir, "*.js"));
+                results.AddRange(files.Select(f => (f, false)));
+            }
+
+            // Also include loose files at the root level
+            results.AddRange(Directory.GetFiles(rootPath, "*.tsx").Select(f => (f, false)));
+            results.AddRange(Directory.GetFiles(rootPath, "*.jsx").Select(f => (f, false)));
+            results.AddRange(Directory.GetFiles(rootPath, "*.js").Select(f => (f, false)));
+        }
+        catch { /* skip inaccessible directories */ }
     }
 
     /// <summary>
