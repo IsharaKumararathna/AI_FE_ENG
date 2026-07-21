@@ -756,16 +756,53 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
     };
 
     /// <summary>
-    /// Computes an import path relative to the project's <c>src/</c> folder
-    /// (e.g. <c>Components/CustomUIs/BUSButtons/BUSButton</c>, no extension),
-    /// so the caller can write a real <c>import ... from '...'</c> statement.
+    /// <summary>
+    /// Computes an import path relative to the project's <c>src/</c> folder.
+    /// If the component folder has an <c>index.ts</c> (or <c>.js</c>) barrel
+    /// that re-exports the target file, we return the folder path (e.g.
+    /// <c>DesignSystem/components/Tabs</c>). Otherwise we return the file
+    /// path without extension (e.g.
+    /// <c>DesignSystem/components/Tabs/Tabs</c>).
     /// </summary>
     private static string ComputeImportPath(string filePath)
     {
         var normalized = filePath.Replace('\\', '/');
         var srcIndex = normalized.LastIndexOf("/src/", StringComparison.OrdinalIgnoreCase);
         var relative = srcIndex >= 0 ? normalized[(srcIndex + 5)..] : Path.GetFileName(normalized);
-        return Path.ChangeExtension(relative, null) ?? relative;
+        var withoutExt = Path.ChangeExtension(relative, null) ?? relative;
+
+        // If the component folder has a barrel file (index.ts / index.js)
+        // that re-exports the target, the import should be the folder path,
+        // not the file path.
+        var dir = Path.GetDirectoryName(filePath);
+        if (dir is not null)
+        {
+            if (File.Exists(Path.Combine(dir, "index.ts")) ||
+                File.Exists(Path.Combine(dir, "index.js")) ||
+                File.Exists(Path.Combine(dir, "index.tsx")) ||
+                File.Exists(Path.Combine(dir, "index.jsx")))
+            {
+                // Verify the barrel actually re-exports the target file
+                var barrelPath = Path.Combine(dir, "index.ts");
+                if (!File.Exists(barrelPath)) barrelPath = Path.Combine(dir, "index.js");
+                if (!File.Exists(barrelPath)) barrelPath = Path.Combine(dir, "index.tsx");
+                if (!File.Exists(barrelPath)) barrelPath = Path.Combine(dir, "index.jsx");
+
+                if (File.Exists(barrelPath))
+                {
+                    var barrelContent = File.ReadAllText(barrelPath);
+                    var targetName = Path.GetFileNameWithoutExtension(filePath);
+                    if (barrelContent.Contains(targetName))
+                    {
+                        // Use folder path (one segment shorter)
+                        var folderPath = Path.GetDirectoryName(withoutExt.Replace('/', Path.DirectorySeparatorChar))?.Replace('\\', '/');
+                        return folderPath ?? withoutExt;
+                    }
+                }
+            }
+        }
+
+        return withoutExt;
     }
 
     private static string ClassifyComponent(string componentId, string folderName, string content)

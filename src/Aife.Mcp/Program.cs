@@ -1207,13 +1207,14 @@ static string ExtractComponentPathPrefix(string importPath)
 {
     var parts = importPath.Split('/');
 
-    // The last two segments are ComponentName/ComponentName (the file).
-    // Everything before that is the root prefix the LLM writes as the
-    // starting folder in import statements.
-    if (parts.Length <= 2)
-        return parts[0]; // flat: "Button/Button" → "Button"
+    // Drop the last segment (the component name/folder).
+    // Whether barrel (DesignSystem/components/Tabs) or file
+    // (DesignSystem/components/Button/Button), everything before
+    // the final segment is the root prefix the LLM writes in imports.
+    if (parts.Length <= 1)
+        return parts[0];
 
-    return string.Join("/", parts.Take(parts.Length - 2));
+    return string.Join("/", parts.Take(parts.Length - 1));
 }
 
 /// <summary>

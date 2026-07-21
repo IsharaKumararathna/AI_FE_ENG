@@ -17,4 +17,13 @@
     <PackageReference Include="Polly" />
   </ItemGroup>
 
+  <!-- Embed the AiPreviewPage template so it's available next to the
+       published binary — no dev-repo knowledge/ dependency at runtime. -->
+  <ItemGroup>
+    <Content Include="..\..\knowledge\referenceUiPatterns\AiPreviewPage.template.tsx"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest"
+             Link="knowledge\referenceUiPatterns\AiPreviewPage.template.tsx" />
+  </ItemGroup>
+
 </Project>
