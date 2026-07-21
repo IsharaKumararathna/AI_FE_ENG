@@ -24,7 +24,7 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         RegexOptions.Compiled);
 
     private static readonly Regex TsxPropsRegex = new(
-        @"interface\s+I(\w+)Props\b.*?\{([^}]+)\}",
+        @"interface\s+I?(\w+Props)\b.*?\{([^}]+)\}",
         RegexOptions.Compiled | RegexOptions.Singleline);
 
     private static readonly Regex PropLineRegex = new(

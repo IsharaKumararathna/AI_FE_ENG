@@ -1124,33 +1124,34 @@ static string AutoFixTsx(string content, string slugRoot, string fullPath, IKnow
 
     // Discover the component-root folder name from the first KB entry.
     // e.g. "Components/CustomUIs/BUSButton/BUSButton" -> "CustomUIs"
+    //      "DesignSystem/components/Button/Button"   -> "DesignSystem"
     var allComponents = provider.SearchComponentsAsync(new ComponentQuery(), CancellationToken.None)
         .GetAwaiter().GetResult();
     var firstId = allComponents?.FirstOrDefault()?.ComponentId;
-    string componentRoot = "CustomUIs"; // sensible default
+    string componentRoot = "CustomUIs"; // fallback for empty KB
     if (firstId is not null)
     {
         var detail = provider.GetComponentAsync(firstId, CancellationToken.None)
             .GetAwaiter().GetResult();
         if (detail?.ImportPath is { } ip)
         {
-            var parts = ip.Split('/');
-            var compIdx = Array.FindIndex(parts, p => p.Equals("Components", StringComparison.OrdinalIgnoreCase));
-            if (compIdx >= 0 && compIdx + 1 < parts.Length)
-                componentRoot = parts[compIdx + 1]; // e.g. "CustomUIs"
+            componentRoot = ExtractComponentPathPrefix(ip);
         }
     }
+
+    // Escape for regex: componentRoot may now contain '/' (e.g. "DesignSystem/components")
+    var escapedRoot = System.Text.RegularExpressions.Regex.Escape(componentRoot);
 
     // Fix `from '../$componentRoot/...'` patterns (LLM assumed one level up)
     content = System.Text.RegularExpressions.Regex.Replace(
         content,
-        $@"from\s+['""]\.\./{componentRoot}/([^'""]+)['""]",
+        $@"from\s+['""]\.\./{escapedRoot}/([^'""]+)['""]",
         $"from '{upPrefix}{componentRoot}/$1'");
 
-    // Fix `from '../Components/$componentRoot/...'` patterns
+    // Fix `from '../Components/$componentRoot/...'` patterns (old BUS convention)
     content = System.Text.RegularExpressions.Regex.Replace(
         content,
-        $@"from\s+['""]\.\./Components/{componentRoot}/([^'""]+)['""]",
+        $@"from\s+['""]\.\./Components/{escapedRoot}/([^'""]+)['""]",
         $"from '{upPrefix}{componentRoot}/$1'");
 
     // ── Fix 2: Missing `import styles` ──
@@ -1184,6 +1185,35 @@ static string AutoFixTsx(string content, string slugRoot, string fullPath, IKnow
         "onClick={(e: React.MouseEvent) =>");
 
     return content;
+}
+
+/// <summary>
+/// Extracts the import-path root prefix that the LLM is most likely to use
+/// (incorrectly, with too few "../") in generated import statements.
+/// <br/>
+/// The import path always follows the pattern
+/// <c>&lt;rootPrefix&gt;/&lt;ComponentName&gt;/&lt;ComponentName&gt;</c>.
+/// We take everything before the last two segments as the root prefix.
+/// <br/>
+/// Examples:
+/// <c>"DesignSystem/components/Button/Button"</c> → <c>"DesignSystem/components"</c>
+/// <c>"Components/CustomUIs/BUSButton/BUSButton"</c> → <c>"Components/CustomUIs"</c>
+/// <c>"MyUI/Widgets/Panel/Panel"</c> → <c>"MyUI/Widgets"</c>
+/// <c>"components/Button/Button"</c> → <c>"components"</c>
+/// <br/>
+/// Zero hardcoded folder names — works for any project structure.
+/// </summary>
+static string ExtractComponentPathPrefix(string importPath)
+{
+    var parts = importPath.Split('/');
+
+    // The last two segments are ComponentName/ComponentName (the file).
+    // Everything before that is the root prefix the LLM writes as the
+    // starting folder in import statements.
+    if (parts.Length <= 2)
+        return parts[0]; // flat: "Button/Button" → "Button"
+
+    return string.Join("/", parts.Take(parts.Length - 2));
 }
 
 /// <summary>
