@@ -1,10 +1,7 @@
-// @aife-version: 7
-import React, { useState, useEffect, useMemo } from 'react';
+// @aife-version: 9
+import React, { useState, useEffect } from 'react';
 
 // ── Auto-discover all AI preview pages ──
-// Each sub-folder under _AiPreview/ is a preview page. This require.context
-// runs at build time and picks up every index.tsx automatically — no route
-// wiring needed when a new component is added via save_ai_preview.
 const previewModules = require.context('./', true, /\/index\.tsx$/);
 
 interface PreviewEntry {
@@ -16,13 +13,12 @@ function buildPreviewEntries(): PreviewEntry[] {
   return previewModules
     .keys()
     .map((key: string) => {
-      // key looks like './customer-register/index.tsx'
       const slug = key.replace(/^\.\//, '').replace(/\/index\.tsx$/, '');
       const module = previewModules(key);
       const Component = module.default || module;
       return { slug, Component };
     })
-    .filter((entry) => entry.slug !== ''); // exclude the top-level index.tsx itself
+    .filter((entry) => entry.slug !== '');
 }
 
 // ── Types ──
@@ -90,13 +86,9 @@ function escapeHtml(text: string): string {
 
 const LivePreviewTab: React.FC<{ entry: PreviewEntry }> = ({ entry }) => {
   const { slug, Component } = entry;
-  // The key on this wrapper div forces React to unmount and remount the
-  // inner <Component /> when the slug changes. Without this, React may
-  // reuse the DOM subtree even when the Component reference changes,
-  // which means the preview always shows the first-loaded component.
   return (
     <div key={slug} style={{ padding: '16px', background: '#fff', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-      <Component />
+      <Component key={slug} />
     </div>
   );
 };
@@ -397,53 +389,32 @@ const AnalysisTab: React.FC<{ meta: MetaData | null }> = ({ meta }) => {
 // ── Main AiPreviewPage ──
 
 const AiPreviewPage: React.FC = () => {
-  const entries = buildPreviewEntries();
-
+  // ── Call buildPreviewEntries ONCE at module scope via lazy init ──
+  const [entries] = useState(() => buildPreviewEntries());
+  const [selectedSlug, setSelectedSlug] = useState(entries[0]?.slug ?? '');
   const [activeTab, setActiveTab] = useState<TabId>('preview');
   const [meta, setMeta] = useState<MetaData | null>(null);
   const [metaLoading, setMetaLoading] = useState(false);
 
-  // Simple index-based selection. No string comparison, no useMemo, no
-  // complex state initialization races. Just pick entry by index.
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const selectedEntry = entries.find((e) => e.slug === selectedSlug) || null;
 
-  const selectedEntry = entries[selectedIndex] || null;
-
-  // Trigger the dropdown to track selectedIndex changes.
-  // This ref + onChange pattern is an uncontrolled <select> — simpler,
-  // avoids all React controlled-input reconciliation quirks.
-  const selectRef = React.useRef<HTMLSelectElement>(null);
-
-  // Load meta.json whenever selectedIndex changes
+  // Load meta.json whenever selectedSlug changes
   useEffect(() => {
-    const slug = selectedEntry?.slug;
-    if (!slug) {
-      setMeta(null);
-      return;
-    }
+    if (!selectedSlug) { setMeta(null); return; }
     setMetaLoading(true);
-    loadMeta(slug).then((m) => {
-      setMeta(m);
-      setMetaLoading(false);
-    });
-  }, [selectedIndex]); // eslint-disable-line react-hooks/exhaustive-deps
+    loadMeta(selectedSlug).then((m) => { setMeta(m); setMetaLoading(false); });
+  }, [selectedSlug]);
 
-  // Reset tab to 'preview' when switching previews
-  useEffect(() => {
-    setActiveTab('preview');
-  }, [selectedIndex]);
+  // Reset tab
+  useEffect(() => { setActiveTab('preview'); }, [selectedSlug]);
 
-  // ── No previews available ──
   if (entries.length === 0) {
     return (
       <div style={{ padding: '48px', textAlign: 'center' }}>
         <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
-        <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1f2a37', marginBottom: '8px' }}>
-          No AI Previews Yet
-        </h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1f2a37', marginBottom: '8px' }}>No AI Previews Yet</h2>
         <p style={{ color: '#6b7280', fontSize: '14px', maxWidth: '480px', margin: '0 auto' }}>
-          Generated components will appear here automatically. Use the AI Frontend Generator to create
-          your first preview — no manual route wiring needed.
+          Generated components will appear here automatically.
         </p>
       </div>
     );
@@ -451,99 +422,32 @@ const AiPreviewPage: React.FC = () => {
 
   return (
     <div style={{ padding: '24px' }}>
-      {/* Slug selector — only show if multiple previews exist */}
       {entries.length > 1 && (
         <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '14px', fontWeight: 600, color: '#1f2a37' }}>Preview:</span>
           <select
-            ref={selectRef}
-            defaultValue={entries[0]?.slug ?? ''}
-            onChange={() => {
-              const idx = selectRef.current?.selectedIndex ?? 0;
-              setSelectedIndex(idx);
-            }}
-            style={{
-              padding: '8px 12px',
-              border: '1px solid #d7dce5',
-              borderRadius: '8px',
-              fontSize: '14px',
-              background: '#fff',
-              minWidth: '200px',
-            }}
+            value={selectedSlug}
+            onChange={(e) => setSelectedSlug(e.target.value)}
+            style={{ padding: '8px 12px', border: '1px solid #d7dce5', borderRadius: '8px', fontSize: '14px', background: '#fff', minWidth: '200px' }}
           >
-            {entries.map((e) => (
-              <option key={e.slug} value={e.slug}>
-                {e.slug}
-              </option>
-            ))}
+            {entries.map((e) => <option key={e.slug} value={e.slug}>{e.slug}</option>)}
           </select>
         </div>
       )}
 
-      {/* 4-tab layout — plain HTML/CSS, no Design System dependency */}
       <div style={{ display: 'flex', gap: '1px', marginBottom: '0', borderBottom: '2px solid #d7dce5' }}>
         {TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setActiveTab(t.id)}
-            style={{
-              padding: '10px 20px',
-              background: activeTab === t.id ? '#fff' : '#f3f4f6',
-              color: activeTab === t.id ? '#1a56db' : '#6b7280',
-              border: activeTab === t.id ? '2px solid #1a56db' : '2px solid transparent',
-              borderBottom: activeTab === t.id ? '2px solid #fff' : '2px solid transparent',
-              borderRadius: '8px 8px 0 0',
-              fontWeight: activeTab === t.id ? 600 : 400,
-              fontSize: '14px',
-              cursor: 'pointer',
-              marginBottom: '-2px',
-              position: 'relative' as const,
-            }}
-          >
+          <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ padding: '10px 20px', background: activeTab === t.id ? '#fff' : '#f3f4f6', color: activeTab === t.id ? '#1a56db' : '#6b7280', border: activeTab === t.id ? '2px solid #1a56db' : '2px solid transparent', borderBottom: activeTab === t.id ? '2px solid #fff' : '2px solid transparent', borderRadius: '8px 8px 0 0', fontWeight: activeTab === t.id ? 600 : 400, fontSize: '14px', cursor: 'pointer', marginBottom: '-2px', position: 'relative' as const }}>
             {t.icon} {t.label}
           </button>
         ))}
       </div>
 
-      {/* Tab content */}
       <div style={{ marginTop: '16px' }}>
-        {activeTab === 'preview' && selectedEntry && <LivePreviewTab entry={selectedEntry} />}
-
-        {activeTab === 'review' && (
-          <>
-            {metaLoading ? (
-              <div style={{ padding: '24px', textAlign: 'center', color: '#6b7280' }}>
-                Loading review data...
-              </div>
-            ) : (
-              <ReviewReportTab meta={meta} />
-            )}
-          </>
-        )}
-
-        {activeTab === 'code' && (
-          <>
-            {metaLoading ? (
-              <div style={{ padding: '24px', textAlign: 'center', color: '#6b7280' }}>
-                Loading source code...
-              </div>
-            ) : (
-              <ReactCodeTab meta={meta} />
-            )}
-          </>
-        )}
-
-        {activeTab === 'analysis' && (
-          <>
-            {metaLoading ? (
-              <div style={{ padding: '24px', textAlign: 'center', color: '#6b7280' }}>
-                Loading analysis data...
-              </div>
-            ) : (
-              <AnalysisTab meta={meta} />
-            )}
-          </>
-        )}
+        {activeTab === 'preview' && selectedEntry && <LivePreviewTab key={selectedSlug} entry={selectedEntry} />}
+        {activeTab === 'review' && (metaLoading ? <div style={{ padding: '24px', textAlign: 'center', color: '#6b7280' }}>Loading review data...</div> : <ReviewReportTab meta={meta} />)}
+        {activeTab === 'code' && (metaLoading ? <div style={{ padding: '24px', textAlign: 'center', color: '#6b7280' }}>Loading source code...</div> : <ReactCodeTab meta={meta} />)}
+        {activeTab === 'analysis' && (metaLoading ? <div style={{ padding: '24px', textAlign: 'center', color: '#6b7280' }}>Loading analysis data...</div> : <AnalysisTab meta={meta} />)}
       </div>
     </div>
   );
