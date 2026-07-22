@@ -1,4 +1,4 @@
-// @aife-version: 2
+// @aife-version: 3
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -498,7 +498,7 @@ const AiPreviewPage: React.FC = () => {
 
       {/* Tab content */}
       <div style={{ marginTop: '16px' }}>
-        {activeTab === 'preview' && selectedEntry && <LivePreviewTab entry={selectedEntry} />}
+        {activeTab === 'preview' && selectedEntry && <LivePreviewTab key={selectedEntry.slug} entry={selectedEntry} />}
 
         {activeTab === 'review' && (
           <>
