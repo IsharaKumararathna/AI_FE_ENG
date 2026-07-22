@@ -1,6 +1,5 @@
-// @aife-version: 3
+// @aife-version: 7
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
 
 // ── Auto-discover all AI preview pages ──
 // Each sub-folder under _AiPreview/ is a preview page. This require.context
@@ -90,9 +89,13 @@ function escapeHtml(text: string): string {
 // ── Sub-components ──
 
 const LivePreviewTab: React.FC<{ entry: PreviewEntry }> = ({ entry }) => {
-  const { Component } = entry;
+  const { slug, Component } = entry;
+  // The key on this wrapper div forces React to unmount and remount the
+  // inner <Component /> when the slug changes. Without this, React may
+  // reuse the DOM subtree even when the Component reference changes,
+  // which means the preview always shows the first-loaded component.
   return (
-    <div style={{ padding: '16px', background: '#fff', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+    <div key={slug} style={{ padding: '16px', background: '#fff', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
       <Component />
     </div>
   );
@@ -394,33 +397,41 @@ const AnalysisTab: React.FC<{ meta: MetaData | null }> = ({ meta }) => {
 // ── Main AiPreviewPage ──
 
 const AiPreviewPage: React.FC = () => {
-  const { slug: routeSlug } = useParams<{ slug?: string }>();
-  const entries = useMemo(() => buildPreviewEntries(), []);
+  const entries = buildPreviewEntries();
 
-  // Determine which preview to show
   const [activeTab, setActiveTab] = useState<TabId>('preview');
   const [meta, setMeta] = useState<MetaData | null>(null);
   const [metaLoading, setMetaLoading] = useState(false);
 
-  // If a specific slug is in the URL, select that entry; otherwise show the first one
-  const selectedEntry = routeSlug
-    ? entries.find((e) => e.slug === routeSlug) || null
-    : entries.length > 0
-      ? entries[0]
-      : null;
+  // Simple index-based selection. No string comparison, no useMemo, no
+  // complex state initialization races. Just pick entry by index.
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
-  // Load meta.json whenever the selected entry changes
+  const selectedEntry = entries[selectedIndex] || null;
+
+  // Trigger the dropdown to track selectedIndex changes.
+  // This ref + onChange pattern is an uncontrolled <select> — simpler,
+  // avoids all React controlled-input reconciliation quirks.
+  const selectRef = React.useRef<HTMLSelectElement>(null);
+
+  // Load meta.json whenever selectedIndex changes
   useEffect(() => {
-    if (!selectedEntry) {
+    const slug = selectedEntry?.slug;
+    if (!slug) {
       setMeta(null);
       return;
     }
     setMetaLoading(true);
-    loadMeta(selectedEntry.slug).then((m) => {
+    loadMeta(slug).then((m) => {
       setMeta(m);
       setMetaLoading(false);
     });
-  }, [selectedEntry?.slug]);
+  }, [selectedIndex]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Reset tab to 'preview' when switching previews
+  useEffect(() => {
+    setActiveTab('preview');
+  }, [selectedIndex]);
 
   // ── No previews available ──
   if (entries.length === 0) {
@@ -438,9 +449,6 @@ const AiPreviewPage: React.FC = () => {
     );
   }
 
-  // ── Slug selector (dropdown for multiple previews) ──
-  const currentSlug = selectedEntry?.slug || entries[0]?.slug || '';
-
   return (
     <div style={{ padding: '24px' }}>
       {/* Slug selector — only show if multiple previews exist */}
@@ -448,10 +456,11 @@ const AiPreviewPage: React.FC = () => {
         <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '14px', fontWeight: 600, color: '#1f2a37' }}>Preview:</span>
           <select
-            value={currentSlug}
-            onChange={(e) => {
-              const newSlug = e.target.value;
-              window.location.hash = `#/ai-preview/${newSlug}`;
+            ref={selectRef}
+            defaultValue={entries[0]?.slug ?? ''}
+            onChange={() => {
+              const idx = selectRef.current?.selectedIndex ?? 0;
+              setSelectedIndex(idx);
             }}
             style={{
               padding: '8px 12px',
@@ -498,7 +507,7 @@ const AiPreviewPage: React.FC = () => {
 
       {/* Tab content */}
       <div style={{ marginTop: '16px' }}>
-        {activeTab === 'preview' && selectedEntry && <LivePreviewTab key={selectedEntry.slug} entry={selectedEntry} />}
+        {activeTab === 'preview' && selectedEntry && <LivePreviewTab entry={selectedEntry} />}
 
         {activeTab === 'review' && (
           <>
