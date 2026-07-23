@@ -1,0 +1,174 @@
+{
+  "componentId": "BUSSelectField",
+  "name": "Select Field",
+  "category": "select",
+  "status": "approved",
+  "description": "BUS Design System — SelectField primitive. Tokens: src/DesignSystem/tokens/colors.ts, spacing.ts, radius.ts, typography.ts",
+  "props": [
+    {
+      "name": "label",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "value",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "onChange",
+      "type": "function",
+      "required": true
+    },
+    {
+      "name": "options",
+      "type": "SelectOption",
+      "required": true
+    },
+    {
+      "name": "placeholder",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "helperText",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "error",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "required",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "disabled",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "fieldSize",
+      "type": "InputSize",
+      "required": false,
+      "default": "md",
+      "enum": [
+        "sm",
+        "md"
+      ]
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "onClick",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onFocus",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onBlur",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onKeyDown",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "id",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "style",
+      "type": "object",
+      "required": false
+    },
+    {
+      "name": "type",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "readOnly",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "autoFocus",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "tabIndex",
+      "type": "number",
+      "required": false
+    }
+  ],
+  "variants": [
+    {
+      "name": "sm",
+      "description": "InputSize = 'sm'"
+    },
+    {
+      "name": "md",
+      "description": "InputSize = 'md'"
+    }
+  ],
+  "tokensConsumed": [
+    "spacing.space[3]",
+    "typography.fontFamily.base",
+    "typography.textRole.labelText.fontSize",
+    "typography.textRole.labelText.fontWeight",
+    "typography.lineHeight.standard",
+    "colors.text.heading",
+    "colors.status.error",
+    "typography.textRole.bodyText.fontSize",
+    "typography.fontWeight.regular",
+    "colors.input.background",
+    "colors.input.border",
+    "radiusTokens.radius.input",
+    "colors.input.borderHover",
+    "colors.input.borderFocus",
+    "colors.focus.ring",
+    "colors.input.disabledBackground",
+    "colors.input.disabledBorder",
+    "colors.text.disabled",
+    "colors.status.errorHover",
+    "typography.textRole.helperText.fontSize"
+  ],
+  "accessibility": {
+    "role": "alert",
+    "ariaProps": [
+      "aria-hidden",
+      "aria-invalid",
+      "aria-describedby",
+      "aria-required"
+    ]
+  },
+  "mapsFromHtml": [
+    "select",
+    "form"
+  ],
+  "importPath": "DesignSystem/components/SelectField",
+  "exportName": "SelectField",
+  "isDefaultExport": false,
+  "sourceFile": "src/DesignSystem/components/SelectField.tsx"
+}

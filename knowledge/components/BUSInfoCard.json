@@ -1,0 +1,132 @@
+{
+  "componentId": "BUSInfoCard",
+  "name": "Info Card",
+  "category": "card",
+  "status": "approved",
+  "description": "BUS Design System — InfoCard primitive. Tokens: src/DesignSystem/tokens/colors.ts, spacing.ts, typography.ts",
+  "props": [
+    {
+      "name": "title",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "description",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "icon",
+      "type": "ReactNode",
+      "required": false
+    },
+    {
+      "name": "showIcon",
+      "type": "boolean",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "actionLabel",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "actionIcon",
+      "type": "ReactNode",
+      "required": false
+    },
+    {
+      "name": "onAction",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "secondaryActionLabel",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "secondaryActionIcon",
+      "type": "ReactNode",
+      "required": false
+    },
+    {
+      "name": "onSecondaryAction",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "align",
+      "type": "InfoCardAlign",
+      "required": false,
+      "default": "center",
+      "enum": [
+        "center",
+        "left"
+      ]
+    },
+    {
+      "name": "size",
+      "type": "InfoCardSize",
+      "required": false,
+      "default": "md",
+      "enum": [
+        "sm",
+        "md",
+        "lg"
+      ]
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "variants": [
+    {
+      "name": "center",
+      "description": "InfoCardAlign = 'center'"
+    },
+    {
+      "name": "left",
+      "description": "InfoCardAlign = 'left'"
+    },
+    {
+      "name": "sm",
+      "description": "InfoCardSize = 'sm'"
+    },
+    {
+      "name": "md",
+      "description": "InfoCardSize = 'md'"
+    },
+    {
+      "name": "lg",
+      "description": "InfoCardSize = 'lg'"
+    }
+  ],
+  "tokensConsumed": [
+    "$bus-ds-text-heading",
+    "$bus-ds-font-family",
+    "$bus-ds-color-primary",
+    "$bus-ds-font-weight-semibold",
+    "$bus-ds-line-height",
+    "$bus-ds-text-high-contrast",
+    "$bus-ds-font-size-body",
+    "$bus-ds-font-weight-regular",
+    "$bus-ds-text-body"
+  ],
+  "accessibility": {
+    "ariaProps": [
+      "aria-hidden"
+    ]
+  },
+  "mapsFromHtml": [
+    "card"
+  ],
+  "importPath": "DesignSystem/components/InfoCard",
+  "exportName": "InfoCard",
+  "isDefaultExport": false,
+  "sourceFile": "src/DesignSystem/components/InfoCard.tsx"
+}

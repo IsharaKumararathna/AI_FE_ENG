@@ -1,28 +1,80 @@
 {
   "componentId": "BUSButton",
-  "name": "BUSButton",
+  "name": "Button",
   "category": "button",
   "status": "approved",
-  "description": "Extracted from BUSButton.js",
+  "description": "BUS Design System — Button primitive. Tokens: src/DesignSystem/tokens/colors.ts, spacing.ts, radius.ts, typography.ts",
   "props": [
+    {
+      "name": "variant",
+      "type": "ButtonVariant",
+      "required": false,
+      "default": "primary",
+      "enum": [
+        "primary",
+        "secondary",
+        "subtle",
+        "ghost",
+        "destructive"
+      ]
+    },
+    {
+      "name": "size",
+      "type": "ButtonSize",
+      "required": false,
+      "default": "md",
+      "enum": [
+        "xs",
+        "sm",
+        "md",
+        "lg"
+      ]
+    },
+    {
+      "name": "loading",
+      "type": "boolean",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "leftIcon",
+      "type": "ReactNode",
+      "required": false
+    },
+    {
+      "name": "rightIcon",
+      "type": "ReactNode",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
     {
       "name": "onClick",
       "type": "function",
       "required": false
     },
     {
-      "name": "onMouseOver",
+      "name": "onChange",
       "type": "function",
       "required": false
     },
     {
-      "name": "onMouseLeave",
+      "name": "onFocus",
       "type": "function",
       "required": false
     },
     {
-      "name": "className",
-      "type": "string",
+      "name": "onBlur",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onKeyDown",
+      "type": "function",
       "required": false
     },
     {
@@ -36,53 +88,107 @@
       "required": false
     },
     {
-      "name": "color",
+      "name": "style",
+      "type": "object",
+      "required": false
+    },
+    {
+      "name": "type",
       "type": "string",
       "required": false
     },
     {
-      "name": "fontWeight",
+      "name": "name",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "value",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "placeholder",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "readOnly",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "autoFocus",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "tabIndex",
       "type": "number",
-      "required": false
-    },
-    {
-      "name": "fontSize",
-      "type": "string",
-      "required": false
-    },
-    {
-      "name": "borderRadius",
-      "type": "string",
-      "required": false
-    },
-    {
-      "name": "backgroundColor",
-      "type": "string",
-      "required": false
-    },
-    {
-      "name": "padding",
-      "type": "string",
-      "required": false
-    },
-    {
-      "name": "children",
-      "type": "ReactNode",
       "required": false
     }
   ],
-  "tokensConsumed": [
-    "color.primary",
-    "color.primary.hover",
-    "color.text.white",
-    "spacing.xs",
-    "radius.md"
+  "variants": [
+    {
+      "name": "primary",
+      "description": "ButtonVariant = 'primary'"
+    },
+    {
+      "name": "secondary",
+      "description": "ButtonVariant = 'secondary'"
+    },
+    {
+      "name": "subtle",
+      "description": "ButtonVariant = 'subtle'"
+    },
+    {
+      "name": "ghost",
+      "description": "ButtonVariant = 'ghost'"
+    },
+    {
+      "name": "destructive",
+      "description": "ButtonVariant = 'destructive'"
+    },
+    {
+      "name": "xs",
+      "description": "ButtonSize = 'xs'"
+    },
+    {
+      "name": "sm",
+      "description": "ButtonSize = 'sm'"
+    },
+    {
+      "name": "md",
+      "description": "ButtonSize = 'md'"
+    },
+    {
+      "name": "lg",
+      "description": "ButtonSize = 'lg'"
+    }
   ],
+  "tokensConsumed": [
+    "spacing.space[3]",
+    "typography.fontFamily.base",
+    "typography.lineHeight.standard",
+    "radiusTokens.radius.button",
+    "componentSpacing.buttonPaddingX",
+    "typography.textRole.buttonText.fontSize",
+    "colors.focus.ring",
+    "componentSpacing.buttonLgPaddingX",
+    "typography.textRole.buttonTextLg.fontSize",
+    "colors.brand.primary"
+  ],
+  "accessibility": {
+    "ariaProps": [
+      "aria-busy",
+      "aria-hidden"
+    ]
+  },
   "mapsFromHtml": [
     "button"
   ],
-  "importPath": "Components/CustomUIs/BUSButtons/BUSButton",
-  "exportName": "BUSButton",
+  "importPath": "DesignSystem/components/Button",
+  "exportName": "Button",
   "isDefaultExport": false,
-  "sourceFile": "src/Components/CustomUIs/BUSButtons/BUSButton.js"
+  "sourceFile": "src/DesignSystem/components/Button.tsx"
 }

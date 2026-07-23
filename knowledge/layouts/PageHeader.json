@@ -1,0 +1,9 @@
+{
+  "layoutId": "PageHeader",
+  "name": "PageHeader",
+  "description": "BUS Design System — PageHeader layout component. Tokens: src/DesignSystem/tokens/colors.ts, spacing.ts, typography.ts",
+  "slots": [
+    "header",
+    "actions"
+  ]
+}

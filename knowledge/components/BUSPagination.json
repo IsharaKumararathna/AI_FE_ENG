@@ -1,0 +1,65 @@
+{
+  "componentId": "BUSPagination",
+  "name": "Pagination",
+  "category": "navigation",
+  "status": "approved",
+  "description": "BUS Design System — Pagination primitive. Tokens: src/DesignSystem/tokens/colors.ts, spacing.ts",
+  "props": [
+    {
+      "name": "page",
+      "type": "number",
+      "required": true
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true
+    },
+    {
+      "name": "onPageChange",
+      "type": "function",
+      "required": true
+    },
+    {
+      "name": "onPageSizeChange",
+      "type": "function",
+      "required": true
+    },
+    {
+      "name": "pageSizeOptions",
+      "type": "number",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "tokensConsumed": [
+    "colors.grey[50]",
+    "colors.grey[500]",
+    "colors.grey[100]",
+    "colors.focus.ring",
+    "colors.grey[300]",
+    "colors.grey[800]",
+    "colors.grey[400]",
+    "colors.border.default",
+    "colors.input.borderFocus"
+  ],
+  "accessibility": {
+    "ariaProps": [
+      "aria-label",
+      "aria-hidden",
+      "aria-current"
+    ]
+  },
+  "mapsFromHtml": [
+    "nav"
+  ],
+  "importPath": "DesignSystem/components/Pagination",
+  "exportName": "Pagination",
+  "isDefaultExport": false,
+  "sourceFile": "src/DesignSystem/components/Pagination.tsx"
+}

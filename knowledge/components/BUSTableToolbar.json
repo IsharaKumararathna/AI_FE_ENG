@@ -1,0 +1,50 @@
+{
+  "componentId": "BUSTableToolbar",
+  "name": "Table Toolbar",
+  "category": "table",
+  "status": "approved",
+  "description": "BUS Design System — TableToolbar primitive",
+  "props": [
+    {
+      "name": "searchValue",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "onSearch",
+      "type": "function",
+      "required": true
+    },
+    {
+      "name": "onClear",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "searchPlaceholder",
+      "type": "string",
+      "required": false,
+      "default": "Search"
+    },
+    {
+      "name": "saveFilterDisabled",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "tokensConsumed": [],
+  "mapsFromHtml": [
+    "tabs",
+    "tab"
+  ],
+  "importPath": "DesignSystem/components/TableToolbar",
+  "exportName": "TableToolbar",
+  "isDefaultExport": false,
+  "sourceFile": "src/DesignSystem/components/TableToolbar.tsx"
+}

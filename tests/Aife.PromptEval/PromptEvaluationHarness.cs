@@ -49,4 +49,48 @@ public sealed class PromptEvaluationHarness
             Threshold = threshold
         };
     }
+
+    /// <summary>
+    /// Structural evaluation: scores each generated output with a
+    /// <see cref="StructuralReactScorer"/> (banned packages, hardcoded colors,
+    /// import presence) instead of exact-string matching. An entry counts as
+    /// "correct" when its structural score ≥ <paramref name="entryPassScore"/>.
+    /// This is the correct mode for code-generation prompts where many valid
+    /// outputs exist for one input.
+    /// </summary>
+    public PromptEvaluationResult EvaluateStructural(
+        string promptKey,
+        string version,
+        IReadOnlyList<ScoredDatasetEntry> dataset,
+        double threshold = 0.80,
+        double entryPassScore = 0.80)
+    {
+        var scorer = new StructuralReactScorer();
+        var correct = 0;
+        var totalTokens = 0;
+        var totalLatencyMs = 0L;
+
+        foreach (var entry in dataset)
+        {
+            var (response, tokens, latencyMs) = _runPrompt(entry.Input);
+            totalTokens += tokens;
+            totalLatencyMs += latencyMs;
+
+            var score = scorer.Score(response);
+            if (score >= entryPassScore)
+                correct++;
+        }
+
+        var count = dataset.Count;
+        return new PromptEvaluationResult
+        {
+            PromptKey = promptKey,
+            Version = version,
+            TotalEntries = count,
+            CorrectCount = correct,
+            AverageTokenCost = count > 0 ? (double)totalTokens / count : 0,
+            AverageLatencyMs = count > 0 ? (double)totalLatencyMs / count : 0,
+            Threshold = threshold
+        };
+    }
 }

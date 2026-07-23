@@ -1,0 +1,97 @@
+{
+  "componentId": "BUSStatusPill",
+  "name": "Status Pill",
+  "category": "feedback",
+  "status": "approved",
+  "description": "BUS Design System — StatusPill primitive. Tokens: src/DesignSystem/tokens/colors.ts, typography.ts, radius.ts",
+  "props": [
+    {
+      "name": "status",
+      "type": "StatusPillVariant",
+      "required": true,
+      "enum": [
+        "active",
+        "inactive",
+        "pending",
+        "completed",
+        "draft",
+        "error",
+        "warning",
+        "multiple",
+        "neutral"
+      ]
+    },
+    {
+      "name": "children",
+      "type": "ReactNode",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "variants": [
+    {
+      "name": "active",
+      "description": "StatusPillVariant = 'active'"
+    },
+    {
+      "name": "inactive",
+      "description": "StatusPillVariant = 'inactive'"
+    },
+    {
+      "name": "pending",
+      "description": "StatusPillVariant = 'pending'"
+    },
+    {
+      "name": "completed",
+      "description": "StatusPillVariant = 'completed'"
+    },
+    {
+      "name": "draft",
+      "description": "StatusPillVariant = 'draft'"
+    },
+    {
+      "name": "error",
+      "description": "StatusPillVariant = 'error'"
+    },
+    {
+      "name": "warning",
+      "description": "StatusPillVariant = 'warning'"
+    },
+    {
+      "name": "multiple",
+      "description": "StatusPillVariant = 'multiple'"
+    },
+    {
+      "name": "neutral",
+      "description": "StatusPillVariant = 'neutral'"
+    }
+  ],
+  "tokensConsumed": [
+    "colors.grey[100]",
+    "colors.text.heading",
+    "colors.grey[400]",
+    "colors.blue[100]",
+    "colors.brand.primary",
+    "colors.blue[400]",
+    "colors.text.body",
+    "colors.grey[300]"
+  ],
+  "accessibility": {
+    "ariaProps": [
+      "aria-hidden"
+    ]
+  },
+  "mapsFromHtml": [
+    "badge",
+    "span"
+  ],
+  "importPath": "DesignSystem/components/StatusPill",
+  "exportName": "StatusPill",
+  "isDefaultExport": false,
+  "sourceFile": "src/DesignSystem/components/StatusPill.tsx"
+}

@@ -1,0 +1,154 @@
+{
+  "componentId": "BUSContainer",
+  "name": "Container",
+  "category": "layout",
+  "status": "approved",
+  "description": "BUS Design System — Container primitive",
+  "props": [
+    {
+      "name": "as",
+      "type": "string",
+      "required": false,
+      "default": "section",
+      "enum": [
+        "section",
+        "div",
+        "article"
+      ]
+    },
+    {
+      "name": "children",
+      "type": "ReactNode",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "radius",
+      "type": "ContainerRadius",
+      "required": false,
+      "default": "lg",
+      "enum": [
+        "md",
+        "lg"
+      ]
+    },
+    {
+      "name": "appearance",
+      "type": "ContainerAppearance",
+      "required": false,
+      "default": "surface",
+      "enum": [
+        "surface",
+        "plain"
+      ]
+    },
+    {
+      "name": "onClick",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onChange",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onFocus",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onBlur",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onKeyDown",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "disabled",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "id",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "style",
+      "type": "object",
+      "required": false
+    },
+    {
+      "name": "type",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "value",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "placeholder",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "readOnly",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "autoFocus",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "tabIndex",
+      "type": "number",
+      "required": false
+    }
+  ],
+  "variants": [
+    {
+      "name": "md",
+      "description": "ContainerRadius = 'md'"
+    },
+    {
+      "name": "lg",
+      "description": "ContainerRadius = 'lg'"
+    },
+    {
+      "name": "surface",
+      "description": "ContainerAppearance = 'surface'"
+    },
+    {
+      "name": "plain",
+      "description": "ContainerAppearance = 'plain'"
+    }
+  ],
+  "tokensConsumed": [
+    "$bus-ds-surface"
+  ],
+  "mapsFromHtml": [
+    "div"
+  ],
+  "importPath": "DesignSystem/components/Container",
+  "exportName": "Container",
+  "isDefaultExport": false,
+  "sourceFile": "src/DesignSystem/components/Container.tsx"
+}

@@ -1,0 +1,77 @@
+{
+  "componentId": "BUSWorkflowHeader",
+  "name": "Workflow Header",
+  "category": "layout",
+  "status": "approved",
+  "description": "WorkflowHeader component (source: WorkflowHeader.tsx).",
+  "props": [
+    {
+      "name": "steps",
+      "type": "WorkflowStepItem",
+      "required": true
+    },
+    {
+      "name": "onBack",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "backLabel",
+      "type": "string",
+      "required": false,
+      "default": "Back"
+    },
+    {
+      "name": "actionLabel",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "onAction",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "menuItems",
+      "type": "DropdownMenuItem",
+      "required": false
+    },
+    {
+      "name": "onMenuSelect",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "variants": [
+    {
+      "name": "completed",
+      "description": "WorkflowStepStatus = 'completed'"
+    },
+    {
+      "name": "active",
+      "description": "WorkflowStepStatus = 'active'"
+    },
+    {
+      "name": "upcoming",
+      "description": "WorkflowStepStatus = 'upcoming'"
+    }
+  ],
+  "tokensConsumed": [],
+  "accessibility": {
+    "ariaProps": [
+      "aria-hidden",
+      "aria-label"
+    ]
+  },
+  "mapsFromHtml": [],
+  "importPath": "DesignSystem/components/WorkflowHeader",
+  "exportName": "WorkflowHeader",
+  "isDefaultExport": false,
+  "sourceFile": "src/DesignSystem/components/WorkflowHeader.tsx"
+}

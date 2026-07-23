@@ -1,9 +1,9 @@
 {
-  "componentId": "BUSCheckbox",
-  "name": "Checkbox",
+  "componentId": "BUSToggleSwitch",
+  "name": "Toggle Switch",
   "category": "input",
   "status": "approved",
-  "description": "BUS Design System — Checkbox primitive. Tokens: src/DesignSystem/tokens/colors.ts, spacing.ts, radius.ts, typography.ts",
+  "description": "BUS Design System — ToggleSwitch primitive. Tokens: src/DesignSystem/tokens/colors.ts, spacing.ts, radius.ts, typography.ts",
   "props": [
     {
       "name": "label",
@@ -21,19 +21,8 @@
       "required": true
     },
     {
-      "name": "indeterminate",
-      "type": "boolean",
-      "required": false,
-      "default": false
-    },
-    {
       "name": "disabled",
       "type": "boolean",
-      "required": false
-    },
-    {
-      "name": "error",
-      "type": "string",
       "required": false
     },
     {
@@ -54,43 +43,42 @@
     }
   ],
   "tokensConsumed": [
-    "radiusTokens.radiusScale.base",
+    "radiusTokens.radius.pill",
     "colors.brand.primary",
-    "colors.input.border",
-    "colors.status.error",
-    "colors.border.disabled",
+    "colors.grey[200]",
     "colors.focus.ring",
     "spacing.space[1]",
     "typography.fontFamily.base",
     "spacing.space[5]",
-    "colors.surface.surfaceMuted",
-    "colors.surface.surface",
-    "colors.text.disabled",
+    "radiusTokens.radiusScale.full",
     "typography.textRole.labelText.fontSize",
     "typography.textRole.labelText.fontWeight",
     "typography.lineHeight.standard",
     "colors.text.heading",
+    "colors.text.disabled",
     "typography.textRole.helperText.fontSize",
-    "$bus-ds-checkbox-size",
-    "$bus-ds-checkbox-border-radius",
-    "$bus-ds-checkbox-primary",
-    "$bus-ds-checkbox-border",
-    "$bus-ds-checkbox-error",
-    "$bus-ds-checkbox-disabled",
-    "$bus-ds-checkbox-focus-ring"
+    "$bus-ds-toggle-track-width",
+    "$bus-ds-toggle-track-height",
+    "$bus-ds-toggle-track-radius",
+    "$bus-ds-toggle-thumb-size",
+    "$bus-ds-toggle-thumb-offset",
+    "$bus-ds-toggle-thumb-travel",
+    "$bus-ds-toggle-color-on",
+    "$bus-ds-toggle-color-off",
+    "$bus-ds-toggle-focus-ring"
   ],
   "accessibility": {
-    "role": "alert",
+    "role": "switch",
     "ariaProps": [
-      "aria-invalid",
+      "aria-checked",
       "aria-hidden"
     ]
   },
   "mapsFromHtml": [
-    "checkbox"
+    "switch"
   ],
-  "importPath": "DesignSystem/components/Checkbox",
-  "exportName": "Checkbox",
+  "importPath": "DesignSystem/components/ToggleSwitch",
+  "exportName": "ToggleSwitch",
   "isDefaultExport": false,
-  "sourceFile": "src/DesignSystem/components/Checkbox.tsx"
+  "sourceFile": "src/DesignSystem/components/ToggleSwitch.tsx"
 }

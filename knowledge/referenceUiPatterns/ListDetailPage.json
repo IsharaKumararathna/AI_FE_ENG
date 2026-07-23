@@ -1,0 +1,15 @@
+{
+  "patternId": "ListDetailPage",
+  "name": "List + Detail Page",
+  "description": "Master list (DataTable) with a side detail panel. Standard pattern for record-selection pages sourced from the BUS DesignSystem.",
+  "layoutId": "AppShell",
+  "regions": [
+    { "slot": "header", "element": "Header" },
+    { "slot": "sidebar", "element": "SideNav" },
+    { "slot": "main", "element": "PageHeader" },
+    { "slot": "children", "element": "BUSDataTable" },
+    { "slot": "children", "element": "BUSInfoCard" }
+  ],
+  "sourceApp": "BUSPlatform3-Client-Core",
+  "sourceVersion": "DesignSystem"
+}

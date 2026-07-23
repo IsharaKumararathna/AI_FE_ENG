@@ -57,7 +57,7 @@ public class PrototypeConformanceReviewerTests
         };
         var analysis = new PrototypeAnalysis
         {
-            Layout = "AppLayout",
+            Layout = "AppShell",
             Elements = new List<DetectedElement> { new() { Kind = "button" } }
         };
 
@@ -84,7 +84,7 @@ public class PrototypeConformanceReviewerTests
         };
         var analysis = new PrototypeAnalysis
         {
-            Layout = "AppLayout",
+            Layout = "AppShell",
             Elements = new List<DetectedElement> { new() { Kind = "carousel" } }
         };
 
@@ -109,7 +109,7 @@ public class PrototypeConformanceReviewerTests
         };
         var analysis = new PrototypeAnalysis
         {
-            Layout = "AppLayout",
+            Layout = "AppShell",
             Elements = new List<DetectedElement>
             {
                 new() { Kind = "button" },
@@ -162,7 +162,7 @@ public class PrototypeConformanceReviewerTests
         };
         var analysis = new PrototypeAnalysis
         {
-            Layout = "AppLayout",
+            Layout = "AppShell",
             Elements = new List<DetectedElement> { new() { Kind = "button" } }
         };
 

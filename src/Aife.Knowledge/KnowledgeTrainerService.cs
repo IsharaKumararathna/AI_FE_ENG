@@ -23,14 +23,6 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         @"^(#[0-9a-fA-F]{3,8}|[0-9]+px|[0-9]+%|rgba?\([^)]+\)|[\d.]+(?:rem|em|vh|vw)|[a-z-]+\([^)]*\)).*$",
         RegexOptions.Compiled);
 
-    private static readonly Regex TsxPropsRegex = new(
-        @"interface\s+I?(\w+Props)\b.*?\{([^}]+)\}",
-        RegexOptions.Compiled | RegexOptions.Singleline);
-
-    private static readonly Regex PropLineRegex = new(
-        @"(\w+)\??\s*:\s*(\w+(?:<[^>]+>)?)(?:;|,)",
-        RegexOptions.Compiled);
-
     // Matches `X.propTypes = { ... };` blocks used by plain JS/JSX components
     // (BUS core repo convention: PropTypes instead of TS interfaces).
     private static readonly Regex PropTypesBlockRegex = new(
@@ -53,6 +45,53 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
     private static readonly Regex DefaultExportNameRegex = new(
         @"export\s+default\s+(\w+)\s*;",
         RegexOptions.Compiled);
+
+    // ── Trainer v2: rich TS / DesignSystem extraction ──
+    // `export type ButtonVariant = 'primary' | 'secondary' | ...;`
+    private static readonly Regex TypeUnionRegex = new(
+        @"export\s+type\s+(\w+)\s*=\s*([^;]+);",
+        RegexOptions.Compiled);
+
+    private static readonly Regex StringLiteralRegex = new(
+        @"'([^']+)'",
+        RegexOptions.Compiled);
+
+    // SCSS sidecar token comments, e.g. `// token: colors.focus.ring`
+    private static readonly Regex TokenCommentRegex = new(
+        @"//\s*token:\s*([A-Za-z_][\w.\[\]]*)",
+        RegexOptions.Compiled);
+
+    // SCSS `$bus-ds-*` variable references.
+    private static readonly Regex ScssVarRefRegex = new(
+        @"\$(bus-ds-[\w-]+)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    // TS interface header with optional `extends` clause: captures name + extends.
+    private static readonly Regex InterfaceHeaderRegex = new(
+        @"(?:export\s+)?interface\s+(\w*Props)(?:\s+extends\s+([^{]+?))?\s*\{",
+        RegexOptions.Compiled);
+
+    // A single prop declaration line: `name?: Type` (optional `?` captured).
+    private static readonly Regex PropDeclRegex = new(
+        @"^(\w+)(\?)?\s*:\s*(.+)$",
+        RegexOptions.Compiled);
+
+    // Destructure defaults: `variant = 'primary'` / `loading = false` / `size = 2`.
+    private static readonly Regex DestructureDefaultRegex = new(
+        @"(\w+)\s*=\s*('([^']*)'|[\x22]([^\x22]*)[\x22]|true|false|-?\d+(?:\.\d+)?)",
+        RegexOptions.Compiled);
+
+    private static readonly Regex AriaAttrRegex = new(
+        @"aria-([\w-]+)",
+        RegexOptions.Compiled);
+
+    private static readonly Regex RoleAttrRegex = new(
+        @"role\s*=\s*[""']([\w-]+)[""']",
+        RegexOptions.Compiled);
+
+    private static readonly Regex FirstCodeLineRegex = new(
+        @"^\s*(import|export|const|function|interface|type)\b",
+        RegexOptions.Compiled | RegexOptions.Multiline);
 
     private static readonly Dictionary<string, (string componentId, string name, string category)> TokenCategoryMap = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -149,6 +188,21 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
 
             result = result with { ComponentsExtracted = components.Count };
 
+            // 2b. Extract layout patterns (DesignSystem layout/ folder).
+            //     Replace mode clears previously trained layouts first.
+            if (mode == TrainMode.Replace)
+            {
+                var layoutDir = Path.Combine(_knowledgePath, "layouts");
+                if (Directory.Exists(layoutDir))
+                {
+                    foreach (var f in Directory.GetFiles(layoutDir, "*.json"))
+                        try { File.Delete(f); } catch { /* skip locked */ }
+                }
+            }
+            var layouts = ExtractLayouts(folderPath);
+            foreach (var layout in layouts)
+                WriteLayoutFile(layout);
+
             // 3. Update manifest
             //    Replace mode: overwrite manifest with only discovered components
             //    Update mode: merge with existing, keep existing entries
@@ -234,6 +288,10 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
             // DesignSystem (repo-root): src/DesignSystem/tokens/tokens.scss
             Path.Combine(folderPath, "src", "DesignSystem", "tokens", "tokens.scss"),
             Path.Combine(folderPath, "src", "DesignSystem", "Tokens", "tokens.scss"),
+            // DesignSystem (Client-Core): src/DesignSystem/styles/_tokens.scss
+            Path.Combine(folderPath, "src", "DesignSystem", "styles", "_tokens.scss"),
+            Path.Combine(folderPath, "src", "DesignSystem", "Styles", "_tokens.scss"),
+            Path.Combine(folderPath, "src", "DesignSystem", "tokens", "_tokens.scss"),
             // Direct DesignSystem path (--components-source points AT DesignSystem/)
             Path.Combine(folderPath, "tokens", "Variables.scss"),
             Path.Combine(folderPath, "Tokens", "Variables.scss"),
@@ -255,6 +313,8 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         return Directory.EnumerateFiles(folderPath, "Variables.scss", SearchOption.AllDirectories)
             .FirstOrDefault()
             ?? Directory.EnumerateFiles(folderPath, "tokens.scss", SearchOption.AllDirectories)
+               .FirstOrDefault(f => HasVariables(f))
+            ?? Directory.EnumerateFiles(folderPath, "_tokens.scss", SearchOption.AllDirectories)
                .FirstOrDefault(f => HasVariables(f));
     }
 
@@ -592,34 +652,32 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         var category = ClassifyComponent(componentId, folderName, content);
         var mapsFromHtml = InferMapsFromHtml(componentId, content);
 
-        // Extract props: prefer a TypeScript interface (I*Props); fall back to
-        // PropTypes.* (the BUS core repo's plain JS/JSX convention).
-        var props = new List<ComponentProp>();
-        var interfaceMatch = TsxPropsRegex.Match(content);
-        if (interfaceMatch.Success)
-        {
-            var propsBlock = interfaceMatch.Groups[2].Value;
-            foreach (Match pm in PropLineRegex.Matches(propsBlock))
-            {
-                var propName = pm.Groups[1].Value.Trim();
-                var propType = pm.Groups[2].Value.Trim();
-                props.Add(new ComponentProp
-                {
-                    Name = propName,
-                    Type = MapType(propType),
-                    Required = !propName.EndsWith("?")
-                });
-            }
-        }
+        // Extract props: prefer a rich TypeScript interface parse (DesignSystem
+        // convention) that captures enum values, defaults, descriptions, and
+        // inherited HTMLAttributes props; fall back to PropTypes.* (BUS core
+        // plain JS/JSX convention).
+        var unions = ExtractTypeUnions(content);
+        var defaults = ExtractDefaultsFromSignature(content, componentName);
+        List<ComponentProp> props;
+        if (InterfaceHeaderRegex.IsMatch(content))
+            props = ExtractInterfacePropsRich(content, unions, defaults);
         else
-        {
             props = ExtractPropTypesProps(content);
-        }
 
-        // Infer tokens consumed from the component code
-        var tokensConsumed = InferTokensConsumed(content, componentId);
+        // Variants: derive from `export type XVariant = 'a' | 'b'` unions.
+        var variants = ExtractVariants(content);
+
+        // Tokens consumed: read the co-located SCSS sidecar's `// token:` and
+        // `$bus-ds-*` references (DesignSystem convention), falling back to a
+        // content heuristic for legacy components without a sidecar.
+        var tokensConsumed = ExtractTokensFromScssSidecar(filePath, content, componentId);
+
+        // Accessibility: infer role / aria-* / keyboard support from the JSX.
+        var accessibility = ExtractAccessibility(content);
 
         var importPath = ComputeImportPath(filePath);
+        var relativeSource = Path.GetRelativePath(Path.GetDirectoryName(filePath)!, filePath);
+        var description = ExtractLeadingDescription(content, componentName, relativeSource);
 
         return new ComponentDetail
         {
@@ -627,9 +685,12 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
             Name = ToHumanName(componentName),
             Category = category,
             Status = "approved",
-            Description = $"Extracted from {Path.GetRelativePath(Path.GetDirectoryName(filePath)!, filePath)}",
+            Description = description,
             Props = props,
+            Variants = variants.Count > 0 ? variants : null,
             TokensConsumed = tokensConsumed,
+            Examples = null,
+            Accessibility = accessibility,
             MapsFromHtml = mapsFromHtml,
             ImportPath = importPath,
             ExportName = exportName,
@@ -811,32 +872,33 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         var folder = folderName.ToLowerInvariant();
         var contentLower = content.ToLowerInvariant();
 
+        // NOTE: categories must stay within the component-catalog schema enum:
+        // button, input, select, table, dialog, layout, navigation, card,
+        // typography, feedback, other. (Legacy "form"/"display" were invalid.)
         if ((lower.Contains("button") && !lower.Contains("radio")) || folder.Contains("button")) return "button";
-        if (lower.Contains("grid") || lower.Contains("table") || folder.Contains("grid")) return "table";
-        if (lower.Contains("tab") || folder.Contains("tab") || lower.Contains("nav")) return "navigation";
-        if (lower.Contains("input") || lower.Contains("search") || lower.Contains("textbox")
-            || folder.Contains("input")) return "input";
-        if (lower.Contains("form") || lower.Contains("field") || folder.Contains("form")) return "form";
-        if (lower.Contains("dialog") || lower.Contains("modal") || folder.Contains("dialog")) return "dialog";
-        if (lower.Contains("checkbox") || lower.Contains("check")) return "form";
-        if (lower.Contains("switch") || lower.Contains("toggle")) return "form";
-        if (lower.Contains("label") || lower.Contains("badge") || lower.Contains("chip")) return "display";
-        if (lower.Contains("layout") || lower.Contains("shell")) return "layout";
-        if (lower.Contains("dropdown") || lower.Contains("select") || lower.Contains("multi")) return "input";
+        if (lower.Contains("grid") || lower.Contains("datatable") || lower.Contains("table")
+            || folder.Contains("table") || folder.Contains("grid")) return "table";
+        if (lower.Contains("tab") || lower.Contains("pagination") || folder.Contains("tab")) return "navigation";
+        if (lower.Contains("dropdown") || lower.Contains("menu")) return "select";
+        if (lower.Contains("select")) return "select";
+        if (lower.Contains("search")) return "input";
+        if (lower.Contains("input") || lower.Contains("textbox") || folder.Contains("input")) return "input";
+        if (lower.Contains("checkbox") || lower.Contains("check")) return "input";
+        if (lower.Contains("switch") || lower.Contains("toggle")) return "input";
+        if (lower.Contains("form") || lower.Contains("field") || folder.Contains("form")) return "input";
+        if (lower.Contains("chips") || lower.Contains("chip")) return "input";
+        if (lower.Contains("statuspill") || lower.Contains("pill") || lower.Contains("badge")
+            || lower.Contains("label")) return "feedback";
+        if (lower.Contains("card")) return "card";
+        if (lower.Contains("shell") || lower.Contains("layout") || lower.Contains("header")
+            || lower.Contains("sidenav") || lower.Contains("container")) return "layout";
+        if (lower.Contains("dialog") || lower.Contains("modal") || lower.Contains("window")
+            || lower.Contains("popup") || folder.Contains("dialog")) return "dialog";
+        if (lower.Contains("skeleton") || lower.Contains("progress") || lower.Contains("loading")
+            || lower.Contains("spinner")) return "feedback";
 
         return "other";
     }
-
-    private static string MapType(string tsType) => tsType.ToLowerInvariant() switch
-    {
-        "string" => "string",
-        "number" => "number",
-        "boolean" => "boolean",
-        "reactnode" or "react.reactnode" => "ReactNode",
-        "function" => "function",
-        "void" => "function",
-        _ => "any"
-    };
 
     private static List<string> InferTokensConsumed(string content, string componentId)
     {
@@ -873,15 +935,24 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         var maps = new List<string>();
         var lower = componentId.ToLowerInvariant();
 
-        if (lower.Contains("button") && !lower.Contains("radio")) maps.AddRange(new[] { "button" });
-        if (lower.Contains("grid") || lower.Contains("table")) maps.AddRange(new[] { "table" });
+        if (lower.Contains("button") && !lower.Contains("radio")) maps.Add("button");
+        if (lower.Contains("grid") || lower.Contains("datatable") || lower.EndsWith("table")) maps.Add("table");
         if (lower.Contains("tab")) maps.AddRange(new[] { "tabs", "tab" });
-        if (lower.Contains("input") || lower.Contains("search")) maps.AddRange(new[] { "input", "search" });
-        if (lower.Contains("checkbox")) maps.AddRange(new[] { "checkbox" });
-        if (lower.Contains("switch") || lower.Contains("toggle")) maps.AddRange(new[] { "switch" });
-        if (lower.Contains("form") || lower.Contains("field")) maps.AddRange(new[] { "form", "formfield" });
+        if (lower.Contains("pagination")) maps.Add("nav");
+        if (lower.Contains("search")) maps.AddRange(new[] { "search", "input" });
+        if (lower.Contains("input") || lower.Contains("textbox")) maps.Add("input");
+        if (lower.Contains("select") || lower.Contains("dropdown")) maps.Add("select");
+        if (lower.Contains("checkbox")) maps.Add("checkbox");
+        if (lower.Contains("switch") || lower.Contains("toggle")) maps.Add("switch");
+        if (lower.Contains("statuspill") || lower.Contains("pill") || lower.Contains("badge")) maps.AddRange(new[] { "badge", "span" });
+        if (lower.Contains("chips") || lower.Contains("chip")) maps.AddRange(new[] { "chip", "input" });
+        if (lower.Contains("form") || lower.Contains("field")) maps.Add("form");
+        if (lower.Contains("card")) maps.Add("card");
+        if (lower.Contains("header") && !lower.Contains("workflow")) maps.Add("header");
+        if (lower.Contains("sidenav") || lower.Contains("navbar") || lower.Contains("navigation")) maps.Add("nav");
+        if (lower.Contains("shell") || lower.Contains("container")) maps.Add("div");
 
-        return maps;
+        return maps.Distinct().ToList();
     }
 
     private static string ToHumanName(string componentName)
@@ -968,10 +1039,10 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
             version = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss"),
             components = merged,
             tokens = ExistingKnowledgeFileOrDefault("tokens/tokens.json"),
-            layouts = ExistingKnowledgeFilesOrEmpty("layouts/AppLayout.json"),
-            referenceUiPatterns = ExistingKnowledgeFilesOrEmpty("referenceUiPatterns/ActiveInspectionsPage.json"),
+            layouts = ExistingFilesInDir("layouts", "*.json"),
+            referenceUiPatterns = ExistingFilesInDir("referenceUiPatterns", "*.json"),
             icons = ExistingKnowledgeFileOrDefault("icons/icons.json"),
-            bestPractices = ExistingKnowledgeFilesOrEmpty("best-practices/naming.md"),
+            bestPractices = ExistingFilesInDir("best-practices", "*.md"),
             accessibilityRules = ExistingKnowledgeFileOrDefault("accessibility/rules.json")
         };
 
@@ -1011,5 +1082,409 @@ public sealed class KnowledgeTrainerService : IKnowledgeTrainer
         {
             return new List<string>();
         }
+    }
+
+    // ── Trainer v2 helper methods ──────────────────────────────────────────
+
+    /// <summary>
+    /// Builds a semantic description from the leading <c>//</c> comment block
+    /// above the first import/export/interface. Falls back to a generated
+    /// "<c>{componentName} component</c>" string when no header comment exists
+    /// (legacy plain-JS components). This replaces the uninformative
+    /// "Extracted from X.js" placeholder so <c>match_element</c> and the
+    /// generator get real signal.
+    /// </summary>
+    private static string ExtractLeadingDescription(string content, string componentName, string sourceFile)
+    {
+        var firstCodeLine = FirstCodeLineRegex.Match(content);
+        if (!firstCodeLine.Success)
+            return $"{componentName} component (source: {sourceFile}).";
+
+        var header = content.Substring(0, firstCodeLine.Index);
+        var lines = header.Split('\n')
+            .Select(l => l.Trim().TrimStart('/').Trim())
+            .Where(l => l.Length > 0)
+            .ToList();
+
+        if (lines.Count == 0)
+            return $"{componentName} component (source: {sourceFile}).";
+
+        var desc = lines[0];
+        var tokensLine = lines.FirstOrDefault(l => l.StartsWith("Tokens:", StringComparison.OrdinalIgnoreCase));
+        if (tokensLine is not null)
+            desc += ". " + tokensLine;
+        return desc;
+    }
+
+    /// <summary>Parses all <c>export type X = 'a' | 'b';</c> unions into a map.</summary>
+    private static Dictionary<string, List<string>> ExtractTypeUnions(string content)
+    {
+        var map = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+        foreach (Match m in TypeUnionRegex.Matches(content))
+        {
+            var name = m.Groups[1].Value.Trim();
+            var body = m.Groups[2].Value;
+            var values = StringLiteralRegex.Matches(body)
+                .Cast<Match>()
+                .Select(x => x.Groups[1].Value)
+                .ToList();
+            if (values.Count > 0)
+                map[name] = values;
+        }
+        return map;
+    }
+
+    /// <summary>
+    /// Extracts prop default values from the function destructure, e.g.
+    /// <c>function Button({ variant = 'primary', loading = false, ... })</c>.
+    /// </summary>
+    private static Dictionary<string, object?> ExtractDefaultsFromSignature(string content, string componentName)
+    {
+        var defaults = new Dictionary<string, object?>(StringComparer.Ordinal);
+        // Match `function Button({ a = 'x', b = 2, ...rest }: ButtonProps)` — note
+        // the `(` before the destructure `{`, which the original regex missed.
+        var sigRegex = new Regex(
+            $@"function\s+{Regex.Escape(componentName)}\s*\(\s*\{{([^}}]*)\}}",
+            RegexOptions.Compiled);
+        var m = sigRegex.Match(content);
+        if (!m.Success)
+            return defaults;
+
+        var destructure = m.Groups[1].Value;
+        foreach (Match dm in DestructureDefaultRegex.Matches(destructure))
+        {
+            var propName = dm.Groups[1].Value;
+            var rawVal = dm.Groups[2].Value;
+            object? value;
+            if (dm.Groups[3].Success)
+                value = dm.Groups[3].Value;               // 'string'
+            else if (dm.Groups[4].Success)
+                value = dm.Groups[4].Value;                // "string"
+            else if (rawVal == "true")
+                value = true;
+            else if (rawVal == "false")
+                value = false;
+            else if (int.TryParse(rawVal, out var iv))
+                value = iv;
+            else if (double.TryParse(rawVal, System.Globalization.NumberStyles.Any,
+                         System.Globalization.CultureInfo.InvariantCulture, out var dv))
+                value = dv;
+            else
+                value = rawVal;
+            defaults[propName] = value;
+        }
+        return defaults;
+    }
+
+    /// <summary>
+    /// Rich TS prop extraction: captures enum values (from type unions),
+    /// default values (from the destructure), per-prop descriptions, and
+    /// inherited HTMLAttributes props (resolving the <c>{...rest}</c> spread
+    /// that the old PropTypes-only extractor missed).
+    /// </summary>
+    private static List<ComponentProp> ExtractInterfacePropsRich(
+        string content,
+        IReadOnlyDictionary<string, List<string>> unions,
+        IReadOnlyDictionary<string, object?> defaults)
+    {
+        var props = new List<ComponentProp>();
+        var header = InterfaceHeaderRegex.Match(content);
+        if (!header.Success)
+            return props;
+
+        var extendsClause = header.Groups[2].Success ? header.Groups[2].Value.Trim() : null;
+        var bodyOpen = header.Index + header.Length - 1; // index of '{'
+        var bodyClose = FindMatchingBrace(content, bodyOpen);
+        if (bodyClose <= bodyOpen)
+            return props;
+        var body = content.Substring(bodyOpen + 1, bodyClose - bodyOpen - 1);
+
+        foreach (var stmt in SplitTopLevel(body, ';'))
+        {
+            var trimmed = stmt.Trim();
+            if (trimmed.Length == 0
+                || trimmed.StartsWith("//", StringComparison.Ordinal)
+                || trimmed.StartsWith("/*", StringComparison.Ordinal))
+                continue;
+
+            var (comment, propPart) = SplitComment(trimmed);
+            var pm = PropDeclRegex.Match(propPart.Trim());
+            if (!pm.Success)
+                continue;
+
+            var propName = pm.Groups[1].Value;
+            var required = !pm.Groups[2].Success; // group 2 = optional '?'
+            var rawType = pm.Groups[3].Value.Trim().TrimEnd(';').Trim();
+            var type = MapTypeRich(rawType);
+
+            var prop = new ComponentProp
+            {
+                Name = propName,
+                Type = type,
+                Required = required,
+                Description = string.IsNullOrWhiteSpace(comment) ? null : comment
+            };
+
+            // Enum: resolve named union, or inline 'a' | 'b' union.
+            if (unions.TryGetValue(rawType, out var unionValues))
+                prop = prop with { Enum = unionValues };
+            else if (rawType.StartsWith("'") && rawType.Contains('|'))
+            {
+                var inline = StringLiteralRegex.Matches(rawType)
+                    .Cast<Match>().Select(x => x.Groups[1].Value).ToList();
+                if (inline.Count > 0)
+                    prop = prop with { Enum = inline };
+            }
+
+            // Default from the destructure map.
+            if (defaults.TryGetValue(propName, out var def))
+                prop = prop with { Default = def };
+
+            props.Add(prop);
+        }
+
+        if (!string.IsNullOrEmpty(extendsClause) && extendsClause.Contains("HTMLAttributes"))
+            props = MergeInheritedHtmlProps(props);
+
+        return props;
+    }
+
+    /// <summary>Splits a trailing <c>// comment</c> off a prop statement.</summary>
+    private static (string? comment, string propPart) SplitComment(string stmt)
+    {
+        var idx = stmt.IndexOf("//", StringComparison.Ordinal);
+        if (idx < 0)
+            return (null, stmt);
+        return (stmt.Substring(idx + 2).Trim(), stmt.Substring(0, idx));
+    }
+
+    private static string MapTypeRich(string tsType)
+    {
+        var t = tsType.Trim();
+        if (t.EndsWith("[]"))
+            t = t.Substring(0, t.Length - 2).Trim();
+        var lower = t.ToLowerInvariant();
+        return lower switch
+        {
+            "string" => "string",
+            "number" => "number",
+            "boolean" => "boolean",
+            "reactnode" or "react.reactnode" => "ReactNode",
+            "function" or "void" => "function",
+            "any" => "any",
+            "object" => "object",
+            _ when lower.Contains("|") => "string",      // union of string literals
+            _ when lower.StartsWith("(") => "function",  // function type literal
+            _ => t                                       // keep named types (e.g. ButtonVariant)
+        };
+    }
+
+    /// <summary>Returns the index of the brace matching the <c>{</c> at <paramref name="openIndex"/>.</summary>
+    private static int FindMatchingBrace(string content, int openIndex)
+    {
+        if (openIndex < 0 || openIndex >= content.Length || content[openIndex] != '{')
+            return -1;
+        var depth = 0;
+        for (var i = openIndex; i < content.Length; i++)
+        {
+            var c = content[i];
+            if (c == '{') depth++;
+            else if (c == '}')
+            {
+                depth--;
+                if (depth == 0) return i;
+            }
+        }
+        return -1;
+    }
+
+    /// <summary>
+    /// Adds common props inherited from React.HTMLAttributes / *HTMLAttributes
+    /// (the <c>{...rest}</c> spread) that aren't already explicitly declared.
+    /// </summary>
+    private static List<ComponentProp> MergeInheritedHtmlProps(List<ComponentProp> props)
+    {
+        var inherited = new (string name, string type)[]
+        {
+            ("onClick", "function"), ("onChange", "function"), ("onFocus", "function"),
+            ("onBlur", "function"), ("onKeyDown", "function"), ("disabled", "boolean"),
+            ("id", "string"), ("className", "string"), ("style", "object"), ("type", "string"),
+            ("name", "string"), ("value", "string"), ("placeholder", "string"),
+            ("readOnly", "boolean"), ("autoFocus", "boolean"), ("tabIndex", "number")
+        };
+        var existing = props.Select(p => p.Name).ToHashSet(StringComparer.Ordinal);
+        foreach (var (name, type) in inherited)
+        {
+            if (!existing.Contains(name))
+                props.Add(new ComponentProp { Name = name, Type = type, Required = false });
+        }
+        return props;
+    }
+
+    /// <summary>
+    /// Derives named variants from every <c>export type XVariant/YSize = ...</c>
+    /// union in the file, so the generator knows the exact allowed values
+    /// instead of inventing ones like <c>variant="danger"</c>.
+    /// </summary>
+    private static List<ComponentVariant> ExtractVariants(string content)
+    {
+        var variants = new List<ComponentVariant>();
+        foreach (var (unionName, values) in ExtractTypeUnions(content))
+        {
+            foreach (var value in values)
+            {
+                variants.Add(new ComponentVariant
+                {
+                    Name = value,
+                    Description = $"{unionName} = '{value}'"
+                });
+            }
+        }
+        return variants;
+    }
+
+    /// <summary>Infers accessibility metadata (role, aria-*, keyboard) from the JSX.</summary>
+    private static ComponentAccessibility? ExtractAccessibility(string content)
+    {
+        var ariaProps = AriaAttrRegex.Matches(content)
+            .Cast<Match>()
+            .Select(m => "aria-" + m.Groups[1].Value)
+            .Distinct()
+            .ToList();
+        var roleMatch = RoleAttrRegex.Match(content);
+        var hasKeyboard = content.Contains("onKeyDown") || content.Contains("onKeyPress")
+            || content.Contains("onKeyUp") || content.Contains("focus-visible")
+            || content.Contains("tabIndex");
+
+        if (ariaProps.Count == 0 && !roleMatch.Success && !hasKeyboard)
+            return null;
+
+        return new ComponentAccessibility
+        {
+            Role = roleMatch.Success ? roleMatch.Groups[1].Value : null,
+            KeyboardSupport = hasKeyboard ? true : null,
+            AriaProps = ariaProps.Count > 0 ? ariaProps : null,
+            Notes = null
+        };
+    }
+
+    /// <summary>
+    /// Reads the co-located SCSS sidecar's <c>// token:</c> comments and
+    /// <c>$bus-ds-*</c> references to record the real tokens a component
+    /// consumes (DesignSystem convention). Falls back to the legacy content
+    /// heuristic when no sidecar exists.
+    /// </summary>
+    private static List<string> ExtractTokensFromScssSidecar(string tsxPath, string content, string componentId)
+    {
+        var tokens = new List<string>();
+        var dir = Path.GetDirectoryName(tsxPath);
+        var baseName = Path.GetFileNameWithoutExtension(tsxPath);
+        if (dir is not null)
+        {
+            var scssPath = Path.Combine(dir, baseName + ".scss");
+            if (File.Exists(scssPath))
+            {
+                var scss = File.ReadAllText(scssPath);
+                foreach (Match m in TokenCommentRegex.Matches(scss))
+                    tokens.Add(m.Groups[1].Value);
+                foreach (Match m in ScssVarRefRegex.Matches(scss))
+                    tokens.Add("$" + m.Groups[1].Value);
+            }
+        }
+
+        if (tokens.Count == 0)
+            tokens.AddRange(InferTokensConsumed(content, componentId));
+
+        return tokens.Distinct().ToList();
+    }
+
+    /// <summary>
+    /// Scans <c>src/DesignSystem/layout/*/</c> for layout components (AppShell,
+    /// Header, PageHeader, SideNav) and builds LayoutPattern entries with slots
+    /// inferred from their props/JSX. Fills the previously single-entry layouts KB.
+    /// </summary>
+    private List<LayoutPattern> ExtractLayouts(string folderPath)
+    {
+        var layouts = new List<LayoutPattern>();
+        var candidates = new[]
+        {
+            Path.Combine(folderPath, "src", "DesignSystem", "layout"),
+            Path.Combine(folderPath, "src", "DesignSystem", "Layout"),
+            Path.Combine(folderPath, "layout"),
+            Path.Combine(folderPath, "Layout"),
+        };
+        var layoutDir = candidates.FirstOrDefault(Directory.Exists);
+        if (layoutDir is null)
+            return layouts;
+
+        foreach (var dir in Directory.GetDirectories(layoutDir))
+        {
+            var tsx = Directory.GetFiles(dir, "*.tsx")
+                .Concat(Directory.GetFiles(dir, "*.jsx"))
+                .FirstOrDefault();
+            if (tsx is null)
+                continue;
+
+            var componentContent = File.ReadAllText(tsx);
+            var name = Path.GetFileNameWithoutExtension(tsx);
+            layouts.Add(new LayoutPattern
+            {
+                LayoutId = name,
+                Name = name,
+                Description = ExtractLeadingDescription(componentContent, name, tsx),
+                Slots = InferLayoutSlots(componentContent)
+            });
+        }
+        return layouts;
+    }
+
+    private static List<string> InferLayoutSlots(string content)
+    {
+        var slots = new List<string>();
+        var lower = content.ToLowerInvariant();
+
+        if (content.Contains("children")) slots.Add("children");
+        if (content.Contains("headerProps") || lower.Contains("header")) slots.Add("header");
+        if (content.Contains("navItems") || content.Contains("navGroups")
+            || lower.Contains("sidenav") || lower.Contains("sidebar"))
+            slots.Add("sidebar");
+        if (lower.Contains("main") || content.Contains("contentClassName")) slots.Add("main");
+        if (lower.Contains("footer")) slots.Add("footer");
+        if (content.Contains("actions")) slots.Add("actions");
+        if ((content.Contains("title") || content.Contains("subtitle")) && !slots.Contains("header"))
+            slots.Add("header");
+
+        return slots.Distinct().ToList();
+    }
+
+    private void WriteLayoutFile(LayoutPattern layout)
+    {
+        var dir = Path.Combine(_knowledgePath, "layouts");
+        Directory.CreateDirectory(dir);
+        var filePath = Path.Combine(dir, $"{layout.LayoutId}.json");
+        var json = JsonConvert.SerializeObject(layout, new JsonSerializerSettings
+        {
+            Formatting = Formatting.Indented,
+            ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver(),
+            NullValueHandling = NullValueHandling.Ignore
+        });
+        File.WriteAllText(filePath, json);
+    }
+
+    /// <summary>
+    /// Lists every file matching <paramref name="pattern"/> under a knowledge
+    /// subfolder, as relative manifest paths. Auto-discovers trained AND
+    /// pre-seeded assets (layouts, referenceUiPatterns, best-practices)
+    /// instead of hardcoding single filenames.
+    /// </summary>
+    private string[] ExistingFilesInDir(string dirRelative, string pattern)
+    {
+        var dir = Path.Combine(_knowledgePath, dirRelative);
+        if (!Directory.Exists(dir))
+            return Array.Empty<string>();
+        return Directory.GetFiles(dir, pattern)
+            .Select(f => $"{dirRelative}/{Path.GetFileName(f)}")
+            .OrderBy(x => x)
+            .ToArray();
     }
 }

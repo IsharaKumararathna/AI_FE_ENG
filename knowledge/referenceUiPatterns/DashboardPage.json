@@ -1,0 +1,15 @@
+{
+  "patternId": "DashboardPage",
+  "name": "Dashboard Page",
+  "description": "KPI summary dashboard: PageHeader with actions, followed by a responsive grid of InfoCards and a DataTable for recent activity.",
+  "layoutId": "AppShell",
+  "regions": [
+    { "slot": "header", "element": "Header" },
+    { "slot": "sidebar", "element": "SideNav" },
+    { "slot": "main", "element": "PageHeader" },
+    { "slot": "children", "element": "BUSInfoCard" },
+    { "slot": "children", "element": "BUSDataTable" }
+  ],
+  "sourceApp": "BUSPlatform3-Client-Core",
+  "sourceVersion": "DesignSystem"
+}

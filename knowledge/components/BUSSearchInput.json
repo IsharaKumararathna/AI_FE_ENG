@@ -1,0 +1,161 @@
+{
+  "componentId": "BUSSearchInput",
+  "name": "Search Input",
+  "category": "input",
+  "status": "approved",
+  "description": "BUS Design System — SearchInput primitive. Tokens: src/DesignSystem/tokens/colors.ts, spacing.ts, radius.ts, typography.ts",
+  "props": [
+    {
+      "name": "value",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "onChange",
+      "type": "function",
+      "required": true
+    },
+    {
+      "name": "onClear",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "label",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "placeholder",
+      "type": "string",
+      "required": false,
+      "default": "Search…"
+    },
+    {
+      "name": "helperText",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "error",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "disabled",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "fieldSize",
+      "type": "SearchInputSize",
+      "required": false,
+      "default": "md",
+      "enum": [
+        "sm",
+        "md"
+      ]
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "onClick",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onFocus",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onBlur",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onKeyDown",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "id",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "style",
+      "type": "object",
+      "required": false
+    },
+    {
+      "name": "type",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "readOnly",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "autoFocus",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "tabIndex",
+      "type": "number",
+      "required": false
+    }
+  ],
+  "variants": [
+    {
+      "name": "sm",
+      "description": "SearchInputSize = 'sm'"
+    },
+    {
+      "name": "md",
+      "description": "SearchInputSize = 'md'"
+    }
+  ],
+  "tokensConsumed": [
+    "spacing.space[3]",
+    "typography.fontFamily.base",
+    "typography.textRole.labelText.fontSize",
+    "colors.text.heading",
+    "colors.grey[400]",
+    "colors.grey[300]",
+    "radius.input",
+    "colors.focus.ring",
+    "colors.status.error",
+    "colors.grey[100]"
+  ],
+  "accessibility": {
+    "role": "alert",
+    "keyboardSupport": true,
+    "ariaProps": [
+      "aria-hidden",
+      "aria-invalid",
+      "aria-describedby",
+      "aria-label"
+    ]
+  },
+  "mapsFromHtml": [
+    "search",
+    "input"
+  ],
+  "importPath": "DesignSystem/components/SearchInput",
+  "exportName": "SearchInput",
+  "isDefaultExport": false,
+  "sourceFile": "src/DesignSystem/components/SearchInput.tsx"
+}

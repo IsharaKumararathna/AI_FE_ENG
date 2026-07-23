@@ -1,0 +1,56 @@
+{
+  "componentId": "BUSTabs",
+  "name": "Tabs",
+  "category": "navigation",
+  "status": "approved",
+  "description": "BUS Design System — Tabs primitive. Tokens: src/DesignSystem/tokens/colors.ts, spacing.ts, typography.ts",
+  "props": [
+    {
+      "name": "tabs",
+      "type": "TabItem",
+      "required": true
+    },
+    {
+      "name": "activeTab",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "onChange",
+      "type": "function",
+      "required": true
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "tokensConsumed": [
+    "typography.fontFamily.base",
+    "colors.brand.primary",
+    "colors.focus.ring",
+    "colors.blue[600]",
+    "colors.grey[400]",
+    "colors.blue[100]",
+    "colors.grey[200]"
+  ],
+  "accessibility": {
+    "role": "tablist",
+    "ariaProps": [
+      "aria-selected",
+      "aria-disabled",
+      "aria-label",
+      "aria-hidden"
+    ]
+  },
+  "mapsFromHtml": [
+    "tabs",
+    "tab"
+  ],
+  "importPath": "DesignSystem/components/Tabs",
+  "exportName": "Tabs",
+  "isDefaultExport": false,
+  "sourceFile": "src/DesignSystem/components/Tabs.tsx"
+}

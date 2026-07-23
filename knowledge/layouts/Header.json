@@ -1,0 +1,8 @@
+{
+  "layoutId": "Header",
+  "name": "Header",
+  "description": "BUS Design System — Header layout component. Tokens: src/DesignSystem/tokens/colors.ts, typography.ts, spacing.ts",
+  "slots": [
+    "header"
+  ]
+}

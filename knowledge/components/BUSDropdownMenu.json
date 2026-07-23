@@ -1,0 +1,80 @@
+{
+  "componentId": "BUSDropdownMenu",
+  "name": "Dropdown Menu",
+  "category": "select",
+  "status": "approved",
+  "description": "BUS Design System — DropdownMenu primitive. Tokens: src/DesignSystem/tokens/colors.ts, spacing.ts, radius.ts, shadows.ts",
+  "props": [
+    {
+      "name": "trigger",
+      "type": "ReactNode",
+      "required": true
+    },
+    {
+      "name": "items",
+      "type": "DropdownMenuItem",
+      "required": true
+    },
+    {
+      "name": "onSelect",
+      "type": "function",
+      "required": true
+    },
+    {
+      "name": "align",
+      "type": "DropdownMenuAlign",
+      "required": false,
+      "default": "right",
+      "enum": [
+        "left",
+        "right"
+      ]
+    },
+    {
+      "name": "disabled",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "variants": [
+    {
+      "name": "left",
+      "description": "DropdownMenuAlign = 'left'"
+    },
+    {
+      "name": "right",
+      "description": "DropdownMenuAlign = 'right'"
+    }
+  ],
+  "tokensConsumed": [
+    "colors.focus.ring",
+    "zIndex.dropdown",
+    "colors.grey[100]",
+    "colors.status.error",
+    "colors.status.errorBg",
+    "colors.grey[400]"
+  ],
+  "accessibility": {
+    "role": "menu",
+    "ariaProps": [
+      "aria-haspopup",
+      "aria-expanded",
+      "aria-controls",
+      "aria-labelledby",
+      "aria-hidden"
+    ]
+  },
+  "mapsFromHtml": [
+    "select"
+  ],
+  "importPath": "DesignSystem/components/DropdownMenu",
+  "exportName": "DropdownMenu",
+  "isDefaultExport": false,
+  "sourceFile": "src/DesignSystem/components/DropdownMenu.tsx"
+}

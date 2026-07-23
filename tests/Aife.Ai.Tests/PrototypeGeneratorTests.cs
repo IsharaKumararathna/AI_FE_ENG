@@ -27,14 +27,14 @@ public class PrototypeGeneratorTests
               "css": ":root { --color-action-primary: #0066cc; }",
               "intermediateUiTree": {
                 "page": "Dashboard",
-                "layout": "AppLayout",
+                "layout": "AppShell",
                 "children": [
                   { "componentId": "BUSButton" },
-                  { "componentId": "BUSGrid" }
+                  { "componentId": "BUSDataTable" }
                 ]
               },
               "tokensUsed": ["color.primary", "spacing.md"],
-              "componentsUsed": ["BUSButton", "BUSGrid"]
+              "componentsUsed": ["BUSButton", "BUSDataTable"]
             }
             """
         });
@@ -71,10 +71,10 @@ public class PrototypeGeneratorTests
                 new()
                 {
                     Name = "Dashboard",
-                    Layout = "AppLayout",
+                    Layout = "AppShell",
                     Regions = new List<RegionSpec>
                     {
-                        new() { Slot = "main", Component = "BUSGrid" }
+                        new() { Slot = "main", Component = "BUSDataTable" }
                     },
                     Actions = new List<ActionSpec>
                     {
@@ -95,15 +95,15 @@ public class PrototypeGeneratorTests
         // Tree
         result.Tree.Should().NotBeNull();
         result.Tree.Page.Should().Be("Dashboard");
-        result.Tree.Layout.Should().Be("AppLayout");
+        result.Tree.Layout.Should().Be("AppShell");
         result.Tree.Children.Should().HaveCount(2);
         result.Tree.Children.Should().Contain(n => n.ComponentId == "BUSButton");
-        result.Tree.Children.Should().Contain(n => n.ComponentId == "BUSGrid");
+        result.Tree.Children.Should().Contain(n => n.ComponentId == "BUSDataTable");
 
         // Provenance
         result.TokensUsed.Should().Contain("color.primary");
         result.ComponentsUsed.Should().Contain("BUSButton");
-        result.ComponentsUsed.Should().Contain("BUSGrid");
+        result.ComponentsUsed.Should().Contain("BUSDataTable");
     }
 
     [Fact]
@@ -120,7 +120,7 @@ public class PrototypeGeneratorTests
                 new()
                 {
                     Name = "Test",
-                    Layout = "AppLayout",
+                    Layout = "AppShell",
                     Regions = new List<RegionSpec>
                     {
                         new() { Slot = "main", Component = "NonExistentComponent" }

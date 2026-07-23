@@ -39,6 +39,15 @@ if (args.Length > 0 && args[0].Equals("proxy", StringComparison.OrdinalIgnoreCas
     return await RunProxyCommandAsync(args);
 }
 
+// `aggregate` subcommand: closes the conformance feedback loop — clusters
+// recurring findings under data/conformance/ into a summary that drives
+// prompt/KB improvements (e.g. the banned-color list in react.generator).
+//   aife-mcp aggregate --conformance data/conformance --out data/conformance-summary.json
+if (args.Length > 0 && args[0].Equals("aggregate", StringComparison.OrdinalIgnoreCase))
+{
+    return await RunAggregateCommandAsync(args);
+}
+
 var knowledgePath = ResolveKnowledgePath(args);
 
 var stdin = Console.OpenStandardInput();
@@ -147,6 +156,27 @@ static async Task<int> RunTrainCommandAsync(string[] args)
 
     Console.WriteLine(JsonConvert.SerializeObject(result, Formatting.Indented));
     return result.Success ? 0 : 1;
+}
+
+// ──────────────────────────────────────────────────────────────────
+//  aggregate subcommand — closes the conformance feedback loop
+// ──────────────────────────────────────────────────────────────────
+
+static async Task<int> RunAggregateCommandAsync(string[] args)
+{
+    var conformanceDir = GetArgValue(args, "--conformance")
+        ?? Path.Combine(Directory.GetCurrentDirectory(), "data", "conformance");
+    var outPath = GetArgValue(args, "--out")
+        ?? Path.Combine(Directory.GetCurrentDirectory(), "data", "conformance-summary.json");
+
+    var aggregator = new ConformanceAggregator(Path.GetFullPath(conformanceDir));
+    var summary = aggregator.WriteSummary(Path.GetFullPath(outPath));
+
+    Console.WriteLine(JsonConvert.SerializeObject(summary, Formatting.Indented));
+    Console.Error.WriteLine($"Wrote conformance summary to {outPath} " +
+        $"({summary.TotalReports} reports, {summary.TotalFindings} findings, " +
+        $"{summary.TopViolations.Count} distinct violation types).");
+    return await Task.FromResult(0);
 }
 
 // ──────────────────────────────────────────────────────────────────

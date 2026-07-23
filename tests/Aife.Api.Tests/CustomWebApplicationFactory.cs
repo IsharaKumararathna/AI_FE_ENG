@@ -44,7 +44,7 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
             {
                 ["Analyze"] = """
                 {
-                  "layout": "AppLayout",
+                  "layout": "AppShell",
                   "elements": [
                     { "kind": "button", "text": "Submit" },
                     { "kind": "table", "text": "Customers" }
@@ -55,7 +55,7 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 [
                   {
                     "path": ".aife/react/Dashboard.tsx",
-                    "content": "import { BUSButton, BUSGrid } from '@org/ds/react'; export const Dashboard = () => null;"
+                    "content": "import { BUSButton, BUSDataTable } from '@org/ds/react'; export const Dashboard = () => null;"
                   }
                 ]
                 """,
@@ -81,10 +81,10 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
                   "css": ":root { --color-primary: #1548be; }",
                   "intermediateUiTree": {
                     "page": "Dashboard",
-                    "layout": "AppLayout",
+                    "layout": "AppShell",
                     "children": [
                       { "componentId": "BUSButton" },
-                      { "componentId": "BUSGrid" }
+                      { "componentId": "BUSDataTable" }
                     ]
                   },
                   "tokensUsed": ["color.primary"],

@@ -89,4 +89,46 @@ public class PromptEvalTests
         summary.Should().Contain("1/1");
         summary.Should().Contain("PASSED");
     }
+
+    [Fact]
+    public void StructuralReactScorer_penalizes_hardcoded_hex()
+    {
+        var scorer = new StructuralReactScorer();
+        var clean = scorer.Score("import { Button } from '../DesignSystem'; export const X = () => <Button variant='primary'>Save</Button>;");
+        var dirty = scorer.Score("import { Button } from '../DesignSystem'; export const X = () => <button style={{background:'#1548be'}}>Save</button>;");
+
+        clean.Should().BeGreaterThan(0.9);
+        dirty.Should().BeLessThan(clean);
+        dirty.Should().BeLessThan(0.8, "hardcoded hex + inline style should fail the entry threshold");
+    }
+
+    [Fact]
+    public void StructuralReactScorer_rejects_banned_packages()
+    {
+        var scorer = new StructuralReactScorer();
+        var score = scorer.Score("import { Button } from '@progress/kendo-react-buttons'; export const X = () => <Button/>;");
+
+        score.Should().BeLessThan(0.6, "Kendo import is a banned package and must tank the score");
+    }
+
+    [Fact]
+    public void EvaluateStructural_counts_entry_passing_when_score_above_threshold()
+    {
+        var dataset = new List<ScoredDatasetEntry>
+        {
+            new() { Input = "good", ExpectedOutput = "", Category = "react" },
+            new() { Input = "bad", ExpectedOutput = "", Category = "react" }
+        };
+
+        var harness = new PromptEvaluationHarness(input => input switch
+        {
+            "good" => ("import { Button } from '../DesignSystem'; export const P = () => <Button variant='primary'>Save</Button>;", 100, 50),
+            _ => ("<button style={{background:'#fff'}}>Save</button>", 80, 40)
+        });
+
+        var result = harness.EvaluateStructural("react.generator", "1.1.0", dataset, entryPassScore: 0.8);
+
+        result.CorrectCount.Should().Be(1, "only the clean output should pass");
+        result.TotalEntries.Should().Be(2);
+    }
 }

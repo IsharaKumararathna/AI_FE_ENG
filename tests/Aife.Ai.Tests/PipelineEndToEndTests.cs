@@ -28,7 +28,7 @@ public class PipelineEndToEndTests
         {
             ["Analyze"] = """
             {
-              "layout": "AppLayout",
+              "layout": "AppShell",
               "elements": [
                 { "kind": "button", "text": "Submit" },
                 { "kind": "table", "text": "Customers" }
@@ -39,7 +39,7 @@ public class PipelineEndToEndTests
             [
               {
                 "path": ".aife/react/Dashboard.tsx",
-                "content": "import { BUSButton, BUSGrid } from '@org/ds/react'; export const Dashboard = () => null;"
+                "content": "import { BUSButton, BUSDataTable } from '@org/ds/react'; export const Dashboard = () => null;"
               }
             ]
             """,
@@ -111,7 +111,7 @@ public class PipelineEndToEndTests
 
         // ── Assert: analysis ──
         result.Analysis.Should().NotBeNull();
-        result.Analysis!.Layout.Should().Be("AppLayout");
+        result.Analysis!.Layout.Should().Be("AppShell");
         result.Analysis.Elements.Should().HaveCount(2);
 
         // ── Assert: mappings (baseline, no LLM needed) ──
@@ -119,19 +119,19 @@ public class PipelineEndToEndTests
         result.Mappings!.Should().Contain(m =>
             m.ComponentId == "BUSButton" && m.Confidence >= 0.95);
         result.Mappings.Should().Contain(m =>
-            m.ComponentId == "BUSGrid" && m.Confidence >= 0.95);
+            m.ComponentId == "BUSDataTable" && m.Confidence >= 0.95);
 
         // ── Assert: intermediate UI tree ──
         result.Tree.Should().NotBeNull();
-        result.Tree!.Layout.Should().Be("AppLayout");
+        result.Tree!.Layout.Should().Be("AppShell");
         result.Tree.Children.Should().HaveCount(2);
         result.Tree.Children.Should().Contain(n => n.ComponentId == "BUSButton");
-        result.Tree.Children.Should().Contain(n => n.ComponentId == "BUSGrid");
+        result.Tree.Children.Should().Contain(n => n.ComponentId == "BUSDataTable");
 
         // ── Assert: generated artifacts ──
         result.Artifacts.Should().NotBeEmpty();
         result.Artifacts!.Should().Contain(a => a.Path == ".aife/react/Dashboard.tsx");
-        result.Artifacts.Should().Contain(a => a.Content.Contains("BUSButton"));
+        result.Artifacts.Should().Contain(a => a.Content.Contains("BUSDataTable"));
 
         // ── Assert: review report ──
         result.Review.Should().NotBeNull();

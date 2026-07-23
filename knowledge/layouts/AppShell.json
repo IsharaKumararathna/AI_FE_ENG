@@ -1,0 +1,11 @@
+{
+  "layoutId": "AppShell",
+  "name": "AppShell",
+  "description": "BUS Design System — AppShell layout component",
+  "slots": [
+    "children",
+    "header",
+    "sidebar",
+    "main"
+  ]
+}

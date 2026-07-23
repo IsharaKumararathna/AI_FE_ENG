@@ -1,0 +1,29 @@
+{
+  "componentId": "BUSDataTable",
+  "name": "Data Table",
+  "category": "table",
+  "status": "approved",
+  "description": "BUS Design System — DataTable primitive. Tokens: src/DesignSystem/tokens/colors.ts, spacing.ts, typography.ts",
+  "props": [],
+  "tokensConsumed": [
+    "colors.grey[50]",
+    "colors.grey[200]",
+    "colors.grey[500]",
+    "colors.grey[400]",
+    "colors.blue[200]"
+  ],
+  "accessibility": {
+    "ariaProps": [
+      "aria-hidden"
+    ]
+  },
+  "mapsFromHtml": [
+    "table",
+    "tabs",
+    "tab"
+  ],
+  "importPath": "DesignSystem/components/DataTable",
+  "exportName": "DataTable",
+  "isDefaultExport": false,
+  "sourceFile": "src/DesignSystem/components/DataTable.tsx"
+}

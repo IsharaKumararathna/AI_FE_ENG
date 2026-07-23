@@ -1,12 +1,14 @@
 {
   "patternId": "ActiveInspectionsPage",
   "name": "Active Inspections Page",
-  "description": "BUSpek inspection listing page pattern sourced from BUSKvalitet app.",
-  "layoutId": "AppLayout",
+  "description": "Inspection listing page: AppShell frame with a PageHeader (title + 'New' action) and a DataTable of open inspections. Sourced from the BUSpek/BUSkvalitet app, remapped to the Client-Core DesignSystem.",
+  "layoutId": "AppShell",
   "regions": [
-    { "slot": "header", "element": "BUSAppBar" },
-    { "slot": "sidebar", "element": "BUSNav" },
-    { "slot": "main", "element": "DataGrid" }
+    { "slot": "header", "element": "Header" },
+    { "slot": "sidebar", "element": "SideNav" },
+    { "slot": "main", "element": "PageHeader" },
+    { "slot": "children", "element": "BUSDataTable" },
+    { "slot": "children", "element": "BUSButton" }
   ],
   "sourceApp": "BUSKvalitet",
   "sourceVersion": "3.x"

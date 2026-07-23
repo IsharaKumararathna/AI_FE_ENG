@@ -1,0 +1,8 @@
+{
+  "layoutId": "SideNav",
+  "name": "SideNav",
+  "description": "BUS Design System — SideNav layout component. Tokens: src/DesignSystem/tokens/colors.ts, spacing.ts, typography.ts",
+  "slots": [
+    "sidebar"
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "componentId": "BUSChipsField",
+  "name": "Chips Field",
+  "category": "input",
+  "status": "approved",
+  "description": "BUS Design System — ChipsField primitive",
+  "props": [
+    {
+      "name": "label",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "required",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "chips",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "onRemoveChip",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "onClear",
+      "type": "function",
+      "required": false
+    },
+    {
+      "name": "clearAriaLabel",
+      "type": "string",
+      "required": false,
+      "default": "Clear chips"
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "disabled",
+      "type": "boolean",
+      "required": false,
+      "default": false
+    }
+  ],
+  "tokensConsumed": [],
+  "accessibility": {
+    "role": "group",
+    "ariaProps": [
+      "aria-hidden",
+      "aria-label",
+      "aria-disabled"
+    ]
+  },
+  "mapsFromHtml": [
+    "chip",
+    "input",
+    "form"
+  ],
+  "importPath": "DesignSystem/components/ChipsField",
+  "exportName": "ChipsField",
+  "isDefaultExport": false,
+  "sourceFile": "src/DesignSystem/components/ChipsField.tsx"
+}

@@ -3,38 +3,86 @@
     {
       "ruleId": "A11Y_BUTTON_FOCUS_RING",
       "category": "Accessibility",
-      "statement": "Buttons must have a visible focus ring.",
-      "severity": "blocking"
+      "statement": "Buttons must have a visible focus ring. BUSButton implements :focus-visible via the $bus-ds-focus-ring token — do not override outline to none without replacing it.",
+      "severity": "blocking",
+      "componentId": "BUSButton"
+    },
+    {
+      "ruleId": "A11Y_BUTTON_ARIA_BUSY",
+      "category": "Accessibility",
+      "statement": "When loading=true, BUSButton sets aria-busy. Do not render a separate loading spinner that competes with the built-in one.",
+      "severity": "advisory",
+      "componentId": "BUSButton"
     },
     {
       "ruleId": "A11Y_INPUT_LABEL",
       "category": "Accessibility",
-      "statement": "Inputs must have an associated label or aria-label.",
-      "severity": "blocking"
+      "statement": "Every TextInput, SearchInput, SelectField, ChipsField and MobileNumberInput must have an associated <label> or aria-label. Prefer FormField wrapping which provides the label.",
+      "severity": "blocking",
+      "componentId": "BUSTextInput"
     },
     {
       "ruleId": "A11Y_TABLE_HEADER_SCOPE",
       "category": "Accessibility",
-      "statement": "Table header cells (<th>) must declare scope.",
-      "severity": "advisory"
-    },
-    {
-      "ruleId": "A11Y_MODAL_FOCUS_TRAP",
-      "category": "Accessibility",
-      "statement": "Modal dialogs must trap focus inside and close on Escape.",
-      "severity": "blocking"
+      "statement": "DataTable header cells must declare scope. Use the DataTable column config; do not render a raw <table> without scope on <th>.",
+      "severity": "advisory",
+      "componentId": "BUSDataTable"
     },
     {
       "ruleId": "A11Y_TOGGLE_SWITCH_ROLE",
       "category": "Accessibility",
-      "statement": "Toggle switches must have role=switch and aria-checked.",
-      "severity": "blocking"
+      "statement": "ToggleSwitch must expose role=switch and aria-checked reflecting its checked state. Do not build a toggle from a raw checkbox + div.",
+      "severity": "blocking",
+      "componentId": "BUSToggleSwitch"
+    },
+    {
+      "ruleId": "A11Y_CHECKBOX_LABEL",
+      "category": "Accessibility",
+      "statement": "Checkbox must have an associated label via the label prop or FormField. A bare checkbox with no label fails conformance.",
+      "severity": "blocking",
+      "componentId": "BUSCheckbox"
+    },
+    {
+      "ruleId": "A11Y_TABS_KEYBOARD",
+      "category": "Accessibility",
+      "statement": "Tabs must support arrow-key navigation between tab triggers and activate on Enter/Space. Use BUSTabStrip which implements this; do not hand-build tabs.",
+      "severity": "blocking",
+      "componentId": "BUSTabStrip"
+    },
+    {
+      "ruleId": "A11Y_MODAL_FOCUS_TRAP",
+      "category": "Accessibility",
+      "statement": "Modal dialogs (BUSPopup / BUSWindow) must trap focus inside and close on Escape. Do not render a modal without these behaviors.",
+      "severity": "blocking",
+      "componentId": "BUSPopup"
     },
     {
       "ruleId": "A11Y_SEARCH_COMBOBOX",
       "category": "Accessibility",
-      "statement": "Search inputs with autocomplete must have role=combobox, aria-autocomplete, and aria-expanded.",
-      "severity": "advisory"
+      "statement": "SearchInput with autocomplete must use role=combobox, aria-autocomplete=list, and aria-expanded on the input.",
+      "severity": "advisory",
+      "componentId": "BUSSearchInput"
+    },
+    {
+      "ruleId": "A11Y_DROPDOWN_MENU",
+      "category": "Accessibility",
+      "statement": "DropdownMenu trigger must have aria-haspopup=menu and aria-expanded; menu items must be keyboard navigable.",
+      "severity": "blocking",
+      "componentId": "BUSDropdownMenu"
+    },
+    {
+      "ruleId": "A11Y_PAGINATION_LABEL",
+      "category": "Accessibility",
+      "statement": "Pagination controls must have aria-labels (e.g. 'Go to page 2') and mark the current page with aria-current=page.",
+      "severity": "advisory",
+      "componentId": "BUSPagination"
+    },
+    {
+      "ruleId": "A11Y_STATUS_PILL_ROLE",
+      "category": "Accessibility",
+      "statement": "StatusPill conveying state should use role=status (or be decorative with aria-hidden) — never a bare styled span for meaningful status.",
+      "severity": "advisory",
+      "componentId": "BUSStatusPill"
     }
   ]
 }

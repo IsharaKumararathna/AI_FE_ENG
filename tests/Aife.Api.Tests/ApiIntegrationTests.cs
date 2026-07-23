@@ -142,10 +142,10 @@ public class ApiIntegrationTests : IClassFixture<CustomWebApplicationFactory>
                 new
                 {
                     name = "Dashboard",
-                    layout = "AppLayout",
+                    layout = "AppShell",
                     regions = new[]
                     {
-                        new { slot = "main", component = "BUSGrid" }
+                        new { slot = "main", component = "BUSDataTable" }
                     },
                     actions = new[]
                     {

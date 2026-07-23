@@ -1,38 +1,33 @@
 {
   "componentId": "BUSForm",
   "name": "Form",
-  "category": "form",
+  "category": "input",
   "status": "approved",
-  "description": "Extracted from BUSFormAdapter.js",
+  "description": "BUS Design System — Form composite component",
   "props": [
     {
-      "name": "initialValues",
-      "type": "object",
-      "required": false
+      "name": "className",
+      "type": "string",
+      "required": false,
+      "default": ""
     },
     {
-      "name": "onSubmit",
+      "name": "onCancel",
       "type": "function",
       "required": false
     },
     {
-      "name": "render",
+      "name": "onContinue",
       "type": "function",
-      "required": false
-    },
-    {
-      "name": "ignoreModified",
-      "type": "boolean",
       "required": false
     }
   ],
   "tokensConsumed": [],
   "mapsFromHtml": [
-    "form",
-    "formfield"
+    "form"
   ],
-  "importPath": "Components/CustomUIs/BUSFormFields/BUSFormAdapter",
+  "importPath": "DesignSystem/components/Form",
   "exportName": "Form",
   "isDefaultExport": false,
-  "sourceFile": "src/Components/CustomUIs/BUSFormFields/BUSFormAdapter.js"
+  "sourceFile": "src/DesignSystem/components/Form.tsx"
 }

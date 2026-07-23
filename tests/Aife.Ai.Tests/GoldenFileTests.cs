@@ -48,7 +48,7 @@ public class GoldenFileTests
             [
               {
                 "path": ".aife/react/Dashboard.tsx",
-                "content": "import { BUSButton, BUSGrid } from '@org/ds/react'; export const Dashboard = () => null;"
+                "content": "import { BUSButton, BUSDataTable } from '@org/ds/react'; export const Dashboard = () => null;"
               }
             ]
             """;
@@ -63,11 +63,11 @@ public class GoldenFileTests
         var tree = new IntermediateUiTree
         {
             Page = "Dashboard",
-            Layout = "AppLayout",
+            Layout = "AppShell",
             Children = new List<UiNode>
             {
                 new() { NodeId = "n1", ComponentId = "BUSButton" },
-                new() { NodeId = "n2", ComponentId = "BUSGrid" }
+                new() { NodeId = "n2", ComponentId = "BUSDataTable" }
             }
         };
 
@@ -96,14 +96,14 @@ public class GoldenFileTests
               "css": ":root { --color-primary: #1548be; }",
               "intermediateUiTree": {
                 "page": "Dashboard",
-                "layout": "AppLayout",
+                "layout": "AppShell",
                 "children": [
                   { "componentId": "BUSButton" },
-                  { "componentId": "BUSGrid" }
+                  { "componentId": "BUSDataTable" }
                 ]
               },
               "tokensUsed": ["color.primary", "spacing.md"],
-              "componentsUsed": ["BUSButton", "BUSGrid"]
+              "componentsUsed": ["BUSButton", "BUSDataTable"]
             }
             """;
 
@@ -122,10 +122,10 @@ public class GoldenFileTests
                 new()
                 {
                     Name = "Dashboard",
-                    Layout = "AppLayout",
+                    Layout = "AppShell",
                     Regions = new List<RegionSpec>
                     {
-                        new() { Slot = "main", Component = "BUSGrid" }
+                        new() { Slot = "main", Component = "BUSDataTable" }
                     },
                     Actions = new List<ActionSpec>
                     {

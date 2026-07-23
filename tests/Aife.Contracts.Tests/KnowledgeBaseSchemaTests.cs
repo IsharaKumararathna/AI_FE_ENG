@@ -28,14 +28,14 @@ public class KnowledgeBaseSchemaTests
     }
 
     [Fact]
-    public void AppLayout_validates_against_layout_pattern_schema()
+    public void AppShell_validates_against_layout_pattern_schema()
     {
         var (isValid, errors) = SchemaValidator.ValidateFile(
             Path.Combine(TestPaths.Schemas, "layout-pattern.schema.json"),
-            Path.Combine(TestPaths.Knowledge, "layouts", "AppLayout.json"));
+            Path.Combine(TestPaths.Knowledge, "layouts", "AppShell.json"));
 
         isValid.Should().BeTrue(
-            "AppLayout.json must conform to the layout pattern schema. Errors:\n{0}", errors);
+            "AppShell.json must conform to the layout pattern schema. Errors:\n{0}", errors);
     }
 
     [Fact]
